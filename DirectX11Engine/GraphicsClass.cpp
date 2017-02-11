@@ -11,7 +11,7 @@ bool GraphicsClass::Init(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	bool result = mD3D->Init(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, true, SCREEN_DEPTH, SCREEN_NEAR);
+	bool result = mD3D->Init(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
 	if (!result) 
 	{

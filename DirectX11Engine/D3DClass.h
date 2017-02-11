@@ -29,7 +29,7 @@ class D3DClass
 		XMMATRIX* GetWorldMatrix() { return &mWorld; }
 		XMMATRIX* GetViewMatrix() { return &mView; }
 
-		void GetVideoCardInfo(char* cardName, int& memory);
+		void GetVideoCardInfo(char* cardName, int& memory, HWND hWnd);
 		
 	private:
 		XMMATRIX mProj;

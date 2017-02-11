@@ -7,7 +7,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, 
 	SystemClass* sysClass;
 	bool result;
 
-	sysClass = new SystemClass(true);
+	sysClass = new SystemClass();
 
 	if (!sysClass) 
 	{

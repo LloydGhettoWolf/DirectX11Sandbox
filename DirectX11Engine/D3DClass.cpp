@@ -1,5 +1,6 @@
 //D3DClass.cpp
 #include "D3DClass.h"
+#include <atlstr.h>
 
 D3DClass::D3DClass() :  mSwapChain(0),
 						mDevice (0),
@@ -110,6 +111,10 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	{
 		return false;
 	}
+#if _DEBUG
+	GetVideoCardInfo(mVideoCardDescription, mVideoCardMemory, hwnd);
+#endif
+	
 
 	// Release the display mode list.
 	delete[] displayModeList;
@@ -329,6 +334,8 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 
 	// Initialize the world matrix to the identity matrix.
 	mWorld = XMMatrixIdentity();
+
+	return true;
 }
 
 void D3DClass::Shutdown()
@@ -426,9 +433,12 @@ void D3DClass::EndScene()
 	return;
 }
 
-void D3DClass::GetVideoCardInfo(char* cardName, int& memory)
+void D3DClass::GetVideoCardInfo(char* cardName, int& memory, HWND hWnd)
 {
 	strcpy_s(cardName, 128, mVideoCardDescription);
 	memory = mVideoCardMemory;
+	CString msg;
+	msg.Format(_T("%S"), cardName); // Mind the caps "S"
+	MessageBox(NULL, msg, _T("Hi"), NULL);
 	return;
 }
