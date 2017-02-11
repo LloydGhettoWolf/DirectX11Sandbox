@@ -1,6 +1,7 @@
 #pragma once
 //GraphicsClass.h
 #include <Windows.h>
+#include "D3DClass.h"
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -9,7 +10,7 @@ const float SCREEN_NEAR = 0.1f;
 class GraphicsClass
 {
 	public:
-		GraphicsClass() {};
+		GraphicsClass(): mD3D(nullptr) {};
 		GraphicsClass(const GraphicsClass&) = delete;
 		~GraphicsClass() {};
 
@@ -19,4 +20,6 @@ class GraphicsClass
 
 	private:
 		bool Render();
+
+		D3DClass* mD3D;
 };
