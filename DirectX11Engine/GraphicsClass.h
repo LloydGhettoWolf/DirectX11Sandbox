@@ -2,6 +2,8 @@
 //GraphicsClass.h
 #include <Windows.h>
 #include "D3DClass.h"
+#include "SimpleMesh.h"
+#include "ColorShader.h"
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -11,7 +13,9 @@ const bool FULL_SCREEN = false;
 class GraphicsClass
 {
 	public:
-		GraphicsClass(): mD3D(nullptr) {};
+		GraphicsClass(): mD3D(nullptr),
+						 mMesh(nullptr),
+						 mShader(nullptr){};
 		GraphicsClass(const GraphicsClass&) = delete;
 		~GraphicsClass() {};
 
@@ -23,4 +27,6 @@ class GraphicsClass
 		bool Render();
 
 		D3DClass* mD3D;
+		SimpleMesh* mMesh;
+		ColorShaderClass* mShader;
 };

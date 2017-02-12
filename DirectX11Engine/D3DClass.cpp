@@ -111,6 +111,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	{
 		return false;
 	}
+
 #if _DEBUG
 	GetVideoCardInfo(mVideoCardDescription, mVideoCardMemory, hwnd);
 #endif
