@@ -23,24 +23,30 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA vertData, indexData;
 	HRESULT result;
 
-	mVertCount = 3;
-	mIndexCount = 3;
+	mVertCount = 4;
+	mIndexCount = 6;
 
 	verts = new VertexType[mVertCount];
 	indices = new unsigned long[mIndexCount];
 
 	verts[0].position = XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f);  // Bottom left.
-	verts[0].color = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	verts[0].color = XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f);
 
-	verts[1].position = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);  // Top middle.
-	verts[1].color = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	verts[1].position = XMVectorSet(-1.0f, 1.0f, 0.0f, 1.0f);  // Top middle.
+	verts[1].color = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 
 	verts[2].position = XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f);  // Bottom right.
-	verts[2].color = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	verts[2].color = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f);
+
+	verts[3].position = XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f);  // top right.
+	verts[3].color = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f);
 
 	indices[0] = 0;
 	indices[1] = 1;
 	indices[2] = 2;
+	indices[3] = 2;
+	indices[4] = 1;
+	indices[5] = 3;
 
 	vertBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertBufferDesc.ByteWidth = sizeof(VertexType) * mVertCount;
@@ -87,11 +93,11 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 	return true;
 }
 
-void SimpleMesh::RenderBuffers(ID3D11DeviceContext* deviceContext)
+
+void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int stride;
 	unsigned int offset;
-
 
 	// Set vertex buffer stride and offset.
 	stride = sizeof(VertexType);
@@ -106,13 +112,8 @@ void SimpleMesh::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	return;
-}
-
-void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
-{
-	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext);
+	//now we're set up, let's render!
+	deviceContext->DrawIndexed(mIndexCount, 0, 0);
 
 	return;
 }

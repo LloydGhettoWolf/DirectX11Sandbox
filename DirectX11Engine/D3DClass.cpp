@@ -112,11 +112,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 		return false;
 	}
 
-#if _DEBUG
-	GetVideoCardInfo(mVideoCardDescription, mVideoCardMemory, hwnd);
-#endif
 	
-
 	// Release the display mode list.
 	delete[] displayModeList;
 	displayModeList = 0;
@@ -329,12 +325,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Setup the projection matrix.
 	fieldOfView = (float) XM_PI/ 4.0f;
 	screenAspect = (float)screenWidth / (float)screenHeight;
-
-	// Create the projection matrix for 3D rendering.
-	mProj = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
-
-	// Initialize the world matrix to the identity matrix.
-	mWorld = XMMatrixIdentity();
+	
 
 	return true;
 }

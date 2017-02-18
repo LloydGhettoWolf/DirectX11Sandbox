@@ -1,23 +1,24 @@
 #pragma once
-//GraphicsClass.h
-#include <Windows.h>
-#include "D3DClass.h"
-#include "SimpleMesh.h"
+//SimpleApp.h
+
 #include "ColorShader.h"
+
+class D3DClass;
+class SimpleMesh;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 const bool FULL_SCREEN = false;
 
-class GraphicsClass
+class SimpleApp
 {
 	public:
-		GraphicsClass(): mD3D(nullptr),
-						 mMesh(nullptr),
-						 mShader(nullptr){};
-		GraphicsClass(const GraphicsClass&) = delete;
-		~GraphicsClass() {};
+		SimpleApp(): mD3D(nullptr),
+					 mMesh(nullptr),
+					 mShader(nullptr){};
+		SimpleApp(const SimpleApp&) = delete;
+		~SimpleApp() {};
 
 		bool Init(int, int, HWND);
 		void Shutdown();
@@ -28,5 +29,9 @@ class GraphicsClass
 
 		D3DClass* mD3D;
 		SimpleMesh* mMesh;
-		ColorShaderClass* mShader;
+		ShaderClass* mShader;
+
+		XMMATRIX mProj;
+		XMMATRIX mWorld;
+		XMMATRIX mView;
 };

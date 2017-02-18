@@ -25,17 +25,9 @@ class D3DClass
 		ID3D11Device*			GetDevice() { return mDevice; }
 		ID3D11DeviceContext*	GetDeviceContext() { return mDeviceContext; }
 
-		XMMATRIX* GetProjectionMatrix() { return &mProj; }
-		XMMATRIX* GetWorldMatrix() { return &mWorld; }
-		XMMATRIX* GetViewMatrix() { return &mView; }
-
 		void GetVideoCardInfo(char* cardName, int& memory, HWND hWnd);
 		
 	private:
-		XMMATRIX mProj;
-		XMMATRIX mWorld;
-		XMMATRIX mView;
-
 		bool mVSyncEnabled;
 		int mVideoCardMemory;
 		char mVideoCardDescription[128];

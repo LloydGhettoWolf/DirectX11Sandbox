@@ -22,7 +22,6 @@ public:
 private:
 	bool InitBuffers(ID3D11Device* device);
 	void ShutdownBuffers();
-	void RenderBuffers(ID3D11DeviceContext* context);
 
 	ID3D11Buffer* mVertBuffer;
 	ID3D11Buffer* mIndexBuffer;

@@ -19,7 +19,7 @@ struct PixelInput
 	float4 col : COLOR;
 };
 
-PixelInput ColorVertexShader( VertInput vertIn ) 
+PixelInput main( VertInput vertIn ) 
 {
 	PixelInput output;
 	vertIn.pos.w = 1.0f;

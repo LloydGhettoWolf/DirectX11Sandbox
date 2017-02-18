@@ -2,8 +2,9 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include "InputClass.h"
-#include "GraphicsClass.h"
+
+class InputClass;
+class SimpleApp;
 
 class SystemClass
 {
@@ -29,7 +30,7 @@ private:
 	bool mFullScreen;
 
 	InputClass* mInput;
-	GraphicsClass* mGraphics;
+	SimpleApp* mGraphics;
 };
 
 static SystemClass* App;

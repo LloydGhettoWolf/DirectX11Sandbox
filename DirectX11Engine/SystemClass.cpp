@@ -1,10 +1,11 @@
 //SystemClass.cpp
 #include "SystemClass.h"
+#include "InputClass.h"
+#include "SimpleApp.h"
 
 bool SystemClass::Init()
 {
 	int width = 0, height = 0;
-	bool result;
 
 	InitializeWindows(width, height);
 
@@ -19,7 +20,7 @@ bool SystemClass::Init()
 		return false;
 	}
 
-	mGraphics = new GraphicsClass();
+	mGraphics = new SimpleApp();
 	if (!mGraphics)
 	{
 		return false;
@@ -31,7 +32,6 @@ bool SystemClass::Init()
 	}
 
 	return true;
-
 }
 
 void SystemClass::Shutdown() 

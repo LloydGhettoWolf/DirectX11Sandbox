@@ -6,7 +6,7 @@ struct PixelType
 	float4 col : COLOR;
 };
 
-float4 ColorPixelShader(PixelType input) : SV_TARGET 
+float4 main(PixelType input) : SV_TARGET 
 {
 	return input.col;
 }
