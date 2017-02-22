@@ -1,7 +1,7 @@
 #pragma once
 //SimpleApp.h
 
-#include "ColorShader.h"
+#include "OneLightShader.h"
 
 class D3DClass;
 class SimpleMesh;
@@ -29,7 +29,8 @@ class SimpleApp
 
 		D3DClass* mD3D;
 		SimpleMesh* mMesh;
-		ShaderClass* mShader;
+		OneLightShader* mShader;
+		ID3D11SamplerState* mSamplerState;
 
 		XMMATRIX mProj;
 		XMMATRIX mWorld;

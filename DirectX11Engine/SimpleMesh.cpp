@@ -1,21 +1,26 @@
 //simpleMesh.cpp
 #include "SimpleMesh.h"
+#include "ObjParser.h"
 
-bool SimpleMesh::Init(ID3D11Device* device)
+bool SimpleMesh::Init(ID3D11Device* device, WCHAR* meshName)
 {
-	bool result = InitBuffers(device);
+	if (!InitBuffers(device, meshName))
+		return false;
 
-	return result;
+	//mTexture = new Texture;
+
+	//if (!mTexture->Init(device, fileName))
+		//return false;
+
+	return true;
 }
 
 void SimpleMesh::Shutdown() {
 	ShutdownBuffers();
 }
 
-bool SimpleMesh::InitBuffers(ID3D11Device* device)
+bool SimpleMesh::InitBuffers(ID3D11Device* device, WCHAR* meshName)
 {
-	VertexType* verts;
-	unsigned long* indices;
 
 	D3D11_BUFFER_DESC vertBufferDesc;
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -23,30 +28,13 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA vertData, indexData;
 	HRESULT result;
 
-	mVertCount = 4;
-	mIndexCount = 6;
+	wstring name(meshName);
+	string strName(name.begin(), name.end());
+	ProcessedMeshData* mesh = ReadBoomFile(strName);
 
-	verts = new VertexType[mVertCount];
-	indices = new unsigned long[mIndexCount];
+	mVertCount = mesh->numVerts;
+	mIndexCount = mesh->numIndices;
 
-	verts[0].position = XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f);  // Bottom left.
-	verts[0].color = XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f);
-
-	verts[1].position = XMVectorSet(-1.0f, 1.0f, 0.0f, 1.0f);  // Top middle.
-	verts[1].color = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
-
-	verts[2].position = XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f);  // Bottom right.
-	verts[2].color = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f);
-
-	verts[3].position = XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f);  // top right.
-	verts[3].color = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f);
-
-	indices[0] = 0;
-	indices[1] = 1;
-	indices[2] = 2;
-	indices[3] = 2;
-	indices[4] = 1;
-	indices[5] = 3;
 
 	vertBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertBufferDesc.ByteWidth = sizeof(VertexType) * mVertCount;
@@ -56,7 +44,7 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 	vertBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-	vertData.pSysMem = verts;
+	vertData.pSysMem = &mesh->vertices[0];
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
@@ -69,14 +57,14 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 
 	// Set up the description of the static index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * mIndexCount;
+	indexBufferDesc.ByteWidth = sizeof(unsigned int) * mIndexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
 	indexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = indices;
+	indexData.pSysMem = &mesh->indices[0];
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
@@ -87,8 +75,7 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device)
 		return false;
 	}
 
-	delete [] verts;
-	delete[] indices;
+	delete mesh;
 
 	return true;
 }
@@ -130,6 +117,12 @@ void SimpleMesh::ShutdownBuffers()
 	if (mVertBuffer)
 	{
 		mVertBuffer->Release();
+	}
+
+	if (mTexture)
+	{
+		mTexture->Shutdown();
+		delete mTexture;
 	}
 
 	return;
