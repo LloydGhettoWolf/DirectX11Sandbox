@@ -26,7 +26,7 @@ bool SystemClass::Init()
 		return false;
 	}
 
-	if (!mGraphics->Init(width, height, mHwnd))
+	if (!mGraphics->Init(width, height, mHwnd, mInstance))
 	{
 		return false;
 	}

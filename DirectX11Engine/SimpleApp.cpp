@@ -3,9 +3,12 @@
 #include "SimpleApp.h"
 #include "D3DClass.h"
 #include "SimpleMesh.h"
+#include "Camera.h"
+
+#define DIRECTINPUT_VERSION 0x0800
 
 
-bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd)
+bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInstance)
 {
 	mD3D = new D3DClass();
 
@@ -13,6 +16,9 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		return false;
 	}
+
+	mScreenHeight = screenHeight;
+	mScreenWidth = screenWidth;
 
 	bool result = mD3D->Init(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
@@ -81,12 +87,11 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd)
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR position = XMVectorSet(0.0f, 10.0f, -25.0f, 0.0f);
 	XMVECTOR lookAt = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-	mView = XMMatrixTranspose(XMMatrixLookAtLH(position, lookAt, up));
-
+	
 	float fieldOfView = (float)XM_PI / 4.0f;
-	float screenAspect = (float)screenWidth / (float)screenHeight;
 
-	mProj = XMMatrixTranspose(XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH));
+	mCamera = new Camera();
+	mCamera->Init(position, lookAt, up, SCREEN_NEAR, SCREEN_DEPTH, screenWidth, screenHeight, fieldOfView);
 
 	// Initialize the world matrix to the identity matrix.
 	mWorld = XMMatrixIdentity();
@@ -114,6 +119,40 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
+	//input creation
+
+	mMouseX = 0;
+	mMouseY = 0;
+
+	result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dInput, NULL);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = dInput->CreateDevice(GUID_SysMouse, &mMouse, NULL);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = mMouse->SetDataFormat(&c_dfDIMouse);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = mMouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = mMouse->Acquire();
+	if (FAILED(result))
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -146,14 +185,60 @@ void SimpleApp::Shutdown()
 		mSamplerState->Release();
 	}
 
+	if (mCamera)
+	{
+		delete mCamera;
+	}
+
 	return;
 }
 
 
 bool SimpleApp::Frame()
 {
+	//rotate buddha
+	static float y = 0.0f;
+	mWorld = XMMatrixRotationY(y);
+	y += 0.01f;
+
+	
+	ReadInput();
+	mCamera->ComboRotate((float)mMouseX, (float)mMouseY);
+
+
+	//update camera
 
 	return Render();
+}
+
+bool SimpleApp::ReadInput()
+{
+	//read controls
+	HRESULT result;
+
+	// Read the mouse device.
+	result = mMouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&mMouseState);
+
+	if (FAILED(result))
+	{
+		// If the mouse lost focus or was not acquired then try to get control back.
+		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+		{
+			mMouse->Acquire();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (mMouseState.rgbButtons[0] & 0x80)
+	{
+		mMouseX = mMouseState.lX;
+		mMouseY = mMouseState.lY;
+	}
+
+	return true;
 }
 
 
@@ -162,7 +247,6 @@ bool SimpleApp::Render()
 	XMMATRIX viewMatrix, projMatrix, worldMatrix;
 	bool result;
 
-
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -170,14 +254,9 @@ bool SimpleApp::Render()
 
 	MatrixBufferType matrices;
 
-	//rotate buddha
-	static float y = 0.0f;
-	mWorld = XMMatrixRotationY(y);
-	y += 0.01f;
-
-	matrices.world = mWorld;
-	matrices.projection = mProj;
-	matrices.view = mView;
+	matrices.world = XMMatrixTranspose(mWorld);
+	matrices.projection = XMMatrixTranspose( mCamera->GetProjection());
+	matrices.view = XMMatrixTranspose( mCamera->GetView());
 
 	LightPosBuffer lights;
 	lights.lightPos = XMFLOAT3(0.0f, 10.0f, -25.0f);
