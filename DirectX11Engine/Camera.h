@@ -19,6 +19,8 @@ class Camera
 		XMMATRIX GetView() const { return mViewMatrix; }
 		XMMATRIX GetProjection() const { return mProjectionMatrix; }
 
+		XMVECTOR GetPos() const { return mPos; }
+
 	private:
 		XMVECTOR mLookVec;
 		XMVECTOR mUpVec;

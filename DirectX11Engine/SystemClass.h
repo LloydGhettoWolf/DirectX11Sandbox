@@ -9,7 +9,7 @@ class SimpleApp;
 class SystemClass
 {
 public:
-	SystemClass(bool fullScreen = false) : mAppName(L"DirectX11App"), mInput(nullptr), mGraphics(nullptr), mFullScreen(fullScreen){};
+	SystemClass(bool fullScreen = false) : mAppName(L"DirectX11App"), mInput(nullptr), mApp(nullptr), mFullScreen(fullScreen){};
 	SystemClass(const SystemClass&) = delete;
 	~SystemClass() {};
 
@@ -30,7 +30,7 @@ private:
 	bool mFullScreen;
 
 	InputClass* mInput;
-	SimpleApp* mGraphics;
+	SimpleApp* mApp;
 };
 
 static SystemClass* App;

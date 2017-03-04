@@ -8,7 +8,7 @@ class SimpleMesh;
 class Camera;
 
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_DEPTH = 5000.0f;
 const float SCREEN_NEAR = 0.1f;
 const bool FULL_SCREEN = false;
 
@@ -40,7 +40,9 @@ class SimpleApp
 		IDirectInputDevice8* mMouse;
 		DIMOUSESTATE mMouseState;
 
-		int mMouseX, mMouseY;
+		int mMouseRotateX, mMouseRotateY;
+		int mMouseVertY;
+		int mMouseHorizZ;
 
 		int mScreenWidth, mScreenHeight;
 

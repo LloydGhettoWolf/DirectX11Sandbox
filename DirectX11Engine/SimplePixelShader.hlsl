@@ -5,6 +5,7 @@ struct PixelType
 	float4 pos : SV_POSITION;
 	float3 worldPos : POSITION;
 	float3 norm : NORMAL;
+	float2 tex : TEXCOORD;
 };
 
 Texture2D shaderTexture;

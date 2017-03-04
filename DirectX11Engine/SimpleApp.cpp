@@ -36,7 +36,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	}
 
 	// Initialize the model object.
-	result = mMesh->Init(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/processedMeshes/buddha.boom");
+	result = mMesh->Init(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/processedMeshes/sponza.boom");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -50,7 +50,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 		return false;
 	}
 
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
@@ -68,16 +68,16 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
 
-	/*polygonLayout[2].SemanticName = "TEXCOORD";
+	polygonLayout[2].SemanticName = "TEXCOORD";
 	polygonLayout[2].SemanticIndex = 0;
 	polygonLayout[2].Format = DXGI_FORMAT_R32G32_FLOAT;
 	polygonLayout[2].InputSlot = 0;
 	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[2].InstanceDataStepRate = 0;*/
+	polygonLayout[2].InstanceDataStepRate = 0;
 
 	// Initialize the color shader object.
-	result = mShader->Init(mD3D->GetDevice(), hwnd, L"SimpleVertexShader.hlsl", L"SimplePixelShader.hlsl", polygonLayout, 2);
+	result = mShader->Init(mD3D->GetDevice(), hwnd, L"SimpleVertexShader.hlsl", L"SimplePixelShader.hlsl", polygonLayout, 3);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
@@ -85,8 +85,8 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	}
 
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR position = XMVectorSet(0.0f, 10.0f, -25.0f, 0.0f);
-	XMVECTOR lookAt = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	XMVECTOR position = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR lookAt = XMVectorSet(0.0f, 10.0f, 10.0f, 0.0f);
 	
 	float fieldOfView = (float)XM_PI / 4.0f;
 
@@ -121,8 +121,9 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 	//input creation
 
-	mMouseX = 0;
-	mMouseY = 0;
+	mMouseRotateX = 0;
+	mMouseRotateY = 0;
+	mMouseVertY = 0;
 
 	result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dInput, NULL);
 	if (FAILED(result))
@@ -196,17 +197,15 @@ void SimpleApp::Shutdown()
 
 bool SimpleApp::Frame()
 {
-	//rotate buddha
-	static float y = 0.0f;
-	mWorld = XMMatrixRotationY(y);
-	y += 0.01f;
-
 	
+
 	ReadInput();
-	mCamera->ComboRotate((float)mMouseX, (float)mMouseY);
-
-
+	mCamera->ComboRotate((float)mMouseRotateX, (float)mMouseRotateY);
+	mCamera->MoveCameraVertically((float)mMouseVertY);
+	mCamera->MoveCameraForward((float)mMouseHorizZ);
 	//update camera
+
+	//mWorld = XMMatrixScaling(100.0f, 100.0f, 100.0f);
 
 	return Render();
 }
@@ -234,8 +233,18 @@ bool SimpleApp::ReadInput()
 
 	if (mMouseState.rgbButtons[0] & 0x80)
 	{
-		mMouseX = mMouseState.lX;
-		mMouseY = mMouseState.lY;
+		mMouseRotateX = mMouseState.lX;
+		mMouseRotateY = mMouseState.lY;
+	}
+
+	if (mMouseState.rgbButtons[1] & 0x80)
+	{
+		mMouseHorizZ = mMouseState.lY;
+	}
+
+	if (mMouseState.rgbButtons[2] & 0x80)
+	{
+		mMouseVertY = mMouseState.lY;
 	}
 
 	return true;
@@ -259,7 +268,7 @@ bool SimpleApp::Render()
 	matrices.view = XMMatrixTranspose( mCamera->GetView());
 
 	LightPosBuffer lights;
-	lights.lightPos = XMFLOAT3(0.0f, 10.0f, -25.0f);
+	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
 	lights.lightCol = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	
 	// Render the model using the color shader.

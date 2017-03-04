@@ -21,10 +21,6 @@ void SimpleMesh::Shutdown() {
 
 bool SimpleMesh::InitBuffers(ID3D11Device* device, WCHAR* meshName)
 {
-
-	D3D11_BUFFER_DESC vertBufferDesc;
-	D3D11_BUFFER_DESC indexBufferDesc;
-
 	D3D11_SUBRESOURCE_DATA vertData, indexData;
 	HRESULT result;
 
@@ -32,47 +28,60 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, WCHAR* meshName)
 	string strName(name.begin(), name.end());
 	ProcessedMeshData* mesh = ReadBoomFile(strName);
 
-	mVertCount = mesh->numVerts;
-	mIndexCount = mesh->numIndices;
+	mNumMeshes = mesh->numMeshes;
 
+	D3D11_BUFFER_DESC* vertBufferDesc = new D3D11_BUFFER_DESC[mNumMeshes];
+	D3D11_BUFFER_DESC* indexBufferDesc = new D3D11_BUFFER_DESC[mNumMeshes];
 
-	vertBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertBufferDesc.ByteWidth = sizeof(VertexType) * mVertCount;
-	vertBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertBufferDesc.CPUAccessFlags = 0;
-	vertBufferDesc.MiscFlags = 0;
-	vertBufferDesc.StructureByteStride = 0;
+	mVertCount = new int[mNumMeshes];
+	mIndexCount = new int[mNumMeshes];
 
-	// Give the subresource structure a pointer to the vertex data.
-	vertData.pSysMem = &mesh->vertices[0];
-	vertData.SysMemPitch = 0;
-	vertData.SysMemSlicePitch = 0;
+	mVertBuffer = new ID3D11Buffer*[mNumMeshes];
+	mIndexBuffer = new ID3D11Buffer*[mNumMeshes];
 
-	// Now create the vertex buffer.
-	result = device->CreateBuffer(&vertBufferDesc, &vertData, &mVertBuffer);
-	if (FAILED(result))
+	for (int i = 0; i < mNumMeshes; i++)
 	{
-		return false;
-	}
+		mVertCount[i] = mesh->numVerts[i];
+		mIndexCount[i] = mesh->numIndices[i];
 
-	// Set up the description of the static index buffer.
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned int) * mIndexCount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
+		vertBufferDesc[i].Usage = D3D11_USAGE_DEFAULT;
+		vertBufferDesc[i].ByteWidth = sizeof(VertexType) * mVertCount[i];
+		vertBufferDesc[i].BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertBufferDesc[i].CPUAccessFlags = 0;
+		vertBufferDesc[i].MiscFlags = 0;
+		vertBufferDesc[i].StructureByteStride = 0;
 
-	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = &mesh->indices[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
+		// Give the subresource structure a pointer to the vertex data.
+		vertData.pSysMem = &mesh->vertices[i][0];
+		vertData.SysMemPitch = 0;
+		vertData.SysMemSlicePitch = 0;
 
-	// Create the index buffer.
-	result = device->CreateBuffer(&indexBufferDesc, &indexData, &mIndexBuffer);
-	if (FAILED(result))
-	{
-		return false;
+		// Now create the vertex buffer.
+		result = device->CreateBuffer(&vertBufferDesc[i], &vertData, &mVertBuffer[i]);
+		if (FAILED(result))
+		{
+			return false;
+		}
+
+		// Set up the description of the static index buffer.
+		indexBufferDesc[i].Usage = D3D11_USAGE_DEFAULT;
+		indexBufferDesc[i].ByteWidth = sizeof(unsigned int) * mIndexCount[i];
+		indexBufferDesc[i].BindFlags = D3D11_BIND_INDEX_BUFFER;
+		indexBufferDesc[i].CPUAccessFlags = 0;
+		indexBufferDesc[i].MiscFlags = 0;
+		indexBufferDesc[i].StructureByteStride = 0;
+
+		// Give the subresource structure a pointer to the index data.
+		indexData.pSysMem = &mesh->indices[i][0];
+		indexData.SysMemPitch = 0;
+		indexData.SysMemSlicePitch = 0;
+
+		// Create the index buffer.
+		result = device->CreateBuffer(&indexBufferDesc[i], &indexData, &mIndexBuffer[i]);
+		if (FAILED(result))
+		{
+			return false;
+		}
 	}
 
 	delete mesh;
@@ -90,17 +99,20 @@ void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
 	stride = sizeof(VertexType);
 	offset = 0;
 
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &mVertBuffer, &stride, &offset);
+	for (int i = 0; i < mNumMeshes; i++)
+	{
+		// Set the vertex buffer to active in the input assembler so it can be rendered.
+		deviceContext->IASetVertexBuffers(0, 1, &mVertBuffer[i], &stride, &offset);
 
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		// Set the index buffer to active in the input assembler so it can be rendered.
+		deviceContext->IASetIndexBuffer(mIndexBuffer[i], DXGI_FORMAT_R32_UINT, 0);
 
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	//now we're set up, let's render!
-	deviceContext->DrawIndexed(mIndexCount, 0, 0);
+		//now we're set up, let's render!
+		deviceContext->DrawIndexed(mIndexCount[i], 0, 0);
+	}
 
 	return;
 }
@@ -110,13 +122,19 @@ void SimpleMesh::ShutdownBuffers()
 	// Release the index buffer.
 	if (mIndexBuffer)
 	{
-		mIndexBuffer->Release();
+		for (int i = 0; i < mNumMeshes; i++)
+			mIndexBuffer[i]->Release();
+
+		delete mIndexBuffer;
 	}
 
 	// Release the vertex buffer.
 	if (mVertBuffer)
 	{
-		mVertBuffer->Release();
+		for (int i = 0; i < mNumMeshes; i++)
+			mVertBuffer[i]->Release();
+
+		delete mVertBuffer;
 	}
 
 	if (mTexture)

@@ -20,13 +20,13 @@ bool SystemClass::Init()
 		return false;
 	}
 
-	mGraphics = new SimpleApp();
-	if (!mGraphics)
+	mApp= new SimpleApp();
+	if (!mApp)
 	{
 		return false;
 	}
 
-	if (!mGraphics->Init(width, height, mHwnd, mInstance))
+	if (!mApp->Init(width, height, mHwnd, mInstance))
 	{
 		return false;
 	}
@@ -41,10 +41,10 @@ void SystemClass::Shutdown()
 		delete mInput;
 	}
 
-	if (mGraphics)
+	if (mApp)
 	{
-		mGraphics->Shutdown();
-		delete mGraphics;
+		mApp->Shutdown();
+		delete mApp;
 	}
 
 	ShutdownWindows();
@@ -100,7 +100,7 @@ bool SystemClass::Frame()
 	}
 
 	// Do the frame processing for the graphics object.
-	result = mGraphics->Frame();
+	result = mApp->Frame();
 
 	if (!result)
 	{

@@ -18,16 +18,17 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext* context);
 
-	int GetIndexCount() const { return mIndexCount; }
+	int GetIndexCount(int index) const { return mIndexCount[index]; }
 	ID3D11ShaderResourceView* GetTexture() { return mTexture->GetTexture(); }
 
 private:
 	bool InitBuffers(ID3D11Device* device, WCHAR* meshName);
 	void ShutdownBuffers();
 
-	ID3D11Buffer* mVertBuffer;
-	ID3D11Buffer* mIndexBuffer;
+	ID3D11Buffer** mVertBuffer;
+	ID3D11Buffer** mIndexBuffer;
 	Texture* mTexture;
-	int mVertCount;
-	int mIndexCount;
+	int* mVertCount;
+	int* mIndexCount;
+	int mNumMeshes;
 };

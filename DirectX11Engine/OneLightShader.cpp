@@ -168,8 +168,6 @@ bool OneLightShader::PrepareShader(ID3D11DeviceContext* deviceContext, MatrixBuf
 {
 	bool result;
 
-	
-
 	// Set the shader parameters that it will use for rendering.
 	result = SetShaderParameters(deviceContext, matrices, lights, srv);
 	if (!result)
@@ -241,7 +239,6 @@ bool OneLightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, Mat
 	{
 		return false;
 	}
-
 
 	// Get a pointer to the data in the constant buffer.
 	dataPtr = (MatrixBufferType*)mappedResource.pData;

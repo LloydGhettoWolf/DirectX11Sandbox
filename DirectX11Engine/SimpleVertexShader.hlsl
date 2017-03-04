@@ -11,6 +11,7 @@ struct VertInput
 {
 	float3 pos  : POSITION;
 	float3 norm : NORMAL;
+	float2 tex  : TEXCOORD;
 };
 
 struct PixelInput
@@ -18,6 +19,7 @@ struct PixelInput
 	float4 pos  : SV_POSITION;
 	float3 worldPos : POSITION;
 	float3 norm : NORMAL;
+	float2 tex  : TEXCOORD;
 };
 
 PixelInput main( VertInput vertIn ) 
@@ -30,6 +32,8 @@ PixelInput main( VertInput vertIn )
 	output.worldPos = output.pos;
 	output.pos = mul(output.pos, view);
 	output.pos = mul(output.pos, proj);
+
+	output.tex = vertIn.tex;
 
 
 	return output;

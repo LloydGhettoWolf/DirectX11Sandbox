@@ -10,7 +10,11 @@ using namespace DirectX;
 struct VertexType
 {
 	XMFLOAT3 position;
+	//float padding;
 	XMFLOAT3 normal;
+	//float padding2;
+	XMFLOAT2 uvs;
+	//float morePadding[2];
 };
 
 struct MeshData
@@ -21,13 +25,27 @@ struct MeshData
 
 struct ProcessedMeshData
 {
-	VertexType* vertices;
-	unsigned int* indices;
-	int numVerts;
-	int numIndices;
+	int numMeshes;
+	VertexType** vertices;
+	unsigned int** indices;
+	int* numVerts;
+	int* numIndices;
 
 	ProcessedMeshData() {};
-	~ProcessedMeshData() { delete [] vertices; delete [] indices; }
+
+	~ProcessedMeshData() 
+	{
+		for (int i = 0; i < numMeshes; i++)
+		{
+			delete [] vertices[i];
+			delete [] indices[i];
+		}
+
+		delete [] vertices;
+		delete [] indices;
+		delete [] numVerts;
+		delete [] numIndices;
+	}
 };
 
 MeshData* ReadObjFile(string& fileName);

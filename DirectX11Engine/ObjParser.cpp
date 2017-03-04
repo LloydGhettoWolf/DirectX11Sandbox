@@ -149,18 +149,32 @@ ProcessedMeshData* ReadBoomFile(string& fileName)
 {
 	ifstream file;
 	file.open(fileName.c_str(), ios::binary);
-	headerInfo info;
-	file.read((char*)&info, sizeof(headerInfo));
+	int numMeshes = 0;
+	file >> numMeshes;
 
 	ProcessedMeshData* newMesh = new ProcessedMeshData();
-	newMesh->vertices = new VertexType[info.numverts];
-	newMesh->indices = new unsigned int[info.numIndices];
-	newMesh->numVerts = info.numverts;
-	newMesh->numIndices = info.numIndices;
+	newMesh->numMeshes = numMeshes;
 
-	file.read((char*)&newMesh->vertices[0], sizeof(VertexType) * info.numverts);
-	file.read((char*)&newMesh->indices[0], sizeof(unsigned int) * info.numIndices);
-	
+	newMesh->vertices = new VertexType*[numMeshes];
+	newMesh->indices  = new unsigned int*[numMeshes];
+
+	newMesh->numVerts = new int[numMeshes];
+	newMesh->numIndices = new int[numMeshes];
+
+	for (int i = 0; i < numMeshes; i++)
+	{
+		headerInfo info;
+		file.read((char*)&info, sizeof(headerInfo));
+
+		newMesh->vertices[i] = new VertexType[info.numverts];
+		newMesh->indices[i] = new unsigned int[info.numIndices];
+		newMesh->numVerts[i] = info.numverts;
+		newMesh->numIndices[i] = info.numIndices;
+
+		file.read((char*)&newMesh->vertices[i][0], sizeof(VertexType) * info.numverts);
+		file.read((char*)&newMesh->indices[i][0], sizeof(unsigned int) * info.numIndices);
+	}
+
 	file.close();
 
 	return newMesh;
