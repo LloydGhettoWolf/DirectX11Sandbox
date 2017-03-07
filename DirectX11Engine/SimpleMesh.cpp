@@ -1,16 +1,22 @@
 //simpleMesh.cpp
 #include "SimpleMesh.h"
-#include "ObjParser.h"
 
-bool SimpleMesh::Init(ID3D11Device* device, WCHAR* meshName)
+bool SimpleMesh::Init(ID3D11Device* device, WCHAR* filePath, WCHAR* meshName)
 {
-	if (!InitBuffers(device, meshName))
+	wstring name(meshName);
+	wstring path(filePath);
+	string strName(name.begin(), name.end());
+	string strPath(path.begin(), path.end());
+	ProcessedMeshData* mesh = ReadBoomFile(strPath, strName);
+
+	if (!InitBuffers(device, mesh))
 		return false;
 
-	//mTexture = new Texture;
+	//Init Textures
+	if (!InitTextures(device, mesh))
+		return false;
 
-	//if (!mTexture->Init(device, fileName))
-		//return false;
+	delete mesh;
 
 	return true;
 }
@@ -19,14 +25,10 @@ void SimpleMesh::Shutdown() {
 	ShutdownBuffers();
 }
 
-bool SimpleMesh::InitBuffers(ID3D11Device* device, WCHAR* meshName)
+bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 {
 	D3D11_SUBRESOURCE_DATA vertData, indexData;
 	HRESULT result;
-
-	wstring name(meshName);
-	string strName(name.begin(), name.end());
-	ProcessedMeshData* mesh = ReadBoomFile(strName);
 
 	mNumMeshes = mesh->numMeshes;
 
@@ -84,11 +86,25 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, WCHAR* meshName)
 		}
 	}
 
-	delete mesh;
-
 	return true;
 }
 
+bool SimpleMesh::InitTextures(ID3D11Device* device, ProcessedMeshData* mesh)
+{
+	unsigned int numTextures = mesh->numTextures;
+	mTexture = new Texture[numTextures];
+
+	for (int i = 0; i < numTextures; i++)
+	{
+		string name = mesh->textureNames[i];
+		wstring wName(name.begin(), name.end());
+
+		if (!mTexture[i].Init(device, &wName[0]))
+			return false;
+	}
+
+	return true;
+}
 
 void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
 {
@@ -140,7 +156,7 @@ void SimpleMesh::ShutdownBuffers()
 	if (mTexture)
 	{
 		mTexture->Shutdown();
-		delete mTexture;
+		delete [] mTexture;
 	}
 
 	return;

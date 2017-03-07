@@ -36,7 +36,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	}
 
 	// Initialize the model object.
-	result = mMesh->Init(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/processedMeshes/sponza.boom");
+	result = mMesh->Init(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/processedMeshes/", L"sponza.boom");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
