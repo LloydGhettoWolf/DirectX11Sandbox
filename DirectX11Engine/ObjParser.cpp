@@ -146,7 +146,8 @@ MeshData* ReadObjFile(string& fileName)
 	return data;
 }
 
-ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName)
+//returns an array of processed mesh data
+ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials)
 {
 	string fullPath = filePath + fileName;
 	ifstream file(fullPath.c_str(), ios::binary);
@@ -155,66 +156,57 @@ ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName)
 	data << file.rdbuf();
 	file.close();
 
-	unsigned int numMeshes = 0;
-	unsigned int numMaterials = 0;
+	
 	data.read((char*)&numMeshes, sizeof(unsigned int));
 	data.read((char*)&numMaterials, sizeof(unsigned int));
 
-	ProcessedMeshData* newMesh = new ProcessedMeshData();
-	newMesh->numMeshes = numMeshes;
+	ProcessedMeshData* newMeshes = new ProcessedMeshData[numMeshes];
 
-	newMesh->vertices = new VertexType*[numMeshes];
-	newMesh->indices  = new unsigned int*[numMeshes];
-
-	newMesh->numVerts = new int[numMeshes];
-	newMesh->numIndices = new int[numMeshes];
-
-	newMesh->materialIndices = new unsigned int[numMaterials];
-	newMesh->materialTable = new materialInfo[numMaterials];
-
-	newMesh->numMaterials = numMaterials;
-
+	
 	// Copy across information about submeshes
 	for (unsigned int i = 0; i < numMeshes; i++)
 	{
 		headerInfo info;
 		data.read((char*)&info, sizeof(headerInfo));
 
-		newMesh->vertices[i] = new VertexType[info.numverts];
-		newMesh->indices[i] = new unsigned int[info.numIndices];
-		newMesh->numVerts[i] = info.numverts;
-		newMesh->numIndices[i] = info.numIndices;
+		newMeshes[i].vertices = new VertexType[info.numverts];
+		newMeshes[i].indices = new unsigned int[info.numIndices];
+		newMeshes[i].numVerts = info.numverts;
+		newMeshes[i].numIndices = info.numIndices;
 
-		data.read((char*)&newMesh->vertices[i][0], sizeof(VertexType) * info.numverts);
-		data.read((char*)&newMesh->indices[i][0], sizeof(unsigned int) * info.numIndices);
+		data.read((char*)&newMeshes[i].vertices[0], sizeof(VertexType) * info.numverts);
+		data.read((char*)&newMeshes[i].indices[0], sizeof(unsigned int) * info.numIndices);
 	}
-
-	// Read in material information
-	for (unsigned int i = 0; i < numMaterials; i++)
-	{
-		data.read((char*)&newMesh->materialTable[i], sizeof(materialInfo));
-	}
-
-	//now read in textures for this mesh
 	
-	unsigned int numTextures;
-	data.read((char*)&numTextures, sizeof(unsigned int));
-	newMesh->numTextures = numTextures;
-	newMesh->textureNames = new string[numTextures];
+
+	
+
+	//// Read in material information
+	//for (unsigned int i = 0; i < numMaterials; i++)
+	//{
+	//	data.read((char*)&newMeshes[i].materialTable, sizeof(materialInfo));
+	//}
+
+	////now read in textures for this mesh
+	//
+	//unsigned int numTextures;
+	//data.read((char*)&numTextures, sizeof(unsigned int));
+	//newMesh->numTextures = numTextures;
+	//newMesh->textureNames = new string[numTextures];
 
 
-	for (unsigned int i = 0; i < numTextures; i++)
-	{
-		string texName;
-		unsigned int len;
-		data.read((char*)&len, sizeof(unsigned int));
-		char* temp = new char[len + 1];
-		temp[len] = '\0';
-		data.read(temp, len);
-		string s(temp);
-		newMesh->textureNames[i] = filePath + s;
-		delete[] temp;
-	}
+	//for (unsigned int i = 0; i < numTextures; i++)
+	//{
+	//	string texName;
+	//	unsigned int len;
+	//	data.read((char*)&len, sizeof(unsigned int));
+	//	char* temp = new char[len + 1];
+	//	temp[len] = '\0';
+	//	data.read(temp, len);
+	//	string s(temp);
+	//	newMesh->textureNames[i] = filePath + s;
+	//	delete[] temp;
+	//}
 
-	return newMesh;
+	return newMeshes;
 }

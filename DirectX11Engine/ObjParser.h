@@ -35,34 +35,21 @@ struct materialInfo
 
 struct ProcessedMeshData
 {
-	int numMeshes;
-	int numTextures;
-	int numMaterials;
-	VertexType** vertices;
-	unsigned int** indices;
-	unsigned int* materialIndices;
-	materialInfo* materialTable;
-	string* textureNames;
-	int* numVerts;
-	int* numIndices;
+	VertexType* vertices;
+	unsigned int* indices;
+	unsigned int materialIndex;
+	materialInfo materialTable;
+	string textureName;
+	int numVerts;
+	int numIndices;
 
 	ProcessedMeshData() {};
 
 	~ProcessedMeshData() 
 	{
-		for (int i = 0; i < numMeshes; i++)
-		{
-			delete [] vertices[i];
-			delete [] indices[i];
-		}
-
-		delete [] vertices;
-		delete [] indices;
-		delete [] numVerts;
-		delete [] numIndices;
-		delete [] textureNames;
+		
 	}
 };
 
 MeshData* ReadObjFile(string& fileName);
-ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName);
+ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials);

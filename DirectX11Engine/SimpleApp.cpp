@@ -28,23 +28,40 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 		return false;
 	}
 
+
+	// Initialize the model object.
+
+	wstring path(L"C://Users/GhettoFett/Documents/processedMeshes/");
+	wstring name(L"sponza.boom");
+	string strName(name.begin(), name.end());
+	string strPath(path.begin(), path.end());
+
+	
+
+	ProcessedMeshData* meshData = ReadBoomFile(strPath, strName, numMeshes, numMaterials);
+
 	// Create the model object.
-	mMesh = new SimpleMesh();
+	mMesh = new SimpleMesh[numMeshes];
 	if (!mMesh)
 	{
 		return false;
 	}
 
-	// Initialize the model object.
-	result = mMesh->Init(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/processedMeshes/", L"sponza.boom");
-	if (!result)
+	for (unsigned int i = 0; i < numMeshes; i++)
 	{
-		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
-		return false;
+		result = mMesh[i].Init(mD3D->GetDevice(), &meshData[i]);
+
+		if (!result)
+		{
+			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			return false;
+		}
 	}
 
+	delete [] meshData;
+
 	// Create the color shader object.
-	mShader = new OneLightShader;
+	mShader = new DefaultDiffuseShader;
 	if (!mShader)
 	{
 		return false;
@@ -85,8 +102,8 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	}
 
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR position = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR lookAt = XMVectorSet(0.0f, 10.0f, 10.0f, 0.0f);
+	XMVECTOR position = XMVectorSet(0.0f, 150.0f, 0.0f, 0.0f);
+	XMVECTOR lookAt = XMVectorSet(0.0f, 150.0f, 10.0f, 0.0f);
 	
 	float fieldOfView = (float)XM_PI / 4.0f;
 
@@ -198,14 +215,13 @@ void SimpleApp::Shutdown()
 bool SimpleApp::Frame()
 {
 	
-
 	ReadInput();
+
+	//update camera
 	mCamera->ComboRotate((float)mMouseRotateX, (float)mMouseRotateY);
 	mCamera->MoveCameraVertically((float)mMouseVertY);
 	mCamera->MoveCameraForward((float)mMouseHorizZ);
-	//update camera
-
-	//mWorld = XMMatrixScaling(100.0f, 100.0f, 100.0f);
+	
 
 	return Render();
 }
@@ -269,13 +285,19 @@ bool SimpleApp::Render()
 
 	LightPosBuffer lights;
 	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
-	lights.lightCol = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	lights.lightCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	
+	MaterialProperties material;
+	material.diffuseCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specComponent = 10.0f;
+
 	// Render the model using the color shader.
-	result = mShader->PrepareShader(context, &matrices, &lights, 0, mSamplerState);
+	result = mShader->PrepareShader(context, &matrices, &lights, &material, 0, mSamplerState);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	mMesh->Render(context);
+	for (unsigned int i = 0; i < numMeshes; i++)
+		mMesh[i].Render(context);
 	
 
 	if (!result)

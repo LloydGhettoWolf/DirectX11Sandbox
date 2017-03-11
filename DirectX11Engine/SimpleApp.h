@@ -1,7 +1,7 @@
 #pragma once
 //SimpleApp.h
 #include <dinput.h>
-#include "OneLightShader.h"
+#include "DefaultDiffuseShader.h"
 
 class D3DClass;
 class SimpleMesh;
@@ -33,7 +33,7 @@ class SimpleApp
 
 		D3DClass* mD3D;
 		SimpleMesh* mMesh;
-		OneLightShader* mShader;
+		DefaultDiffuseShader* mShader;
 		ID3D11SamplerState* mSamplerState;
 
 		IDirectInput8* dInput;
@@ -49,4 +49,7 @@ class SimpleApp
 		Camera* mCamera;
 
 		XMMATRIX mWorld;
+
+		unsigned int numMeshes = 0;
+		unsigned int numMaterials = 0;
 };
