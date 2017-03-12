@@ -142,36 +142,6 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	mMouseRotateY = 0;
 	mMouseVertY = 0;
 
-	result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dInput, NULL);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	result = dInput->CreateDevice(GUID_SysMouse, &mMouse, NULL);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	result = mMouse->SetDataFormat(&c_dfDIMouse);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	result = mMouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	result = mMouse->Acquire();
-	if (FAILED(result))
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -212,10 +182,10 @@ void SimpleApp::Shutdown()
 }
 
 
-bool SimpleApp::Frame()
+bool SimpleApp::Frame(DIMOUSESTATE& state)
 {
 	
-	ReadInput();
+	ReadInput(state);
 
 	//update camera
 	mCamera->ComboRotate((float)mMouseRotateX, (float)mMouseRotateY);
@@ -226,41 +196,23 @@ bool SimpleApp::Frame()
 	return Render();
 }
 
-bool SimpleApp::ReadInput()
+bool SimpleApp::ReadInput(DIMOUSESTATE& state)
 {
-	//read controls
-	HRESULT result;
-
-	// Read the mouse device.
-	result = mMouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&mMouseState);
-
-	if (FAILED(result))
+	//read control
+	if (state.rgbButtons[0] & 0x80)
 	{
-		// If the mouse lost focus or was not acquired then try to get control back.
-		if ((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
-		{
-			mMouse->Acquire();
-		}
-		else
-		{
-			return false;
-		}
+		mMouseRotateX = state.lX;
+		mMouseRotateY = state.lY;
 	}
 
-	if (mMouseState.rgbButtons[0] & 0x80)
+	if (state.rgbButtons[1] & 0x80)
 	{
-		mMouseRotateX = mMouseState.lX;
-		mMouseRotateY = mMouseState.lY;
+		mMouseHorizZ = state.lY;
 	}
 
-	if (mMouseState.rgbButtons[1] & 0x80)
+	if (state.rgbButtons[2] & 0x80)
 	{
-		mMouseHorizZ = mMouseState.lY;
-	}
-
-	if (mMouseState.rgbButtons[2] & 0x80)
-	{
-		mMouseVertY = mMouseState.lY;
+		mMouseVertY = state.lY;
 	}
 
 	return true;

@@ -1,5 +1,6 @@
 #pragma once
 //InputClass.h
+#include <dinput.h>
 
 class InputClass
 {
@@ -8,13 +9,17 @@ class InputClass
 		InputClass(const InputClass&) = delete;
 		~InputClass() {};
 
-		bool Init();
-
-		void KeyDown(unsigned int);
-		void KeyUp(unsigned int);
-
-		bool IsKeyDown(unsigned int);
+		bool Init(HINSTANCE hInstance, HWND hWnd);
+		void Update();
+		void KeyDown(unsigned int input);
+		void KeyUp(unsigned int input);
+		bool IsKeyDown(unsigned int key);
+		const DIMOUSESTATE& GetMouseState() const { return mMouseState;  }
 
 	private:
-		bool mKeys[256];
+		IDirectInput8* dInput;
+		IDirectInputDevice8* mMouse;
+		DIMOUSESTATE mMouseState;
+
+		unsigned int mKeys[256];
 };

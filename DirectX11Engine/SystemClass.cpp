@@ -15,7 +15,7 @@ bool SystemClass::Init()
 		return false;
 	}
 
-	if (!mInput->Init()) 
+	if (!mInput->Init(mInstance, mHwnd)) 
 	{
 		return false;
 	}
@@ -99,8 +99,11 @@ bool SystemClass::Frame()
 		return false;
 	}
 
+	mInput->Update();
+	DIMOUSESTATE state = mInput->GetMouseState();
+
 	// Do the frame processing for the graphics object.
-	result = mApp->Frame();
+	result = mApp->Frame(state);
 
 	if (!result)
 	{

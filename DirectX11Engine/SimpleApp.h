@@ -1,7 +1,7 @@
 #pragma once
 //SimpleApp.h
-#include <dinput.h>
 #include "DefaultDiffuseShader.h"
+#include <dinput.h>
 
 class D3DClass;
 class SimpleMesh;
@@ -25,20 +25,16 @@ class SimpleApp
 
 		bool Init(int, int, HWND, HINSTANCE);
 		void Shutdown();
-		bool Frame();
+		bool Frame(DIMOUSESTATE& state);
 
 	private:
 		bool Render();
-		bool ReadInput();
+		bool ReadInput(DIMOUSESTATE& state);
 
 		D3DClass* mD3D;
 		SimpleMesh* mMesh;
 		DefaultDiffuseShader* mShader;
 		ID3D11SamplerState* mSamplerState;
-
-		IDirectInput8* dInput;
-		IDirectInputDevice8* mMouse;
-		DIMOUSESTATE mMouseState;
 
 		int mMouseRotateX, mMouseRotateY;
 		int mMouseVertY;
