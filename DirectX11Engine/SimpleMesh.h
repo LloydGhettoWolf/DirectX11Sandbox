@@ -21,6 +21,7 @@ public:
 	void Render(ID3D11DeviceContext* context);
 
 	int GetIndexCount( ) const { return mIndexCount; }
+	int GetMaterialIndex() const { return mMaterialIndex; }
 	ID3D11ShaderResourceView* GetTexture() { return mTexture->GetTexture(); }
 
 private:
@@ -32,6 +33,7 @@ private:
 	ID3D11Buffer* mIndexBuffer;
 	Texture* mTexture;
 	DefaultDiffuseShader* shader;
+	int mMaterialIndex;
 	int mVertCount;
 	int mIndexCount;
 };

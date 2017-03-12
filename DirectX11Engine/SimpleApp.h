@@ -1,6 +1,7 @@
 #pragma once
 //SimpleApp.h
 #include "DefaultDiffuseShader.h"
+#include "ObjParser.h"
 #include <dinput.h>
 
 class D3DClass;
@@ -35,6 +36,8 @@ class SimpleApp
 		SimpleMesh* mMesh;
 		DefaultDiffuseShader* mShader;
 		ID3D11SamplerState* mSamplerState;
+
+		materialInfo* mMaterialProperties;
 
 		int mMouseRotateX, mMouseRotateY;
 		int mMouseVertY;

@@ -71,6 +71,8 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 		return false;
 	}
 
+	mMaterialIndex = mesh->materialIndex;
+
 	return true;
 }
 
@@ -121,14 +123,14 @@ void SimpleMesh::ShutdownBuffers()
 	if (mIndexBuffer)
 	{
 		mIndexBuffer->Release();
-		delete mIndexBuffer;
+		//delete mIndexBuffer;
 	}
 
 	// Release the vertex buffer.
 	if (mVertBuffer)
 	{
 		mVertBuffer->Release();
-		delete mVertBuffer;
+		//delete mVertBuffer;
 	}
 
 	if (mTexture)

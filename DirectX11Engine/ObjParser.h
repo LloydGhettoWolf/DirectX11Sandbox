@@ -38,8 +38,6 @@ struct ProcessedMeshData
 	VertexType* vertices;
 	unsigned int* indices;
 	unsigned int materialIndex;
-	materialInfo materialTable;
-	string textureName;
 	int numVerts;
 	int numIndices;
 
@@ -52,4 +50,4 @@ struct ProcessedMeshData
 };
 
 MeshData* ReadObjFile(string& fileName);
-ProcessedMeshData* ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials);
+void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, ProcessedMeshData** meshes, materialInfo** materials);

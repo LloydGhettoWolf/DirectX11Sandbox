@@ -38,7 +38,8 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 	
 
-	ProcessedMeshData* meshData = ReadBoomFile(strPath, strName, numMeshes, numMaterials);
+	ProcessedMeshData* meshData;
+	ReadBoomFile(strPath, strName, numMeshes, numMaterials, &meshData, &mMaterialProperties);
 
 	// Create the model object.
 	mMesh = new SimpleMesh[numMeshes];
@@ -164,8 +165,12 @@ void SimpleApp::Shutdown()
 	// Release the model object.
 	if (mMesh)
 	{
-		mMesh->Shutdown();
-		delete mMesh;
+		for (int i = 0; i < numMeshes; i++)
+		{
+			mMesh[i].Shutdown();
+		}
+
+		delete [] mMesh;
 	}
 
 	if (mSamplerState)
@@ -176,6 +181,11 @@ void SimpleApp::Shutdown()
 	if (mCamera)
 	{
 		delete mCamera;
+	}
+
+	if (mMaterialProperties)
+	{
+		delete mMaterialProperties;
 	}
 
 	return;
@@ -239,23 +249,31 @@ bool SimpleApp::Render()
 	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
 	lights.lightCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	
-	MaterialProperties material;
-	material.diffuseCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specComponent = 10.0f;
-
-	// Render the model using the color shader.
-	result = mShader->PrepareShader(context, &matrices, &lights, &material, 0, mSamplerState);
-
+	
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	for (unsigned int i = 0; i < numMeshes; i++)
+	{
+		// Render the model using the color shader.
+		int materialIndex = mMesh[i].GetMaterialIndex();
+
+		materialInfo material = mMaterialProperties[materialIndex];
+		MaterialProperties materialProperties;
+		materialProperties.diffuseCol = XMFLOAT4(material.diffuse.x, material.diffuse.y, material.diffuse.z, 1.0f);
+		materialProperties.specCol = XMFLOAT4(material.specular.x, material.specular.y, material.specular.z, 1.0f);
+		materialProperties.specComponent = material.specFactor;
+
+	    result = mShader->PrepareShader(context, &matrices, &lights, &materialProperties, 0, mSamplerState);
+
+		if (!result)
+		{
+			return false;
+		}
+
 		mMesh[i].Render(context);
+	}
 	
 
-	if (!result)
-	{
-		return false;
-	}
+	
 
 	mD3D->EndScene();
 
