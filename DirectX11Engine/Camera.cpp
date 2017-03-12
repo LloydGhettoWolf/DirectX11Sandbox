@@ -22,7 +22,7 @@ bool Camera::Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, fl
 
 void  Camera::MoveCameraHorizontally(float amount) 
 {
-	XMVECTOR translationVec = amount * mRightVec;
+	XMVECTOR translationVec = -amount * mRightVec;
 	mPos += translationVec;
 	mViewMatrix = XMMatrixLookAtLH(mPos, mPos + mLookVec, mUpVec);
 }
@@ -30,14 +30,14 @@ void  Camera::MoveCameraHorizontally(float amount)
 
 void  Camera::MoveCameraForward(float amount)
 {
-	XMVECTOR translationVec = amount * mLookVec;
+	XMVECTOR translationVec = -amount * mLookVec;
 	mPos += translationVec;
 	mViewMatrix = XMMatrixLookAtLH(mPos, mPos + mLookVec, mUpVec);
 }
 
 void  Camera::MoveCameraVertically(float amount)
 {
-	XMVECTOR translationVec = amount * mUpVec;
+	XMVECTOR translationVec = -amount * mUpVec;
 	mPos += translationVec;
 	mViewMatrix = XMMatrixLookAtLH(mPos, mPos + mLookVec, mUpVec);
 }
@@ -66,7 +66,7 @@ void Camera::ComboRotate(float amountX, float amountY)
 	if (yRotation < -3.14129f / 2.0f)
 		yRotation = -3.14129f / 2.0f;
 
-	XMMATRIX rotation = XMMatrixRotationY(-amountX);
+	XMMATRIX rotation = XMMatrixRotationY(amountX);
 	mLookVec = XMVector3Transform(mLookVec, rotation);
 	
 	mLookVec = XMVector3Normalize(mLookVec);
