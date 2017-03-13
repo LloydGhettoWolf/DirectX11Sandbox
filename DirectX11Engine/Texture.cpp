@@ -6,7 +6,6 @@ using namespace DirectX;
 
 bool Texture::Init(ID3D11Device* device, WCHAR* fileName)
 {
-	//HRESULT result = D3DX11CreateShaderResourceViewFromFile(device, fileName, 0, 0, &mTexture, 0);
 
 	ScratchImage image;
 	HRESULT result = LoadFromTGAFile(fileName, nullptr, image);

@@ -3,9 +3,9 @@
 struct PixelType
 {
 	float4 pos : SV_POSITION;
-	float3 worldPos : POSITION;
-	float3 norm : NORMAL;
-	float2 tex : TEXCOORD;
+	float4 worldPos : POSITION;
+	float4 norm : NORMAL;
+	float4 tex : TEXCOORD0;
 };
 
 Texture2D shaderTexture;
@@ -14,7 +14,14 @@ SamplerState SampleType;
 cbuffer LightPositions
 {
 	float3 lightPos;
-	float3 lightCol;
+	float4 lightCol;
+};
+
+cbuffer MaterialProperties
+{
+	float4 diffuseCol;
+	float4 specCol;
+	float specComponent;
 };
 
 float4 main(PixelType input) : SV_TARGET 
@@ -25,10 +32,12 @@ float4 main(PixelType input) : SV_TARGET
 	float3 halfVec = normalize(norm + lightVec);
 
 	float diffCoeff = saturate(dot(lightVec, norm));
-	float specCoeff = pow(saturate(dot(halfVec, norm)), 16.0f);
+	float specCoeff = pow(saturate(dot(halfVec, norm)), specComponent);
 
-	float3 diffCol = 0.1f * diffCoeff * lightCol;
-	float3 specCol = specCoeff * lightCol;
+	float4 texSample = shaderTexture.Sample(SampleType, -input.tex.xy);
+
+	float4 diffFactor = diffCoeff * diffuseCol * lightCol;
+	float4 specFactor = specCoeff * specCol * lightCol;
 	
-	return saturate(float4(specCol + diffCol, 1.0f));
+	return  saturate(texSample);
 }

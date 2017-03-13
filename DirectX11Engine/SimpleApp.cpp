@@ -39,16 +39,17 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	
 
 	ProcessedMeshData* meshData;
-	ReadBoomFile(strPath, strName, numMeshes, numMaterials, &meshData, &mMaterialProperties);
+	string* textureNames;
+	ReadBoomFile(strPath, strName, mNumMeshes, mNumMaterials, mNumTextures, &textureNames, &meshData, &mMaterialProperties);
 
 	// Create the model object.
-	mMesh = new SimpleMesh[numMeshes];
+	mMesh = new SimpleMesh[mNumMeshes];
 	if (!mMesh)
 	{
 		return false;
 	}
 
-	for (unsigned int i = 0; i < numMeshes; i++)
+	for (unsigned int i = 0; i < mNumMeshes; i++)
 	{
 		result = mMesh[i].Init(mD3D->GetDevice(), &meshData[i]);
 
@@ -59,7 +60,23 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 		}
 	}
 
-	delete [] meshData;
+	delete[] meshData;
+
+	//init textures
+	mTextures = new Texture[mNumTextures];
+	for (unsigned int i = 0; i < mNumTextures; i++)
+	{
+		wstring wstr(textureNames[i].begin(), textureNames[i].end());
+		result = mTextures[i].Init(mD3D->GetDevice(), &wstr[0]);
+
+		if (!result)
+		{
+			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			return false;
+		}
+	}
+
+	delete[] textureNames;
 
 	// Create the color shader object.
 	mShader = new DefaultDiffuseShader;
@@ -72,7 +89,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
-	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[0].InputSlot = 0;
 	polygonLayout[0].AlignedByteOffset = 0;
 	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
@@ -80,7 +97,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 	polygonLayout[1].SemanticName = "NORMAL";
 	polygonLayout[1].SemanticIndex = 0;
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[1].InputSlot = 0;
 	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
@@ -88,7 +105,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 	polygonLayout[2].SemanticName = "TEXCOORD";
 	polygonLayout[2].SemanticIndex = 0;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[2].InputSlot = 0;
 	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
@@ -165,7 +182,7 @@ void SimpleApp::Shutdown()
 	// Release the model object.
 	if (mMesh)
 	{
-		for (int i = 0; i < numMeshes; i++)
+		for (int i = 0; i < mNumMeshes; i++)
 		{
 			mMesh[i].Shutdown();
 		}
@@ -183,9 +200,15 @@ void SimpleApp::Shutdown()
 		delete mCamera;
 	}
 
+	if (mTextures)
+	{
+		for (int i = 0; i < mNumTextures; i++)
+			mTextures[i].Shutdown();
+	}
+
 	if (mMaterialProperties)
 	{
-		delete mMaterialProperties;
+		delete  [] mMaterialProperties;
 	}
 
 	return;
@@ -251,7 +274,7 @@ bool SimpleApp::Render()
 	
 	
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	for (unsigned int i = 0; i < numMeshes; i++)
+	for (unsigned int i = 0; i < mNumMeshes; i++)
 	{
 		// Render the model using the color shader.
 		int materialIndex = mMesh[i].GetMaterialIndex();
@@ -262,7 +285,11 @@ bool SimpleApp::Render()
 		materialProperties.specCol = XMFLOAT4(material.specular.x, material.specular.y, material.specular.z, 1.0f);
 		materialProperties.specComponent = material.specFactor;
 
-	    result = mShader->PrepareShader(context, &matrices, &lights, &materialProperties, 0, mSamplerState);
+
+
+		ID3D11ShaderResourceView* srv = mTextures[material.diffTexIndex].GetTexture();
+
+	    result = mShader->PrepareShader(context, &matrices, &lights, &materialProperties, srv, mSamplerState);
 
 		if (!result)
 		{

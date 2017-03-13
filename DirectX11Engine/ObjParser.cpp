@@ -43,63 +43,63 @@ inline void ProcessOneLenTokens(MeshData* data,
 }
 
 
-inline void CreateNormals(MeshData* data)
-{
-	// Go over each face
-	// create a normal for that face
-	// for each XMFLOAT3 create a list of face numbers
-	// sum up the normals from each face for each XMFLOAT3
-	// then normalize
-	// hey vertices!
-
-	
-	unsigned int numFaces = data->indices.size() / 3;
-	unsigned int numVerts = data->vertices.size();
-
-	// A vector of vectors storing the faces associated with each XMFLOAT3
-	vector<XMVECTOR> faceNormals;
-	faceNormals.reserve(numVerts);
-
-	for (unsigned int i = 0; i < numVerts; i++)
-	{
-		faceNormals.emplace_back( XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f) );
-	}
-
-	for (unsigned int face = 0; face < numFaces; face++) 
-	{
-		unsigned int index = face * 3;
-		unsigned int indexA = data->indices[index];
-		unsigned int indexB = data->indices[index + 1];
-		unsigned int indexC = data->indices[index + 2];
-		XMVECTOR A = XMLoadFloat3(&data->vertices[indexA].position);
-		XMVECTOR B = XMLoadFloat3(&data->vertices[indexB].position);
-		XMVECTOR C = XMLoadFloat3(&data->vertices[indexC].position);
-
-		XMVECTOR first = B - A;
-		XMVECTOR second = C - A;
-
-		XMFLOAT3 faceNormal;
-		XMStoreFloat3(&faceNormal, XMVector3Cross(second, first));
-		//faceNormals.emplace_back(XMFLOAT3(faceNormal));
-
-		XMVECTOR faceNormalVec = XMLoadFloat3(&faceNormal);
-		faceNormals[indexA] += faceNormalVec;
-		faceNormals[indexB] += faceNormalVec;
-		faceNormals[indexC] += faceNormalVec;
-	}
-
-	// Now normalize all normals
-
-
-	for (unsigned int i = 0; i < numVerts; i++)
-	{
-		faceNormals[i] = XMVector3Normalize(faceNormals[i]);
-		XMFLOAT3 destnorm;
-		XMStoreFloat3(&destnorm, faceNormals[i]);
-		data->vertices[i].normal = destnorm;
-	}
-
-}
+//inline void CreateNormals(MeshData* data)
+//{
+//	// Go over each face
+//	// create a normal for that face
+//	// for each XMFLOAT3 create a list of face numbers
+//	// sum up the normals from each face for each XMFLOAT3
+//	// then normalize
+//	// hey vertices!
+//
+//	
+//	unsigned int numFaces = data->indices.size() / 3;
+//	unsigned int numVerts = data->vertices.size();
+//
+//	// A vector of vectors storing the faces associated with each XMFLOAT3
+//	vector<XMVECTOR> faceNormals;
+//	faceNormals.reserve(numVerts);
+//
+//	for (unsigned int i = 0; i < numVerts; i++)
+//	{
+//		faceNormals.emplace_back( XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f) );
+//	}
+//
+//	for (unsigned int face = 0; face < numFaces; face++) 
+//	{
+//		unsigned int index = face * 3;
+//		unsigned int indexA = data->indices[index];
+//		unsigned int indexB = data->indices[index + 1];
+//		unsigned int indexC = data->indices[index + 2];
+//		XMVECTOR A = XMLoadFloat3(&data->vertices[indexA].position);
+//		XMVECTOR B = XMLoadFloat3(&data->vertices[indexB].position);
+//		XMVECTOR C = XMLoadFloat3(&data->vertices[indexC].position);
+//
+//		XMVECTOR first = B - A;
+//		XMVECTOR second = C - A;
+//
+//		XMFLOAT3 faceNormal;
+//		XMStoreFloat3(&faceNormal, XMVector3Cross(second, first));
+//		//faceNormals.emplace_back(XMFLOAT3(faceNormal));
+//
+//		XMVECTOR faceNormalVec = XMLoadFloat3(&faceNormal);
+//		faceNormals[indexA] += faceNormalVec;
+//		faceNormals[indexB] += faceNormalVec;
+//		faceNormals[indexC] += faceNormalVec;
+//	}
+//
+//	// Now normalize all normals
+//
+//
+//	for (unsigned int i = 0; i < numVerts; i++)
+//	{
+//		faceNormals[i] = XMVector3Normalize(faceNormals[i]);
+//		XMFLOAT3 destnorm;
+//		XMStoreFloat3(&destnorm, faceNormals[i]);
+//		data->vertices[i].normal = destnorm;
+//	}
+//
+//}
 
 MeshData* ReadObjFile(string& fileName)
 {
@@ -139,7 +139,7 @@ MeshData* ReadObjFile(string& fileName)
 
 	cout << data->vertices.size() << " " << data->indices.size() << " " << endl;
 
-	CreateNormals(data);
+	//CreateNormals(data);
 
 	inFile.close();
 
@@ -147,7 +147,8 @@ MeshData* ReadObjFile(string& fileName)
 }
 
 //returns an array of processed mesh data
-void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, ProcessedMeshData** meshes, materialInfo** materials)
+void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, unsigned int& numTextures, 
+				  string** textureNames, ProcessedMeshData** meshes, materialInfo** materials)
 {
 	string fullPath = filePath + fileName;
 	ifstream file(fullPath.c_str(), ios::binary);
@@ -188,24 +189,21 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 		data.read((char*)&(*materials)[i], sizeof(materialInfo));
 	}
 
-	////now read in textures for this mesh
-	//
-	//unsigned int numTextures;
-	//data.read((char*)&numTextures, sizeof(unsigned int));
-	//newMesh->numTextures = numTextures;
-	//newMesh->textureNames = new string[numTextures];
+	//now read in textures for this mesh
+	
+	data.read((char*)&numTextures, sizeof(unsigned int));
+	*textureNames = new string[numTextures];
 
-
-	//for (unsigned int i = 0; i < numTextures; i++)
-	//{
-	//	string texName;
-	//	unsigned int len;
-	//	data.read((char*)&len, sizeof(unsigned int));
-	//	char* temp = new char[len + 1];
-	//	temp[len] = '\0';
-	//	data.read(temp, len);
-	//	string s(temp);
-	//	newMesh->textureNames[i] = filePath + s;
-	//	delete[] temp;
-	//}
+	for (unsigned int i = 0; i < numTextures; i++)
+	{
+		string texName;
+		unsigned int len;
+		data.read((char*)&len, sizeof(unsigned int));
+		char* temp = new char[len + 1];
+		temp[len] = '\0';
+		data.read(temp, len);
+		string s(temp);
+		(*textureNames)[i] = filePath + s;
+		delete[] temp;
+	}
 }

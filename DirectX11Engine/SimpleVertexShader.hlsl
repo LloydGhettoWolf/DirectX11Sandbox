@@ -9,32 +9,31 @@ cbuffer Matrices
 //typedefs
 struct VertInput
 {
-	float3 pos  : POSITION;
-	float3 norm : NORMAL;
-	float2 tex  : TEXCOORD;
+	float4 pos  : POSITION;
+	float4 norm : NORMAL;
+	float4 tex  : TEXCOORD0;
 };
 
 struct PixelInput
 {
 	float4 pos  : SV_POSITION;
-	float3 worldPos : POSITION;
-	float3 norm : NORMAL;
-	float2 tex  : TEXCOORD;
+	float4 worldPos : POSITION;
+	float4 norm : NORMAL;
+	float4 tex  : TEXCOORD0;
 };
+
 
 PixelInput main( VertInput vertIn ) 
 {
 	PixelInput output;
-	output.pos = float4(vertIn.pos, 1.0f);
-	output.norm = mul(vertIn.norm, world);
+	output.pos = vertIn.pos;
+	output.norm = vertIn.norm;
+	output.tex = vertIn.tex;
 
 	output.pos = mul(output.pos, world);
 	output.worldPos = output.pos;
 	output.pos = mul(output.pos, view);
 	output.pos = mul(output.pos, proj);
-
-	output.tex = vertIn.tex;
-
 
 	return output;
 }

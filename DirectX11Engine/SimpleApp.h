@@ -2,6 +2,7 @@
 //SimpleApp.h
 #include "DefaultDiffuseShader.h"
 #include "ObjParser.h"
+#include "Texture.h"
 #include <dinput.h>
 
 class D3DClass;
@@ -39,6 +40,8 @@ class SimpleApp
 
 		materialInfo* mMaterialProperties;
 
+		Texture* mTextures;
+
 		int mMouseRotateX, mMouseRotateY;
 		int mMouseVertY;
 		int mMouseHorizZ;
@@ -49,6 +52,7 @@ class SimpleApp
 
 		XMMATRIX mWorld;
 
-		unsigned int numMeshes = 0;
-		unsigned int numMaterials = 0;
+		unsigned int mNumMeshes = 0;
+		unsigned int mNumMaterials = 0;
+		unsigned int mNumTextures = 0;
 };

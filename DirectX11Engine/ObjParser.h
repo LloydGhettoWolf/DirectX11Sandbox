@@ -10,9 +10,9 @@ using namespace DirectX;
 
 struct VertexType
 {
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
-	XMFLOAT2 uvs;
+	XMFLOAT4 position;
+	XMFLOAT4 normal;
+	XMFLOAT4 uvs;
 };
 
 struct MeshData
@@ -23,7 +23,6 @@ struct MeshData
 
 struct materialInfo
 {
-	string materialName;
 	XMFLOAT3 diffuse;
 	XMFLOAT3 ambient;
 	XMFLOAT3 specular;
@@ -50,4 +49,5 @@ struct ProcessedMeshData
 };
 
 MeshData* ReadObjFile(string& fileName);
-void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, ProcessedMeshData** meshes, materialInfo** materials);
+void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, unsigned int& numTextures,
+					string** textureNames, ProcessedMeshData** meshes, materialInfo** materials);
