@@ -1,10 +1,11 @@
 //main.cpp
-
+#include "TestApp.h"
 #include "SystemClass.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, int iCmdShow) 
 {
 	SystemClass* sysClass;
+	BaseApp* app;
 	bool result;
 
 	sysClass = new SystemClass();
@@ -14,7 +15,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, 
 		return 1;
 	}
 
-	result = sysClass->Init(800, 600);
+	app = new TestApp();
+
+	if (!app)
+	{
+		return 1;
+	}
+
+	result = sysClass->Init(app, 800, 600);
 
 	if (!result)
 	{

@@ -1,8 +1,9 @@
 #pragma once
 //TestApp.h
-#include "DefaultDiffuseShader.h"
-#include "ObjParser.h"
-#include "Texture.h"
+#include <BaseApp.h>
+#include <DefaultDiffuseShader.h>
+#include <ObjParser.h>
+#include <Texture.h>
 #include <dinput.h>
 
 class D3DClass;
@@ -16,12 +17,10 @@ const bool FULL_SCREEN = false;
 
 
 
-class TestApp
+class TestApp : public BaseApp
 {
 public:
-	TestApp() : mD3D(nullptr),
-		mMesh(nullptr),
-		mShader(nullptr) {};
+	TestApp() : mMesh(nullptr), mShader(nullptr) {};
 	TestApp(const TestApp&) = delete;
 	~TestApp() {};
 
@@ -33,7 +32,6 @@ private:
 	bool Render();
 	bool ReadInput(DIMOUSESTATE& state);
 
-	D3DClass* mD3D;
 	SimpleMesh* mMesh;
 	DefaultDiffuseShader* mShader;
 	ID3D11SamplerState* mSamplerState;
