@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 class InputClass;
-class SimpleApp;
+class BaseApp;
 
 class SystemClass
 {
@@ -13,7 +13,7 @@ public:
 	SystemClass(const SystemClass&) = delete;
 	~SystemClass() {};
 
-	bool Init(int width, int height);
+	bool Init(BaseApp* app, int width, int height);
 	void Run();
 	void Shutdown();
 
@@ -30,9 +30,9 @@ private:
 	bool mFullScreen;
 
 	InputClass* mInput;
-	SimpleApp* mApp;
+	BaseApp* mApp;
 };
 
-static SystemClass* App;
+static SystemClass* systemApp;
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

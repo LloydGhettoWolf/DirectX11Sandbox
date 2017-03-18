@@ -5,7 +5,6 @@
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="SimpleMesh.cpp" />
-    <ClCompile Include="SimpleApp.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ObjParser.cpp" />
@@ -16,11 +15,11 @@
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="SimpleMesh.h" />
-    <ClInclude Include="SimpleApp.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
+    <ClInclude Include="BaseApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

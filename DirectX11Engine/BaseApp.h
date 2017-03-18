@@ -4,18 +4,18 @@
 
 class D3DClass;
 
-class SimpleApp
+class BaseApp
 {
 public:
-	SimpleApp() : mD3D(nullptr) {};
-	SimpleApp(const SimpleApp&) = delete;
-	~SimpleApp() {};
+	BaseApp() : mD3D(nullptr) {};
+	BaseApp(const BaseApp&) = delete;
+	~BaseApp() {};
 
 	virtual bool Init(int, int, HWND, HINSTANCE) = 0;
 	virtual void Shutdown() = 0;
 	virtual bool Frame(DIMOUSESTATE& state) = 0;
 
-private:
+protected:
 	virtual bool Render() = 0;
 	virtual bool ReadInput(DIMOUSESTATE& state) = 0;
 

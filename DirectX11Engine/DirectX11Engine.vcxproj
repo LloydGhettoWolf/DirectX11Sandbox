@@ -174,18 +174,17 @@
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="DefaultDiffuseShader.cpp" />
     <ClCompile Include="D3DClass.cpp" />
-    <ClCompile Include="SimpleApp.cpp" />
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="SimpleMesh.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseApp.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
     <ClInclude Include="D3DClass.h" />
-    <ClInclude Include="SimpleApp.h" />
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="SimpleMesh.h" />
     <ClInclude Include="SystemClass.h" />

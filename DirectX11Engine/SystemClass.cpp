@@ -1,9 +1,9 @@
 //SystemClass.cpp
 #include "SystemClass.h"
 #include "InputClass.h"
-#include "SimpleApp.h"
+#include "BaseApp.h"
 
-bool SystemClass::Init(int width, int height)
+bool SystemClass::Init(BaseApp* app, int width, int height)
 {
 
 	InitializeWindows(width, height);
@@ -19,7 +19,7 @@ bool SystemClass::Init(int width, int height)
 		return false;
 	}
 
-	mApp= new SimpleApp();
+	mApp = app;
 	if (!mApp)
 	{
 		return false;
@@ -139,7 +139,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	DEVMODE dmScreenSettings;
 	int posX, posY;
 
-	App = this;
+	systemApp = this;
 
 	// Get the instance of this application.
 	mInstance = GetModuleHandle(NULL);
@@ -184,9 +184,6 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	}
 	else
 	{
-		// If windowed then set it to 800x600 resolution.
-		screenWidth = 800;
-		screenHeight = 600;
 
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;
@@ -245,6 +242,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 			return 0;
 		// All other messages pass to the message handler in the system class.
 		default:
-			return App->MessageHandler(hwnd, umessage, wparam, lparam);
+			return systemApp->MessageHandler(hwnd, umessage, wparam, lparam);
 	}
 }
