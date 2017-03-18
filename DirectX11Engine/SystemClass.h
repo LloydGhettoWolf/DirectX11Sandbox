@@ -13,7 +13,7 @@ public:
 	SystemClass(const SystemClass&) = delete;
 	~SystemClass() {};
 
-	bool Init();
+	bool Init(int width, int height);
 	void Run();
 	void Shutdown();
 

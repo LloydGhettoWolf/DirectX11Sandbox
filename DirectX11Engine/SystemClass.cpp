@@ -3,9 +3,8 @@
 #include "InputClass.h"
 #include "SimpleApp.h"
 
-bool SystemClass::Init()
+bool SystemClass::Init(int width, int height)
 {
-	int width = 0, height = 0;
 
 	InitializeWindows(width, height);
 
