@@ -178,6 +178,9 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 
 		data.read((char*)&(*meshes)[i].vertices[0], sizeof(VertexType) * info.numverts);
 		data.read((char*)&(*meshes)[i].indices[0], sizeof(unsigned int) * info.numIndices);
+
+		data.read((char*)&(*meshes)[i].min, sizeof(XMFLOAT4));
+		data.read((char*)&(*meshes)[i].max, sizeof(XMFLOAT4));
 	}
 	
 	*materials = new materialInfo[numMaterials];
