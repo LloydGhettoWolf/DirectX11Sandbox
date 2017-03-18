@@ -71,7 +71,7 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 
 		if (!result)
 		{
-			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			MessageBox(hwnd, L"Could not initialize the textures", L"Error", MB_OK);
 			return false;
 		}
 	}
@@ -155,7 +155,6 @@ bool SimpleApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hIn
 	}
 
 	//input creation
-
 	mMouseRotateX = 0;
 	mMouseRotateY = 0;
 	mMouseVertY = 0;
@@ -225,7 +224,6 @@ bool SimpleApp::Frame(DIMOUSESTATE& state)
 	mCamera->MoveCameraVertically((float)mMouseVertY);
 	mCamera->MoveCameraForward((float)mMouseHorizZ);
 	
-
 	return Render();
 }
 
@@ -272,7 +270,6 @@ bool SimpleApp::Render()
 	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
 	lights.lightCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	
-	
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	for (unsigned int i = 0; i < mNumMeshes; i++)
 	{
@@ -285,8 +282,6 @@ bool SimpleApp::Render()
 		materialProperties.specCol = XMFLOAT4(material.specular.x, material.specular.y, material.specular.z, 1.0f);
 		materialProperties.specComponent = material.specFactor;
 
-
-
 		ID3D11ShaderResourceView* srv = mTextures[material.diffTexIndex].GetTexture();
 
 	    result = mShader->PrepareShader(context, &matrices, &lights, &materialProperties, srv, mSamplerState);
@@ -298,9 +293,6 @@ bool SimpleApp::Render()
 
 		mMesh[i].Render(context);
 	}
-	
-
-	
 
 	mD3D->EndScene();
 
