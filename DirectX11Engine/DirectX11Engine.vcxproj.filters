@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="SystemClass.cpp" />
+    <ClCompile Include="InputClass.cpp" />
+    <ClCompile Include="D3DClass.cpp" />
+    <ClCompile Include="SimpleMesh.cpp" />
+    <ClCompile Include="SimpleApp.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ObjParser.cpp" />
+    <ClCompile Include="DefaultDiffuseShader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SystemClass.h" />
+    <ClInclude Include="InputClass.h" />
+    <ClInclude Include="D3DClass.h" />
+    <ClInclude Include="SimpleMesh.h" />
+    <ClInclude Include="SimpleApp.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ObjParser.h" />
+    <ClInclude Include="DefaultDiffuseShader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{fa9405cd-48e0-4332-88cc-ae0e97ab29cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="SimpleVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SimplePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
