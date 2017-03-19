@@ -133,11 +133,5 @@ void SimpleMesh::ShutdownBuffers()
 		//delete mVertBuffer;
 	}
 
-	if (mTexture)
-	{
-		mTexture->Shutdown();
-		delete [] mTexture;
-	}
-
 	return;
 }

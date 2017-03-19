@@ -11,7 +11,7 @@ using namespace DirectX;
 class SimpleMesh
 {
 public:
-	SimpleMesh(): mVertBuffer(nullptr), mIndexBuffer(nullptr), mTexture(nullptr) {};
+	SimpleMesh(): mVertBuffer(nullptr), mIndexBuffer(nullptr) {};
 	~SimpleMesh() {};
 	SimpleMesh(const SimpleMesh&) = delete;
 	SimpleMesh(const SimpleMesh&&) = delete;
@@ -22,7 +22,9 @@ public:
 
 	int GetIndexCount( ) const { return mIndexCount; }
 	int GetMaterialIndex() const { return mMaterialIndex; }
-	ID3D11ShaderResourceView* GetTexture() { return mTexture->GetTexture(); }
+
+	ID3D11Buffer* GetVertBuffer()  { return mVertBuffer; }
+	ID3D11Buffer* GetIndexBuffer()  { return mIndexBuffer; }
 
 private:
 	bool InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh);
@@ -31,7 +33,6 @@ private:
 
 	ID3D11Buffer* mVertBuffer;
 	ID3D11Buffer* mIndexBuffer;
-	Texture* mTexture;
 	DefaultDiffuseShader* shader;
 	int mMaterialIndex;
 	int mVertCount;
