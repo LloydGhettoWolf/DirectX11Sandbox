@@ -66,8 +66,9 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mTextures = new Texture[mNumTextures];
 	for (unsigned int i = 0; i < mNumTextures; i++)
 	{
+
 		wstring wstr(textureNames[i].begin(), textureNames[i].end());
-		result = mTextures[i].Init(mD3D->GetDevice(), &wstr[0]);
+		result = mTextures[i].Init(mD3D->GetDeviceContext(), mD3D->GetDevice(), &wstr[0], true);
 
 		if (!result)
 		{
@@ -217,14 +218,12 @@ void TestApp::Shutdown()
 
 bool TestApp::Frame(DIMOUSESTATE& state)
 {
-
 	ReadInput(state);
 
 	//update camera
 	mCamera->ComboRotate((float)mMouseRotateX, (float)mMouseRotateY);
 	mCamera->MoveCameraVertically((float)mMouseVertY);
 	mCamera->MoveCameraForward((float)mMouseHorizZ);
-
 
 	return Render();
 }
@@ -257,9 +256,6 @@ bool TestApp::Render()
 	XMMATRIX viewMatrix, projMatrix, worldMatrix;
 	bool result;
 
-	// Clear the buffers to begin the scene.
-	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
 	ID3D11DeviceContext* context = mD3D->GetDeviceContext();
 
 	MatrixBufferType matrices;
@@ -272,6 +268,22 @@ bool TestApp::Render()
 	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
 	lights.lightCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// Clear the buffers to begin the scene.
+	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	result = mShader->PrepareShader(context, &matrices, &lights);
+
+	if (!result)
+	{
+		return false;
+	}
+
+	result = mShader->SetShaderParameters(context, &matrices, &lights);
+
+	if (!result)
+	{
+		return false;
+	}
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	for (unsigned int i = 0; i < mNumMeshes; i++)
@@ -285,22 +297,17 @@ bool TestApp::Render()
 		materialProperties.specCol = XMFLOAT4(material.specular.x, material.specular.y, material.specular.z, 1.0f);
 		materialProperties.specComponent = material.specFactor;
 
-
-
 		ID3D11ShaderResourceView* srv = mTextures[material.diffTexIndex].GetTexture();
 
-		result = mShader->PrepareShader(context, &matrices, &lights, &materialProperties, srv, mSamplerState);
+		PerMeshStruct perMesh;
+		perMesh.material = &materialProperties;
+		perMesh.sampler = mSamplerState;
+		perMesh.srv = srv;
 
-		if (!result)
-		{
-			return false;
-		}
+		mShader->SetPerMeshParamaters((void*)&perMesh, mD3D->GetDeviceContext());
 
 		mMesh[i].Render(context);
 	}
-
-
-
 
 	mD3D->EndScene();
 
