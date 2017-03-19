@@ -39,7 +39,7 @@ struct ProcessedMeshData
 	unsigned int materialIndex;
 	int numVerts;
 	int numIndices;
-	XMFLOAT4 min, max;
+	XMFLOAT4 min, max, center;
 
 	ProcessedMeshData() {};
 

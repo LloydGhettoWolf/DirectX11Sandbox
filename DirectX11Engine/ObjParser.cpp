@@ -181,6 +181,10 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 
 		data.read((char*)&(*meshes)[i].min, sizeof(XMFLOAT4));
 		data.read((char*)&(*meshes)[i].max, sizeof(XMFLOAT4));
+
+		(*meshes)[i].center.x = 0.5f * ((*meshes)[i].min.x + (*meshes)[i].max.x);
+		(*meshes)[i].center.y = 0.5f * ((*meshes)[i].min.y + (*meshes)[i].max.y);
+		(*meshes)[i].center.z = 0.5f * ((*meshes)[i].min.z + (*meshes)[i].max.z);
 	}
 	
 	*materials = new materialInfo[numMaterials];
