@@ -18,11 +18,9 @@ public:
 	~Texture() {}
 	Texture(const Texture&) = delete;
 
-	bool Init(ID3D11Device* device, WCHAR* fileName);
+	bool Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName);
 	void Shutdown();
 	ID3D11ShaderResourceView* GetTexture() { return mTexture; }
 private:
-	bool LoadTarga(char* filename, int& height, int& width);
 	ID3D11ShaderResourceView* mTexture;
-	unsigned char* m_targaData;
 };
