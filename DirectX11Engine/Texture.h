@@ -18,7 +18,7 @@ public:
 	~Texture() {}
 	Texture(const Texture&) = delete;
 
-	bool Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName);
+	bool Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName, bool needMips = false);
 	void Shutdown();
 	ID3D11ShaderResourceView* GetTexture() { return mTexture; }
 private:
