@@ -242,28 +242,26 @@ void DefaultDiffuseShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HW
 
 bool DefaultDiffuseShader::SetConstantShaderParameters(ID3D11DeviceContext* deviceContext, MatrixBufferType *matrices, LightPosBuffer* lights)
 {
-	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	D3D11_MAPPED_SUBRESOURCE mappedResource2;
 	
-	MatrixBufferType* dataPtr;
-	LightPosBuffer* dataPtr2;
-	unsigned int bufferNumber;
+	MatrixBufferType* matPtr;
+	LightPosBuffer* lightPtr;
 
 	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT result = deviceContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
 	// Get a pointer to the data in the constant buffer.
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
+	matPtr = (MatrixBufferType*)mappedResource.pData;
 
 	// Copy the matrices into the constant buffer.
-	dataPtr->world = matrices->world;
-	dataPtr->view = matrices->view;
-	dataPtr->projection = matrices->projection;
+	matPtr->world = matrices->world;
+	matPtr->view = matrices->view;
+	matPtr->projection = matrices->projection;
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mMatrixBuffer, 0);
@@ -274,47 +272,46 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(ID3D11DeviceContext* devi
 		return false;
 	}
 
-	dataPtr2 = (LightPosBuffer*)mappedResource2.pData;
-	dataPtr2->lightPos = lights->lightPos;
-	dataPtr2->lightCol = lights->lightCol;
+	lightPtr = (LightPosBuffer*)mappedResource2.pData;
+	lightPtr->lightPos = lights->lightPos;
+	lightPtr->lightCol = lights->lightCol;
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);
 
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
 
 	// Finanly set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(0, 1, &mMatrixBuffer);
-	deviceContext->PSSetConstantBuffers(0, 1, &mLightBuffer);
+	deviceContext->VSSetConstantBuffers(MATRIX_BUFFER, 1, &mMatrixBuffer);
+	deviceContext->PSSetConstantBuffers(LIGHT_BUFFER, 1, &mLightBuffer);
 
 	return true;
 }
 
 bool DefaultDiffuseShader::SetPerMeshParamaters(void* data, ID3D11DeviceContext* deviceContext) 
 {
-	D3D11_MAPPED_SUBRESOURCE mappedResource3;
-	MaterialProperties* dataPtr3;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MaterialProperties* meshPtr3;
 
+	//unpack data
 	PerMeshStruct* info = (PerMeshStruct*)data;
 	MaterialProperties* matInfo = info->material;
 	ID3D11SamplerState* samplerState = info->sampler;
 	ID3D11ShaderResourceView* srv = info->srv;
 
-	HRESULT result = deviceContext->Map(mMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource3);
+	HRESULT result = deviceContext->Map(mMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 	{
 		return false;
 	}
 	
-	dataPtr3 = (MaterialProperties*)mappedResource3.pData;
-	dataPtr3->diffuseCol = matInfo->diffuseCol;
-	dataPtr3->specCol = matInfo->specCol;
-	dataPtr3->specComponent = matInfo->specComponent;
+	meshPtr3 = (MaterialProperties*)mappedResource.pData;
+	meshPtr3->diffuseCol = matInfo->diffuseCol;
+	meshPtr3->specCol = matInfo->specCol;
+	meshPtr3->specComponent = matInfo->specComponent;
 
 	deviceContext->Unmap(mMaterialBuffer, 0);
 
-	deviceContext->PSSetConstantBuffers(1, 1, &mMaterialBuffer);
+	deviceContext->PSSetConstantBuffers(MATERIAL_BUFFER, 1, &mMaterialBuffer);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 	deviceContext->PSSetShaderResources(0, 1, &srv);
 }

@@ -3,32 +3,17 @@
 #include <D3D11.h>
 //#include <d3dx11async.h>
 #include <DirectXMath.h>
+#include "Defines.h"
 
 using namespace DirectX;
 
+static const int MATRIX_BUFFER = 0;
+static const int LIGHT_BUFFER = 0;
+static const int MATERIAL_BUFFER = 1;
+
 // Description:
 // A
-struct MatrixBufferType
-{
-	XMMATRIX world;
-	XMMATRIX view;
-	XMMATRIX projection;
-};
 
-struct LightPosBuffer
-{
-	XMFLOAT3 lightPos;
-	float padding1;
-	XMFLOAT4 lightCol;
-};
-
-struct MaterialProperties
-{
-	XMFLOAT4 diffuseCol;
-	XMFLOAT4 specCol;
-	float specComponent;
-	float padding[3];
-};
 
 struct PerMeshStruct
 {
