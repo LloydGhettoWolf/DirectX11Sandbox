@@ -4,8 +4,12 @@
 #include <d3dcommon.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include "SimpleMesh.h"
+#include "Camera.h"
 
 using namespace DirectX;
+
+using ShaderFuncPointer = void(*) (void*, ID3D11DeviceContext*);
 
 class D3DClass
 {
@@ -21,6 +25,9 @@ class D3DClass
 
 		void BeginScene(float red, float green, float blue, float alpha);
 		void EndScene();
+
+		void RenderOpaque(SimpleMesh* meshes, unsigned int numMeshes, Camera* cam);
+		//sort along z
 
 		ID3D11Device*			GetDevice() { return mDevice; }
 		ID3D11DeviceContext*	GetDeviceContext() { return mDeviceContext; }

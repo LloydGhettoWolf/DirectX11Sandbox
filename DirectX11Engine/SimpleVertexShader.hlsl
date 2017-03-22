@@ -29,6 +29,7 @@ PixelInput main( VertInput vertIn )
 	output.pos = vertIn.pos;
 	output.norm = vertIn.norm;
 	output.tex = vertIn.tex;
+	output.tex.y = -output.tex.y;
 
 	output.pos = mul(output.pos, world);
 	output.worldPos = output.pos;

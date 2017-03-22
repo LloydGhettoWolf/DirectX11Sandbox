@@ -9,6 +9,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="DefaultDiffuseShader.cpp" />
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="OutlineShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SystemClass.h" />
@@ -20,6 +22,9 @@
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
     <ClInclude Include="BaseApp.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="OutlineShader.h" />
+    <ClInclude Include="Defines.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -31,6 +36,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SimplePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="OutlinePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="OutlineVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

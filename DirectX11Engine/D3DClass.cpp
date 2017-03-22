@@ -1,6 +1,5 @@
 //D3DClass.cpp
 #include "D3DClass.h"
-#include <atlstr.h>
 
 D3DClass::D3DClass() :  mSwapChain(0),
 						mDevice (0),
@@ -160,7 +159,6 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Set the handle for the window to render to.
 	swapChainDesc.OutputWindow = hwnd;
 
-	// Turn multisampling off.
 	swapChainDesc.SampleDesc.Count = 8;
 	swapChainDesc.SampleDesc.Quality = 0;
 
@@ -291,7 +289,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 
 	// Setup the raster description which will determine how and what polygons will be drawn.
 	rasterDesc.AntialiasedLineEnable = true;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.DepthClipEnable = true;
@@ -401,7 +399,7 @@ void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 	// Clear the back buffer.
 	mDeviceContext->ClearRenderTargetView(mRenderTargetView, color);
 
-	// Clear the depth buffer.
+	// Clear the depth buffer->
 	mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
@@ -410,27 +408,27 @@ void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 
 void D3DClass::EndScene()
 {
-	// Present the back buffer to the screen since rendering is complete.
+	// Present the back buffer to the screen since rendering is complete->
 	if (mVSyncEnabled)
 	{
-		// Lock to screen refresh rate.
+		// Lock to screen refresh rate->
 		mSwapChain->Present(1, 0);
 	}
 	else
 	{
-		// Present as fast as possible.
+		// Present as fast as possible->
 		mSwapChain->Present(0, 0);
 	}
 
 	return;
 }
 
-void D3DClass::GetVideoCardInfo(char* cardName, int& memory, HWND hWnd)
+
+void D3DClass::RenderOpaque(SimpleMesh* meshes, unsigned int numMeshes, Camera* cam)
 {
-	strcpy_s(cardName, 128, mVideoCardDescription);
-	memory = mVideoCardMemory;
-	CString msg;
-	msg.Format(_T("%S"), cardName); // Mind the caps "S"
-	MessageBox(NULL, msg, _T("Hi"), NULL);
-	return;
+	//cull against frustum
+	
+	//sort along z
+
+	//draw!
 }

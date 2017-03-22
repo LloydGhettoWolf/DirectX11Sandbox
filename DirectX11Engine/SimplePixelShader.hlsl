@@ -34,10 +34,10 @@ float4 main(PixelType input) : SV_TARGET
 	float diffCoeff = saturate(dot(lightVec, norm));
 	float specCoeff = pow(saturate(dot(halfVec, norm)), specComponent);
 
-	float4 texSample = shaderTexture.Sample(SampleType, -input.tex.xy);
+	float4 texSample = shaderTexture.Sample(SampleType, input.tex.xy);
 
 	float4 diffFactor = diffCoeff * diffuseCol * lightCol;
 	float4 specFactor = specCoeff * specCol * lightCol;
 	
-	return  saturate(texSample);
+	return  saturate((diffFactor + specFactor) * texSample);
 }

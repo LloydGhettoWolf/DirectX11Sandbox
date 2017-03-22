@@ -162,33 +162,33 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	RegisterClassEx(&wc);
 
 	// Determine the resolution of the clients desktop screen.
-	screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	//screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	//screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
-	if (mFullScreen)
-	{
-		// If full screen set the screen to maximum size of the users desktop and 32bit.
-		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = (unsigned long)screenWidth;
-		dmScreenSettings.dmPelsHeight = (unsigned long)screenHeight;
-		dmScreenSettings.dmBitsPerPel = 32;
-		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+	//if (mFullScreen)
+	//{
+	//	// If full screen set the screen to maximum size of the users desktop and 32bit.
+	//	memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+	//	dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+	//	dmScreenSettings.dmPelsWidth = (unsigned long)screenWidth;
+	//	dmScreenSettings.dmPelsHeight = (unsigned long)screenHeight;
+	//	dmScreenSettings.dmBitsPerPel = 32;
+	//	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-		// Change the display settings to full screen.
-		ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
+	//	// Change the display settings to full screen.
+	//	ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
 
-		// Set the position of the window to the top left corner.
-		posX = posY = 0;
-	}
-	else
-	{
+	//	// Set the position of the window to the top left corner.
+	//	posX = posY = 0;
+	//}
+	//else
+	//{
 
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;
 		posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
-	}
+	//}
 
 	// Create the window with the screen settings and get the handle to it.
 	mHwnd = CreateWindowEx(WS_EX_APPWINDOW, mAppName, mAppName,
