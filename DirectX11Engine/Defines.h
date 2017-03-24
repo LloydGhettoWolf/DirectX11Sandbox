@@ -3,6 +3,8 @@
 
 using namespace DirectX;
 
+#define RENDER_AABB 1
+
 struct MatrixBufferType
 {
 	XMMATRIX world;
@@ -23,4 +25,10 @@ struct MaterialProperties
 	XMFLOAT4 specCol;
 	float specComponent;
 	float padding[3];
+};
+
+struct ConstantsStruct
+{
+	MatrixBufferType* matPtr;
+	LightPosBuffer* lightPtr;
 };

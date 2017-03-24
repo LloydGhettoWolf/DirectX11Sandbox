@@ -2,6 +2,7 @@
 //TestApp.h
 #include <BaseApp.h>
 #include <DefaultDiffuseShader.h>
+#include <OutlineShader.h>
 #include <ObjParser.h>
 #include <Texture.h>
 #include <dinput.h>
@@ -9,6 +10,7 @@
 class D3DClass;
 class SimpleMesh;
 class Camera;
+class Frustum;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 5000.0f;
@@ -27,6 +29,8 @@ public:
 	bool Init(int, int, HWND, HINSTANCE);
 	void Shutdown();
 	bool Frame(DIMOUSESTATE& state);
+	
+
 
 private:
 	bool Render();
@@ -34,6 +38,7 @@ private:
 
 	SimpleMesh* mMesh;
 	DefaultDiffuseShader* mShader;
+	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 
 	materialInfo* mMaterialProperties;
@@ -47,6 +52,7 @@ private:
 	int mScreenWidth, mScreenHeight;
 
 	Camera* mCamera;
+	Frustum* mFrustum;
 
 	XMMATRIX mWorld;
 

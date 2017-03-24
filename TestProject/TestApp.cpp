@@ -1,9 +1,11 @@
 //TestApp.cpp//TestApp.cpp
 #include <Windows.h>
 #include "TestApp.h"
-#include "D3DClass.h"
+#include <D3DClass.h>
 #include "SimpleMesh.h"
 #include "Camera.h"
+#include "Utility.h"
+#include <Frustum.h>
 
 #define DIRECTINPUT_VERSION 0x0800
 
@@ -17,10 +19,10 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
-	mScreenHeight = screenHeight;
-	mScreenWidth = screenWidth;
+	mScreenHeight = 600;
+	mScreenWidth = 800;
 
-	bool result = mD3D->Init(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	bool result = mD3D->Init(800, 600, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
 	if (!result)
 	{
@@ -112,6 +114,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[2].InstanceDataStepRate = 0;
 
+
 	// Initialize the color shader object.
 	result = mShader->Init(mD3D->GetDevice(), hwnd, L"SimpleVertexShader.hlsl", L"SimplePixelShader.hlsl", polygonLayout, 3);
 	if (!result)
@@ -120,9 +123,18 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
+	mOutlineShader = new OutlineShader();
+
+	result = mOutlineShader->Init(mD3D->GetDevice(), hwnd, L"OutlineVertexShader.hlsl", L"OutlinePixelShader.hlsl", polygonLayout, 1);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the outline shader object.", L"Error", MB_OK);
+		return false;
+	}
+
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR position = XMVectorSet(0.0f, 150.0f, 0.0f, 0.0f);
-	XMVECTOR lookAt = XMVectorSet(0.0f, 150.0f, 10.0f, 0.0f);
+	XMVECTOR position = XMVectorSet(0.0f, 50.0f, 0.0f, 0.0f);
+	XMVECTOR lookAt = XMVectorSet(10.0f, 50.0f, 0.0f, 0.0f);
 
 	float fieldOfView = (float)XM_PI / 4.0f;
 
@@ -161,6 +173,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mMouseRotateY = 0;
 	mMouseVertY = 0;
 
+	mFrustum = new Frustum();
+
 	return true;
 }
 
@@ -178,6 +192,12 @@ void TestApp::Shutdown()
 	{
 		mShader->Shutdown();
 		delete mShader;
+	}
+
+	if (mOutlineShader)
+	{
+		mOutlineShader->Shutdown();
+		delete mOutlineShader;
 	}
 
 	// Release the model object.
@@ -225,6 +245,8 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 	mCamera->MoveCameraVertically((float)mMouseVertY);
 	mCamera->MoveCameraForward((float)mMouseHorizZ);
 
+	mFrustum->UpdateFrustum(mCamera);
+
 	return Render();
 }
 
@@ -271,25 +293,32 @@ bool TestApp::Render()
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
-	result = mShader->PrepareShader(context, &matrices, &lights);
+	result = mShader->PrepareShader(context);
 
 	if (!result)
 	{
 		return false;
 	}
 
-	result = mShader->SetShaderParameters(context, &matrices, &lights);
+	ConstantsStruct constants;
+	constants.lightPtr = &lights;
+	constants.matPtr = &matrices;
+	result = mShader->SetConstantShaderParameters((void*)&constants, context);
 
 	if (!result)
 	{
 		return false;
 	}
+
+	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	for (unsigned int i = 0; i < mNumMeshes; i++)
+	unsigned int numUnculledMeshes = unculledMeshes.size();
+
+	for (unsigned int i = 0; i < numUnculledMeshes; i++)
 	{
 		// Render the model using the color shader.
-		int materialIndex = mMesh[i].GetMaterialIndex();
+		int materialIndex = unculledMeshes[i]->GetMaterialIndex();
 
 		materialInfo material = mMaterialProperties[materialIndex];
 		MaterialProperties materialProperties;
@@ -299,15 +328,36 @@ bool TestApp::Render()
 
 		ID3D11ShaderResourceView* srv = mTextures[material.diffTexIndex].GetTexture();
 
-		PerMeshStruct perMesh;
+		DiffuseShaderPerMeshStruct perMesh;
 		perMesh.material = &materialProperties;
 		perMesh.sampler = mSamplerState;
 		perMesh.srv = srv;
 
-		mShader->SetPerMeshParamaters((void*)&perMesh, mD3D->GetDeviceContext());
+		mShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
 
-		mMesh[i].Render(context);
+		unculledMeshes[i]->Render(context);
 	}
+
+	result = mOutlineShader->PrepareShader(context);
+
+	if (!result)
+	{
+		return false;
+	}
+
+#if RENDER_AABB
+	result = mOutlineShader->SetConstantShaderParameters(static_cast<void*>(&matrices), context);
+
+	if (!result)
+	{
+		return false;
+	}
+
+	for (unsigned int i = 0; i < mNumMeshes; i++)
+	{
+		mMesh[i].RenderBoundingBox(context);
+	}
+#endif
 
 	mD3D->EndScene();
 
