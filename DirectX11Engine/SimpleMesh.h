@@ -4,7 +4,6 @@
 #include <DirectXMath.h>
 #include "Texture.h"
 #include "ObjParser.h"
-#include "DefaultDiffuseShader.h"
 
 using namespace DirectX;
 
@@ -33,7 +32,6 @@ public:
 private:
 	bool InitBoundingBox(ID3D11Device* device);
 	bool InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh);
-	bool InitTextures(ID3D11Device* device, ProcessedMeshData* mesh);
 	void ShutdownBuffers();
 
 	ID3D11Buffer* mVertBuffer;
@@ -42,7 +40,6 @@ private:
 	ID3D11Buffer* mAABBVertBuffer;
 	ID3D11Buffer* mAABBIndexBuffer;
 
-	DefaultDiffuseShader* shader;
 	int mMaterialIndex;
 	int mVertCount;
 	int mIndexCount;

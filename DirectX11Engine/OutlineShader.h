@@ -2,7 +2,6 @@
 //outlineshader.h
 #include <D3D11.h>
 #include <DirectXMath.h>
-#include "Defines.h"
 #include "Shader.h"
 
 using namespace DirectX;
@@ -23,4 +22,11 @@ public:
 	bool SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext) { return true; }
 private:
 	ID3D11Buffer* mMatrixBuffer;
+
+	struct MatrixBufferType
+	{
+		XMMATRIX world;
+		XMMATRIX view;
+		XMMATRIX projection;
+	};
 };

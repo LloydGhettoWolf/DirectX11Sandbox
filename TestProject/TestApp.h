@@ -1,7 +1,7 @@
 #pragma once
 //TestApp.h
 #include <BaseApp.h>
-#include <DefaultDiffuseShader.h>
+#include "DefaultDiffuseShader.h"
 #include <OutlineShader.h>
 #include <ObjParser.h>
 #include <Texture.h>

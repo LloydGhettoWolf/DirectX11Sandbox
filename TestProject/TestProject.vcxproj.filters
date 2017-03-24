@@ -3,8 +3,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TestApp.cpp" />
+    <ClCompile Include="DefaultDiffuseShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestApp.h" />
+    <ClInclude Include="Defines.h" />
+    <ClInclude Include="DefaultDiffuseShader.h" />
   </ItemGroup>
 </Project>
