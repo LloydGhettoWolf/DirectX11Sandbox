@@ -1,16 +1,44 @@
 //ColorShader.h
+#include <D3D11.h>
 #include "DefaultDiffuseShader.h"
 #include "ObjParser.h"
-#include <fstream>
-//#include <d3dx11async.h>
 
-bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems)
+
+bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC lightDesc;
 	D3D11_BUFFER_DESC materialDesc;
 
-	Shader::Init(device, hwnd, vsFilename, psFilename, inputs, numElems);
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "NORMAL";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "TEXCOORD";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleVertexShader.cso");
+	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimplePixelShader.cso");
+	Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 3);
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

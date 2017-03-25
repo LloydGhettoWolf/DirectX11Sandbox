@@ -24,7 +24,7 @@ cbuffer MaterialProperties
 	float specComponent;
 };
 
-float4 main(PixelType input) : SV_TARGET 
+float4 main(PixelType input) : SV_TARGET0
 {
 	float3 norm = normalize(input.norm);
 	

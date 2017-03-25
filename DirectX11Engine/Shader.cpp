@@ -1,66 +1,38 @@
 //ColorShader.h
-#include "Shader.h"
+#include <D3D11.h>
 #include <fstream>
-#include <d3dx11async.h>
+#include <atlbase.h>
+#include <D3DX11async.h>
+#include <d3dcompiler.h>
+#include "Shader.h"
 
-bool Shader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems)
+bool Shader::InitShaderData(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename, LPCWSTR psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems)
 {
 	HRESULT result;
 
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
 	ID3D10Blob* pixelShaderBuffer;
-	unsigned int numElements;
-	D3D11_BUFFER_DESC matrixBufferDesc;
-	D3D11_BUFFER_DESC lightDesc;
-	D3D11_BUFFER_DESC materialDesc;
 
 	// Initialize the pointers this function will use to null.
 	errorMessage = 0;
 	vertexShaderBuffer = 0;
 	pixelShaderBuffer = 0;
 
-	// Compile the vertex shader code.
-	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
-		&vertexShaderBuffer, &errorMessage, NULL);
+	result = D3DReadFileToBlob(vsFilename, &vertexShaderBuffer);
 
 	if (result != S_OK)
 	{
-		// If the shader failed to compile it should have writen something to the error message.
-		if (errorMessage)
-		{
-			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
-		}
-		// If there was nothing in the error message then it simply could not find the shader file itself.
-		else
-		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
-		}
-
 		return false;
 	}
 
-	// Compile the pixel shader code.
-	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
-		&pixelShaderBuffer, &errorMessage, NULL);
+	result = D3DReadFileToBlob(psFilename, &pixelShaderBuffer);
 
 	if (result != S_OK)
 	{
-		// If the shader failed to compile it should have writen something to the error message.
-		if (errorMessage)
-		{
-			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
-		}
-		// If there was  nothing in the error message then it simply could not find the file itself.
-		else
-		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
-		}
-
 		return false;
 	}
 
-	// Create the vertex shader from the buffer.
 	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &mVertexShader);
 
 	if (result != S_OK)
@@ -75,7 +47,6 @@ bool Shader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psF
 	{
 		return false;
 	}
-
 
 	// Create the vertex input layout.
 	result = device->CreateInputLayout(inputs, numElems, vertexShaderBuffer->GetBufferPointer(),
@@ -95,7 +66,6 @@ bool Shader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psF
 
 	return true;
 }
-
 
 void Shader::Shutdown()
 {
@@ -135,18 +105,17 @@ bool Shader::PrepareShader(ID3D11DeviceContext* deviceContext)
 }
 
 
-void Shader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+void Shader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, LPCWSTR shaderFilename)
 {
 	char* compileErrors;
 	unsigned long bufferSize, i;
 	std::ofstream fout;
 
-
 	// Get a pointer to the error message text buffer.
 	compileErrors = (char*)(errorMessage->GetBufferPointer());
 
 	// Get the length of the message.
-	bufferSize = errorMessage->GetBufferSize();
+	bufferSize = (unsigned long)errorMessage->GetBufferSize();
 
 	// Open a file to write the error message to.
 	fout.open("shader-error.txt");

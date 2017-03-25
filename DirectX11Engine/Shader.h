@@ -1,5 +1,14 @@
 #pragma once
-#include <D3D11.h>
+#include "SystemClass.h"
+
+struct ID3D11Device;
+struct D3D11_INPUT_ELEMENT_DESC;
+struct ID3D11VertexShader;
+struct ID3D11PixelShader;
+struct ID3D11InputLayout;
+struct ID3D11DeviceContext;
+struct ID3D10Blob;
+
 class Shader
 {
 public:
@@ -11,13 +20,14 @@ public:
 	Shader(const Shader&) = delete;
 	~Shader() {};
 
-	virtual bool Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems) = 0;
+	virtual bool Init(ID3D11Device* device, HWND hwnd) = 0;
 	virtual void Shutdown() = 0;
 	virtual bool PrepareShader(ID3D11DeviceContext* deviceContext);
 	virtual bool SetConstantShaderParameters(void* data, ID3D11DeviceContext* deviceContext) = 0;
 	virtual bool SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext) = 0;
 protected:
-	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename);
+	bool InitShaderData(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename, LPCWSTR psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems);
+	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, LPCWSTR shaderFilename);
 
 	ID3D11VertexShader* mVertexShader;
 	ID3D11PixelShader* mPixelShader;

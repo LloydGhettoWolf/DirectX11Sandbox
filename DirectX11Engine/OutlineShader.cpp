@@ -1,11 +1,22 @@
-#include "OutlineShader.h"
+#include <D3D11.h>
 #include <fstream>
-#include <d3dx11async.h>
+#include "OutlineShader.h"
 
-bool OutlineShader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename, D3D11_INPUT_ELEMENT_DESC* inputs, int numElems)
+bool OutlineShader::Init(ID3D11Device* device, HWND hwnd)
 {
-	Shader::Init(device, hwnd, vsFilename, psFilename, inputs, numElems);
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[1];
 
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/OutlineVertexShader.cso");
+	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/OutlinePixelShader.cso");
+	Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 1);
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
@@ -30,7 +41,6 @@ bool OutlineShader::Init(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCH
 bool OutlineShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext* deviceContext)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	D3D11_MAPPED_SUBRESOURCE mappedResource2;
 
 	MatrixBufferType* matPtr;
 	MatrixBufferType* matrices = (MatrixBufferType*)data;
