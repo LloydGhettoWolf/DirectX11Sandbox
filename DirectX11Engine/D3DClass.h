@@ -1,13 +1,17 @@
 #pragma once
 //D3DClass.h
-#include <dxgi.h>
-#include <d3dcommon.h>
-#include <d3d11.h>
-#include <DirectXMath.h>
-#include "SimpleMesh.h"
-#include "Camera.h"
+#include "SystemClass.h"
 
-using namespace DirectX;
+struct IDXGISwapChain;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11RenderTargetView;
+struct ID3D11Texture2D;
+struct ID3D11DepthStencilState;
+struct ID3D11DepthStencilView;
+struct ID3D11RasterizerState;
+class Camera;
+class SimpleMesh;
 
 using ShaderFuncPointer = void(*) (void*, ID3D11DeviceContext*);
 
@@ -32,7 +36,6 @@ class D3DClass
 		ID3D11Device*			GetDevice() { return mDevice; }
 		ID3D11DeviceContext*	GetDeviceContext() { return mDeviceContext; }
 
-		void GetVideoCardInfo(char* cardName, int& memory, HWND hWnd);
 		
 	private:
 		bool mVSyncEnabled;

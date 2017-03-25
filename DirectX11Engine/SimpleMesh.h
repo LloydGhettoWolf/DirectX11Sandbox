@@ -1,11 +1,12 @@
 //SimpleMesh.h
 #pragma once
-#include <d3d11.h>
 #include <DirectXMath.h>
-#include "Texture.h"
-#include "ObjParser.h"
-
 using namespace DirectX;
+
+struct ID3D11Buffer;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ProcessedMeshData;
 
 class SimpleMesh
 {

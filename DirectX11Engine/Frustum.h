@@ -1,11 +1,11 @@
 #pragma once
 //frustum.h
-#include <D3D11.h>
 #include <DirectXMath.h>
 
 using namespace DirectX;
 
 class Camera;
+struct ID3D11Buffer;
 
 class Frustum
 {

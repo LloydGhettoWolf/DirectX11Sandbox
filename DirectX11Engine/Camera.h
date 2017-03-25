@@ -8,7 +8,7 @@ class Camera
 		Camera()  {};
 		~Camera() {};
 
-		bool   Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, float farZ, float width, float height, float fov);
+		bool   Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, float farZ, int width, int height, float fov);
 		void   MoveCameraForward(float amount);
 		void   MoveCameraHorizontally(float amount);
 		void   MoveCameraVertically(float amount);

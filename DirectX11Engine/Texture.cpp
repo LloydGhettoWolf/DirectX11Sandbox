@@ -1,9 +1,22 @@
 //Texture.cpp
 #include <DirectXTex.h>
+#include <DDSTextureLoader.h>
 #include <D3D11.h>
 #include "Texture.h"
 
 using namespace DirectX;
+
+bool Texture::InitFromDDS(ID3D11Device* device, WCHAR* fileName)
+{
+	HRESULT result = CreateDDSTextureFromFile(device, fileName, nullptr, &mTexture, 0);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 bool Texture::Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName, bool needMips)
 {
@@ -13,8 +26,8 @@ bool Texture::Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fi
 	if (needMips)
 	{
 		D3D11_TEXTURE2D_DESC texDesc = { 0 };
-		texDesc.Height = image.GetMetadata().height;
-		texDesc.Width = image.GetMetadata().width; 
+		texDesc.Height = (UINT)image.GetMetadata().height;
+		texDesc.Width = (UINT)image.GetMetadata().width; 
 		texDesc.MipLevels = 0;
 		texDesc.ArraySize = 1;
 		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -32,7 +45,7 @@ bool Texture::Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fi
 		if (result != S_OK)
 			return false;
 	
-		UINT width = image.GetMetadata().width;
+		UINT width = (UINT)image.GetMetadata().width;
 		context->UpdateSubresource(mipTexture, 0, nullptr, (void*)image.GetPixels(), width * 4, 0);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;

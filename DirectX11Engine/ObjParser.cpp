@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include "ObjParser.h"
+#include "Texture.h"
 
 using namespace std;
 
@@ -126,7 +127,7 @@ MeshData* ReadObjFile(string& fileName)
 		string firstToken;
 		ss >> firstToken;
 
-		int len = firstToken.length();
+		int len = (int)firstToken.length();
 
 		switch (len)
 		{

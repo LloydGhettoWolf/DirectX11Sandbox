@@ -2,7 +2,7 @@
 #include "Camera.h"
 #include <D3D11.h>
 
-bool Camera::Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, float farZ, float width, float height, float fov)
+bool Camera::Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, float farZ, int width, int height, float fov)
 {
 	mViewMatrix = XMMatrixLookAtLH(pos, lookAt, up);
 
@@ -16,7 +16,7 @@ bool Camera::Init(XMVECTOR& pos, XMVECTOR& lookAt, XMVECTOR& up, float nearZ, fl
 
 	mPos = pos;
 
-	mProjectionMatrix = XMMatrixPerspectiveFovLH(fov, width / height, nearZ, farZ);
+	mProjectionMatrix = XMMatrixPerspectiveFovLH(fov, (float)width / (float)height, nearZ, farZ);
 	return true;
 }
 

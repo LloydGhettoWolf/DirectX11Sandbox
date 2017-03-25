@@ -1,5 +1,9 @@
 //simpleMesh.cpp
+#include <d3d11.h>
 #include "SimpleMesh.h"
+#include "Texture.h"
+#include "ObjParser.h"
+
 
 bool SimpleMesh::Init(ID3D11Device* device,ProcessedMeshData* mesh)
 {

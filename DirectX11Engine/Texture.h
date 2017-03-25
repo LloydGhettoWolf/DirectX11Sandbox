@@ -1,6 +1,6 @@
 #pragma once
 //Texture.h
-#include <d3d11.h>
+#include <esent.h>
 
 struct TargaHeader
 {
@@ -11,6 +11,10 @@ struct TargaHeader
 	unsigned char data2;
 };
 
+struct ID3D11DeviceContext;
+struct ID3D11Device;
+struct ID3D11ShaderResourceView;
+
 class Texture
 {
 public:
@@ -19,6 +23,7 @@ public:
 	Texture(const Texture&) = delete;
 
 	bool Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName, bool needMips = false);
+	bool InitFromDDS(ID3D11Device* device, WCHAR* fileName);
 	void Shutdown();
 	ID3D11ShaderResourceView* GetTexture() { return mTexture; }
 private:

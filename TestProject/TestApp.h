@@ -1,23 +1,24 @@
 #pragma once
 //TestApp.h
 #include <BaseApp.h>
-#include "DefaultDiffuseShader.h"
-#include <OutlineShader.h>
-#include <ObjParser.h>
-#include <Texture.h>
-#include <dinput.h>
+#include <DirectXMath.h>
 
 class D3DClass;
 class SimpleMesh;
 class Camera;
 class Frustum;
+class DefaultDiffuseShader;
+class OutlineShader;
+class Texture;
+struct ID3D11SamplerState;
+struct materialInfo;
 
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 5000.0f;
-const float SCREEN_NEAR = 0.1f;
+const float SCREEN_DEPTH = 3000.0f;
+const float SCREEN_NEAR = 1.0f;
 const bool FULL_SCREEN = false;
 
-
+using namespace DirectX;
 
 class TestApp : public BaseApp
 {

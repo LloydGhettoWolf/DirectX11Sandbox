@@ -1,14 +1,21 @@
 //TestApp.cpp//TestApp.cpp
-#include <Windows.h>
-#include "TestApp.h"
+#include <d3d11.h>
 #include <D3DClass.h>
-#include "SimpleMesh.h"
-#include "Camera.h"
-#include "Utility.h"
 #include <Frustum.h>
+#include <OutlineShader.h>
+#include <ObjParser.h>
+#include <Texture.h>
+#include <dinput.h>
+#include <Camera.h>
+#include <Utility.h>
+#include <vector>
+#include <SimpleMesh.h>
+#include "TestApp.h"
+#include "DefaultDiffuseShader.h"
 
 #define DIRECTINPUT_VERSION 0x0800
 
+using namespace std;
 
 bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInstance)
 {
@@ -22,11 +29,11 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mScreenHeight = 600;
 	mScreenWidth = 800;
 
-	bool result = mD3D->Init(800, 600, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	HRESULT result = mD3D->Init(800, 600, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
 	if (!result)
 	{
-		MessageBox(hwnd, L"couldn't init d3d obj", L"D3D11", MB_OK);
+		MessageBox(hwnd, "couldn't init d3d obj", "D3D11", MB_OK);
 		return false;
 	}
 
@@ -57,7 +64,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 		if (!result)
 		{
-			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			MessageBox(hwnd, "Could not initialize the model object.", "Error", MB_OK);
 			return false;
 		}
 	}
@@ -70,11 +77,11 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	{
 
 		wstring wstr(textureNames[i].begin(), textureNames[i].end());
-		result = mTextures[i].Init(mD3D->GetDeviceContext(), mD3D->GetDevice(), &wstr[0], true);
-
+		//result = mTextures[i].Init(mD3D->GetDeviceContext(), mD3D->GetDevice(), &wstr[0], true);
+		mTextures[i].InitFromDDS(mD3D->GetDevice(), &wstr[0]);
 		if (!result)
 		{
-			MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+			MessageBox(hwnd, "Could not initialize the model object.", "Error", MB_OK);
 			return false;
 		}
 	}
@@ -88,47 +95,21 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
-
-	polygonLayout[0].SemanticName = "POSITION";
-	polygonLayout[0].SemanticIndex = 0;
-	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	polygonLayout[0].InputSlot = 0;
-	polygonLayout[0].AlignedByteOffset = 0;
-	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[0].InstanceDataStepRate = 0;
-
-	polygonLayout[1].SemanticName = "NORMAL";
-	polygonLayout[1].SemanticIndex = 0;
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	polygonLayout[1].InputSlot = 0;
-	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[1].InstanceDataStepRate = 0;
-
-	polygonLayout[2].SemanticName = "TEXCOORD";
-	polygonLayout[2].SemanticIndex = 0;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	polygonLayout[2].InputSlot = 0;
-	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[2].InstanceDataStepRate = 0;
-
 
 	// Initialize the color shader object.
-	result = mShader->Init(mD3D->GetDevice(), hwnd, L"SimpleVertexShader.hlsl", L"SimplePixelShader.hlsl", polygonLayout, 3);
+	result = mShader->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
 		return false;
 	}
 
 	mOutlineShader = new OutlineShader();
 
-	result = mOutlineShader->Init(mD3D->GetDevice(), hwnd, L"OutlineVertexShader.hlsl", L"OutlinePixelShader.hlsl", polygonLayout, 1);
+	result = mOutlineShader->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the outline shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, "Could not initialize the outline shader object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -203,7 +184,7 @@ void TestApp::Shutdown()
 	// Release the model object.
 	if (mMesh)
 	{
-		for (int i = 0; i < mNumMeshes; i++)
+		for (unsigned int i = 0; i < mNumMeshes; i++)
 		{
 			mMesh[i].Shutdown();
 		}
@@ -223,7 +204,7 @@ void TestApp::Shutdown()
 
 	if (mTextures)
 	{
-		for (int i = 0; i < mNumTextures; i++)
+		for (unsigned int i = 0; i < mNumTextures; i++)
 			mTextures[i].Shutdown();
 	}
 
@@ -313,7 +294,7 @@ bool TestApp::Render()
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	unsigned int numUnculledMeshes = unculledMeshes.size();
+	unsigned int numUnculledMeshes = (unsigned int)unculledMeshes.size();
 
 	for (unsigned int i = 0; i < numUnculledMeshes; i++)
 	{
