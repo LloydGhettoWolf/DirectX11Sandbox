@@ -8,17 +8,26 @@
 using namespace std;
 using namespace DirectX;
 
-struct VertexType
+struct headerInfo
 {
-	XMFLOAT4 position;
-	XMFLOAT4 normal;
-	XMFLOAT4 uvs;
+	int numverts;
+	int numIndices;
+	unsigned int materialIndex;
 };
 
-struct MeshData
+struct PosNormalUv
 {
-	vector<VertexType> vertices;
-	vector<unsigned int> indices;
+	XMFLOAT3 position;
+	XMFLOAT3 normal;
+	XMFLOAT2 uv;
+};
+
+struct PosNormalUvTan
+{
+	XMFLOAT3 position;
+	XMFLOAT3 normal;
+	XMFLOAT3 tangent;
+	XMFLOAT2 uv;
 };
 
 struct materialInfo
@@ -27,19 +36,21 @@ struct materialInfo
 	XMFLOAT3 ambient;
 	XMFLOAT3 specular;
 	float specFactor;
-	unsigned int diffTexIndex;
-	unsigned int specTexIndex;
-	unsigned int normMapIndex;
+	unsigned int diffTexIndex = 0;
+	unsigned int specTexIndex = 0;
+	unsigned int normMapIndex = 0;
 };
 
 struct ProcessedMeshData
 {
-	VertexType* vertices;
+	PosNormalUv* vertices;
+	PosNormalUvTan* mappedVertices;
 	unsigned int* indices;
 	unsigned int materialIndex;
 	int numVerts;
 	int numIndices;
-	XMFLOAT4 min, max, center;
+	bool isNormalMapped;
+	XMFLOAT3 min, max, center;
 
 	ProcessedMeshData() {};
 
@@ -49,6 +60,6 @@ struct ProcessedMeshData
 	}
 };
 
-MeshData* ReadObjFile(string& fileName);
-void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMaterials, unsigned int& numTextures,
+
+void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, unsigned int& numMappedMeshes, unsigned int& numMaterials, unsigned int& numTextures,
 					string** textureNames, ProcessedMeshData** meshes, materialInfo** materials);
