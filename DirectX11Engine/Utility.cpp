@@ -13,8 +13,8 @@ vector<SimpleMesh*> CullMeshesAgainstFrustum(SimpleMesh* meshes, unsigned int nu
 	//for each mesh in the list to render, use it's bounding box to determine if it is inside or outside the frustum
 	for (unsigned int i = 0; i < numMeshes; i++)
 	{
-		XMFLOAT4 min = meshes[i].GetBoxMin();
-		XMFLOAT4 max = meshes[i].GetBoxMax();
+		XMFLOAT3 min = meshes[i].GetBoxMin();
+		XMFLOAT3 max = meshes[i].GetBoxMax();
 
 		if (frustum->CheckBox(min, max))
 		{
