@@ -7,6 +7,7 @@ struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ProcessedMeshData;
+struct ProcessedNormalMappedMeshData;
 
 class SimpleMesh
 {
@@ -18,17 +19,19 @@ public:
 
 	bool Init(ID3D11Device* device, ProcessedMeshData* mesh);
 	void Shutdown();
-	void Render(ID3D11DeviceContext* context);
+	void Render(ID3D11DeviceContext* context, bool bumped = false);
 	void RenderBoundingBox(ID3D11DeviceContext* context);
 
 	int GetIndexCount( ) const { return mIndexCount; }
 	int GetMaterialIndex() const { return mMaterialIndex; }
+	bool GetIsMapped() const { return misNormalMapped; }
+	
 
 	ID3D11Buffer* GetVertBuffer()  { return mVertBuffer; }
 	ID3D11Buffer* GetIndexBuffer()  { return mIndexBuffer; }
 
-	XMFLOAT4 GetBoxMin() const { return min; }
-	XMFLOAT4 GetBoxMax() const { return max; }
+	XMFLOAT3 GetBoxMin() const { return min; }
+	XMFLOAT3 GetBoxMax() const { return max; }
 
 private:
 	bool InitBoundingBox(ID3D11Device* device);
@@ -45,6 +48,8 @@ private:
 	int mVertCount;
 	int mIndexCount;
 
-	XMFLOAT4 min;
-	XMFLOAT4 max;
+	bool misNormalMapped = false;
+
+	XMFLOAT3 min;
+	XMFLOAT3 max;
 };

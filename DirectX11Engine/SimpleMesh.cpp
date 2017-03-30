@@ -16,9 +16,11 @@ bool SimpleMesh::Init(ID3D11Device* device,ProcessedMeshData* mesh)
 	return true;
 }
 
+
 void SimpleMesh::Shutdown() {
 	ShutdownBuffers();
 }
+
 
 bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 {
@@ -36,14 +38,24 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 	mIndexCount = mesh->numIndices;
 
 	vertBufferDesc->Usage = D3D11_USAGE_DEFAULT;
-	vertBufferDesc->ByteWidth = sizeof(VertexType) * mVertCount;
+	
 	vertBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertBufferDesc->CPUAccessFlags = 0;
 	vertBufferDesc->MiscFlags = 0;
 	vertBufferDesc->StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-	vertData.pSysMem = &mesh->vertices[0];
+	if (mesh->isNormalMapped)
+	{
+		vertBufferDesc->ByteWidth = sizeof(PosNormalUvTan) * mVertCount;
+		vertData.pSysMem = &mesh->mappedVertices[0];
+	}
+	else
+	{
+		vertBufferDesc->ByteWidth = sizeof(PosNormalUv) * mVertCount;
+		vertData.pSysMem = &mesh->vertices[0];
+	}
+	
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
@@ -98,19 +110,19 @@ bool SimpleMesh::InitBoundingBox(ID3D11Device* device)
 	vertBufferDesc->MiscFlags = 0;
 	vertBufferDesc->StructureByteStride = 0;
 
-	XMFLOAT4 aabbVerts[8] =
+	XMFLOAT3 aabbVerts[8] =
 	{
 		//top
-		XMFLOAT4(min.x, min.y, min.z, 1.0f),
-		XMFLOAT4(max.x, min.y, min.z, 1.0f),
-		XMFLOAT4(max.x, min.y, max.z, 1.0f),
-		XMFLOAT4(min.x, min.y, max.z, 1.0f),
-
+		XMFLOAT3(min.x, min.y, min.z),
+		XMFLOAT3(max.x, min.y, min.z),
+		XMFLOAT3(max.x, min.y, max.z),
+		XMFLOAT3(min.x, min.y, max.z),
+			   
 		//bottom
-		XMFLOAT4(min.x, max.y, min.z, 1.0f),
-		XMFLOAT4(max.x, max.y, min.z, 1.0f),
-		XMFLOAT4(max.x, max.y, max.z, 1.0f),
-		XMFLOAT4(min.x, max.y, max.z, 1.0f),
+		XMFLOAT3(min.x, max.y, min.z),
+		XMFLOAT3(max.x, max.y, min.z),
+		XMFLOAT3(max.x, max.y, max.z),
+		XMFLOAT3(min.x, max.y, max.z),
 	};
 
 
@@ -161,13 +173,14 @@ bool SimpleMesh::InitBoundingBox(ID3D11Device* device)
 }
 
 
-void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
+void SimpleMesh::Render(ID3D11DeviceContext* deviceContext, bool bumped)
 {
 	unsigned int stride;
 	unsigned int offset;
 
 	// Set vertex buffer stride and offset.
-	stride = sizeof(VertexType);
+
+	stride = bumped ? sizeof(PosNormalUvTan) : sizeof(PosNormalUv);
 	offset = 0;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.

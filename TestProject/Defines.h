@@ -3,7 +3,7 @@
 
 using namespace DirectX;
 
-#define RENDER_AABB 1
+#define RENDER_AABB 0
 
 struct MatrixBufferType
 {
@@ -14,6 +14,8 @@ struct MatrixBufferType
 
 struct LightPosBuffer
 {
+	XMFLOAT3 eyePos;
+	float padding;
 	XMFLOAT3 lightPos;
 	float padding1;
 	XMFLOAT4 lightCol;

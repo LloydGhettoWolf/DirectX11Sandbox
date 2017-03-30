@@ -7,7 +7,7 @@ class D3DClass;
 class SimpleMesh;
 class Camera;
 class Frustum;
-class DefaultDiffuseShader;
+class Shader;
 class OutlineShader;
 class Texture;
 struct ID3D11SamplerState;
@@ -23,22 +23,20 @@ using namespace DirectX;
 class TestApp : public BaseApp
 {
 public:
-	TestApp() : mMesh(nullptr), mShader(nullptr) {};
+	TestApp() : mMesh(nullptr) {};
 	TestApp(const TestApp&) = delete;
 	~TestApp() {};
 
 	bool Init(int, int, HWND, HINSTANCE);
 	void Shutdown();
 	bool Frame(DIMOUSESTATE& state);
-	
-
 
 private:
 	bool Render();
 	bool ReadInput(DIMOUSESTATE& state);
 
 	SimpleMesh* mMesh;
-	DefaultDiffuseShader* mShader;
+	Shader* mMeshShaders[2];
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 
@@ -58,6 +56,7 @@ private:
 	XMMATRIX mWorld;
 
 	unsigned int mNumMeshes = 0;
+	unsigned int mNumMappedMeshes = 0;
 	unsigned int mNumMaterials = 0;
 	unsigned int mNumTextures = 0;
 };

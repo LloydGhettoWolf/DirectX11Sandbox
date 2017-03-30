@@ -4,11 +4,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TestApp.cpp" />
     <ClCompile Include="DefaultDiffuseShader.cpp" />
+    <ClCompile Include="SpecMapShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestApp.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
+    <ClInclude Include="SpecMapShader.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -20,6 +22,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SimpleVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SpecMapVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SpecMapPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

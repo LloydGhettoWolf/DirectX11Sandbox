@@ -12,6 +12,7 @@
 #include <SimpleMesh.h>
 #include "TestApp.h"
 #include "DefaultDiffuseShader.h"
+#include "SpecMapShader.h"
 
 #define DIRECTINPUT_VERSION 0x0800
 
@@ -29,7 +30,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mScreenHeight = 600;
 	mScreenWidth = 800;
 
-	HRESULT result = mD3D->Init(800, 600, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	HRESULT result = mD3D->Init(mScreenWidth, mScreenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
 	if (!result)
 	{
@@ -49,7 +50,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	ProcessedMeshData* meshData;
 	string* textureNames;
-	ReadBoomFile(strPath, strName, mNumMeshes, mNumMaterials, mNumTextures, &textureNames, &meshData, &mMaterialProperties);
+	ProcessedNormalMappedMeshData* mappedMeshData;
+	ReadBoomFile(strPath, strName, mNumMeshes, mNumMappedMeshes, mNumMaterials, mNumTextures, &textureNames, &meshData, &mMaterialProperties);
 
 	// Create the model object.
 	mMesh = new SimpleMesh[mNumMeshes];
@@ -71,6 +73,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	delete[] meshData;
 
+	
+
 	//init textures
 	mTextures = new Texture[mNumTextures];
 	for (unsigned int i = 0; i < mNumTextures; i++)
@@ -89,15 +93,15 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	delete[] textureNames;
 
 	// Create the color shader object.
-	mShader = new DefaultDiffuseShader;
-	if (!mShader)
+	mMeshShaders[0] = new DefaultDiffuseShader();
+	if (!mMeshShaders[0])
 	{
 		return false;
 	}
 
 
 	// Initialize the color shader object.
-	result = mShader->Init(mD3D->GetDevice(), hwnd);
+	result = mMeshShaders[0]->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
 		MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
@@ -110,6 +114,19 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	if (!result)
 	{
 		MessageBox(hwnd, "Could not initialize the outline shader object.", "Error", MB_OK);
+		return false;
+	}
+
+	mMeshShaders[1] = new SpecMapShader();
+	if (!mMeshShaders[1])
+	{
+		return false;
+	}
+
+	result = mMeshShaders[1]->Init(mD3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the spec shader object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -169,11 +186,16 @@ void TestApp::Shutdown()
 	}
 
 	// Release the color shader object.
-	if (mShader)
+	if (mMeshShaders[0])
 	{
-		mShader->Shutdown();
-		delete mShader;
+		delete mMeshShaders[0];
 	}
+
+	if (mMeshShaders[1])
+	{
+		delete mMeshShaders[1];
+	}
+
 
 	if (mOutlineShader)
 	{
@@ -268,57 +290,70 @@ bool TestApp::Render()
 	matrices.view = XMMatrixTranspose(mCamera->GetView());
 
 	LightPosBuffer lights;
-	XMStoreFloat3(&lights.lightPos, mCamera->GetPos());
-	lights.lightCol = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMStoreFloat3(&lights.eyePos, mCamera->GetPos());
+	lights.lightPos = XMFLOAT3(0.0f, 50.0f, 0.0f);
+	lights.lightCol = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
-	result = mShader->PrepareShader(context);
-
-	if (!result)
-	{
-		return false;
-	}
-
-	ConstantsStruct constants;
-	constants.lightPtr = &lights;
-	constants.matPtr = &matrices;
-	result = mShader->SetConstantShaderParameters((void*)&constants, context);
-
-	if (!result)
-	{
-		return false;
-	}
 
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	unsigned int numUnculledMeshes = (unsigned int)unculledMeshes.size();
+	Shader* thisShader = nullptr;
+	ID3D11ShaderResourceView* diffSrv = nullptr;
+	ID3D11ShaderResourceView* specSrv = nullptr;
 
 	for (unsigned int i = 0; i < numUnculledMeshes; i++)
 	{
 		// Render the model using the color shader.
 		int materialIndex = unculledMeshes[i]->GetMaterialIndex();
-
 		materialInfo material = mMaterialProperties[materialIndex];
+
+		
+		if (material.specTexIndex != 0)
+		{
+			specSrv = mTextures[material.specTexIndex].GetTexture();
+			thisShader = mMeshShaders[1];
+		}
+		else
+		{
+			thisShader = mMeshShaders[0];
+		}
+			
+		result = thisShader->PrepareShader(context);
+
+		ConstantsStruct constants;
+		constants.lightPtr = &lights;
+		constants.matPtr = &matrices;
+		result = thisShader->SetConstantShaderParameters((void*)&constants, context);
+
 		MaterialProperties materialProperties;
 		materialProperties.diffuseCol = XMFLOAT4(material.diffuse.x, material.diffuse.y, material.diffuse.z, 1.0f);
-		materialProperties.specCol = XMFLOAT4(material.specular.x, material.specular.y, material.specular.z, 1.0f);
 		materialProperties.specComponent = material.specFactor;
 
-		ID3D11ShaderResourceView* srv = mTextures[material.diffTexIndex].GetTexture();
+		diffSrv = mTextures[material.diffTexIndex].GetTexture();
 
-		DiffuseShaderPerMeshStruct perMesh;
+		SpecShaderPerMeshStruct perMesh;
 		perMesh.material = &materialProperties;
 		perMesh.sampler = mSamplerState;
-		perMesh.srv = srv;
+		perMesh.diffuseSrv = diffSrv;
+		perMesh.specSrv = specSrv;
 
-		mShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
-
-		unculledMeshes[i]->Render(context);
+		thisShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
+		
+			
+		if (!unculledMeshes[i]->GetIsMapped())
+		{
+			unculledMeshes[i]->Render(context);
+		}
+		
 	}
 
+
+#if RENDER_AABB
 	result = mOutlineShader->PrepareShader(context);
 
 	if (!result)
@@ -326,7 +361,6 @@ bool TestApp::Render()
 		return false;
 	}
 
-#if RENDER_AABB
 	result = mOutlineShader->SetConstantShaderParameters(static_cast<void*>(&matrices), context);
 
 	if (!result)

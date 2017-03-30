@@ -1,14 +1,10 @@
 #pragma once
 //ColorShader.h
-#include <DirectXMath.h>
 #include "Defines.h"
 #include "Shader.h"
 
 using namespace DirectX;
 
-static const int MATRIX_BUFFER = 0;
-static const int LIGHT_BUFFER = 0;
-static const int MATERIAL_BUFFER = 1;
 
 struct ID3D11Buffer;
 struct ID3D11SamplerState;
@@ -35,7 +31,7 @@ public:
 							 mMaterialBuffer(0){};
 
 	DefaultDiffuseShader(const DefaultDiffuseShader&) = delete;
-	~DefaultDiffuseShader() {};
+	~DefaultDiffuseShader() { Shutdown(); };
 
 	bool Init(ID3D11Device* device, HWND hwnd);
 	void Shutdown();
@@ -47,4 +43,9 @@ private:
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mLightBuffer;
 	ID3D11Buffer* mMaterialBuffer;
+
+	static const int MATRIX_BUFFER = 0;
+	static const int LIGHT_BUFFER = 0;
+	static const int MATERIAL_BUFFER = 1;
+
 };
