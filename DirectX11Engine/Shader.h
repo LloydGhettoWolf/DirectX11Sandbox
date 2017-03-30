@@ -18,7 +18,7 @@ public:
 	{};
 
 	Shader(const Shader&) = delete;
-	~Shader() {};
+	virtual ~Shader() {};
 
 	virtual bool Init(ID3D11Device* device, HWND hwnd) = 0;
 	virtual void Shutdown() = 0;
