@@ -197,7 +197,7 @@ bool Frustum::RenderFrustum(ID3D11DeviceContext* deviceContext)
 	return true;
 }
 
-bool Frustum::CheckBox(XMFLOAT4& min, XMFLOAT4& max)
+bool Frustum::CheckBox(XMFLOAT3& min, XMFLOAT3& max)
 {
 	// Check each of the six planes to see if the cube is inside the frustum.
 	for (int plane = 0; plane < 6; plane++)

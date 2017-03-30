@@ -16,7 +16,7 @@ class Frustum
 		bool InitFrustum(ID3D11Device* device);
 		bool UpdateFrustum(Camera* cam);
 		bool RenderFrustum(ID3D11DeviceContext* deviceContext);
-		bool CheckBox(XMFLOAT4& min, XMFLOAT4& max);
+		bool CheckBox(XMFLOAT3& min, XMFLOAT3& max);
 	private:
 		ID3D11Buffer* mVertBuffer;
 		ID3D11Buffer* mIndexBuffer;
