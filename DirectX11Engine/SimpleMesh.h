@@ -38,8 +38,11 @@ private:
 	bool InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh);
 	void ShutdownBuffers();
 
-	ID3D11Buffer* mVertBuffer;
-	ID3D11Buffer* mIndexBuffer;
+	ID3D11Buffer* mVertBuffer = nullptr;
+	ID3D11Buffer* mNormalBuffer = nullptr;
+	ID3D11Buffer* mUvBuffer = nullptr;
+	ID3D11Buffer* mTangentBuffer = nullptr;
+	ID3D11Buffer* mIndexBuffer = nullptr;
 
 	ID3D11Buffer* mAABBVertBuffer;
 	ID3D11Buffer* mAABBIndexBuffer;

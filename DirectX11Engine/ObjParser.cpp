@@ -32,15 +32,16 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 		data.read((char*)&info, sizeof(headerInfo));
 		data.read((char*)&isNormalMapped, sizeof(bool));
 
+		(*meshes)[i].isNormalMapped = false;
+		(*meshes)[i].vertices = new XMFLOAT3[info.numverts];
+		(*meshes)[i].normals = new XMFLOAT3[info.numverts];
+		(*meshes)[i].uvs = new XMFLOAT2[info.numverts];
+
+
 		if (isNormalMapped)
 		{
 			(*meshes)[i].isNormalMapped = true;
-			(*meshes)[i].mappedVertices = new PosNormalUvTan[info.numverts];
-		}
-		else
-		{
-			(*meshes)[i].isNormalMapped = false;
-			(*meshes)[i].vertices = new PosNormalUv[info.numverts];
+			(*meshes)[i].tangents = new XMFLOAT3[info.numverts];
 		}
 		
 		(*meshes)[i].indices = new unsigned int[info.numIndices];
@@ -48,13 +49,13 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 		(*meshes)[i].numIndices = info.numIndices;
 		(*meshes)[i].materialIndex = info.materialIndex;
 
+		data.read((char*)&(*meshes)[i].vertices[0], sizeof(XMFLOAT3) * info.numverts);
+		data.read((char*)&(*meshes)[i].normals[0], sizeof(XMFLOAT3) * info.numverts);
+		data.read((char*)&(*meshes)[i].uvs[0], sizeof(XMFLOAT2) * info.numverts);
+
 		if (isNormalMapped)
 		{
-			data.read((char*)&(*meshes)[i].mappedVertices[0], sizeof(PosNormalUvTan) * info.numverts);
-		}
-		else
-		{
-			data.read((char*)&(*meshes)[i].vertices[0], sizeof(PosNormalUv) * info.numverts);
+			data.read((char*)&(*meshes)[i].tangents[0], sizeof(XMFLOAT3) * info.numverts);
 		}
 
 		

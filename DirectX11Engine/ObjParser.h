@@ -15,20 +15,6 @@ struct headerInfo
 	unsigned int materialIndex;
 };
 
-struct PosNormalUv
-{
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
-	XMFLOAT2 uv;
-};
-
-struct PosNormalUvTan
-{
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
-	XMFLOAT3 tangent;
-	XMFLOAT2 uv;
-};
 
 struct materialInfo
 {
@@ -43,9 +29,11 @@ struct materialInfo
 
 struct ProcessedMeshData
 {
-	PosNormalUv* vertices;
-	PosNormalUvTan* mappedVertices;
-	unsigned int* indices;
+	XMFLOAT3* vertices = nullptr;
+	XMFLOAT3* normals = nullptr;
+	XMFLOAT2* uvs = nullptr;
+	XMFLOAT3* tangents = nullptr;
+	unsigned int* indices = nullptr;
 	unsigned int materialIndex;
 	int numVerts;
 	int numIndices;
@@ -56,7 +44,16 @@ struct ProcessedMeshData
 
 	~ProcessedMeshData() 
 	{
-		
+		delete[] vertices;
+		delete[] normals;
+		delete[] uvs;
+
+		if (tangents != nullptr)
+		{
+			delete[] tangents;
+		}
+
+		delete[] indices;
 	}
 };
 
