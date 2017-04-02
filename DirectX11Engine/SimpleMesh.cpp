@@ -84,7 +84,7 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 	
 	if (mesh->isNormalMapped)
 	{
-		vertBufferDesc->ByteWidth = sizeof(XMFLOAT4) * mVertCount;
+		vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
 		tangentData.pSysMem = &mesh->tangents[0];
 		tangentData.SysMemPitch = 0;
 		tangentData.SysMemSlicePitch = 0;
