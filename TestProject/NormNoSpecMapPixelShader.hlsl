@@ -34,9 +34,9 @@ float4 main(PixelType input) : SV_TARGET0
 	float3 tan = normalize(input.tangent);
 	float3 biTan = normalize(cross(norm,tan));
 
-	float4x4 tangentSpace = float4x4(float4(norm, 1.0f),
-									 float4(tan, 1.0f),
+	float4x4 tangentSpace = float4x4(float4(tan, 1.0f),
 									 float4(biTan, 1.0f),
+									 float4(norm, 1.0f),
 									 float4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	float3 lightVec = normalize(lightPos - input.worldPos);
@@ -45,6 +45,9 @@ float4 main(PixelType input) : SV_TARGET0
 	float3 halfVec = normalize(lightVec + eyeVec);
 
 	float4 normalSample = normTexture.Sample(SampleType, input.tex);
+
+	//expand normal
+	normalSample = (2.0f * normalSample) - 1.0f;
 	normalSample = mul(normalSample, tangentSpace);
 
 	float intensity = saturate(dot(halfVec, normalSample.xyz));

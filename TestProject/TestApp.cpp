@@ -154,7 +154,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	result = mMeshShaders[NORM_NO_SPEC_SHADER]->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, "Could not initialize the norm shader object.", "Error", MB_OK);
+		MessageBox(hwnd, "Could not initialize the norm no spec shader object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -328,8 +328,13 @@ bool TestApp::Render()
 
 	LightPosBuffer lights;
 	XMStoreFloat3(&lights.eyePos, mCamera->GetPos());
-	lights.lightPos = XMFLOAT3(0.0f, 50.0f, 0.0f);
+	static float theta = 0.0f;
+	float xPos = sin(theta) * 700.0f;
+
+	lights.lightPos = XMFLOAT3(xPos, 50.0f, 0.0f);
 	lights.lightCol = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+
+	theta += 0.05f;
 
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);

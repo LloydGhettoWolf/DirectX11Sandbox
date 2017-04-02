@@ -34,8 +34,10 @@ public:
 	bool PrepareShader(ID3D11DeviceContext* deviceContext);
 	bool SetConstantShaderParameters(void* data, ID3D11DeviceContext* deviceContext);
 	bool SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext);
-private:
-private:
+
+protected:
+	bool InitNormalMapShader(ID3D11Device* device, HWND hwnd, LPCWSTR* vsName, LPCWSTR* psName);
+
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mLightBuffer;
 	ID3D11Buffer* mMaterialBuffer;
@@ -43,5 +45,4 @@ private:
 	static const int MATRIX_BUFFER = 0;
 	static const int LIGHT_BUFFER = 0;
 	static const int MATERIAL_BUFFER = 1;
-
 };

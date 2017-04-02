@@ -8,10 +8,7 @@
 
 bool SpecMapShader::Init(ID3D11Device* device, HWND hwnd)
 {
-	D3D11_BUFFER_DESC matrixBufferDesc;
-	D3D11_BUFFER_DESC lightDesc;
-	D3D11_BUFFER_DESC materialDesc;
-
+	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 
 	polygonLayout[0].SemanticName = "POSITION";
@@ -48,45 +45,35 @@ bool SpecMapShader::Init(ID3D11Device* device, HWND hwnd)
 	}
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&matrixBufferDesc, NULL, &mMatrixBuffer);
+	result = device->CreateBuffer(&bufferDesc, NULL, &mMatrixBuffer);
 
 	if (result != S_OK)
 	{
 		return false;
 	}
 
-	lightDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightDesc.ByteWidth = sizeof(LightPosBuffer);
-	lightDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightDesc.MiscFlags = 0;
-	lightDesc.StructureByteStride = 0;
+	bufferDesc.ByteWidth = sizeof(LightPosBuffer);
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&lightDesc, NULL, &mLightBuffer);
+	result = device->CreateBuffer(&bufferDesc, NULL, &mLightBuffer);
 
 	if (result != S_OK)
 	{
 		return false;
 	}
 
-	materialDesc.Usage = D3D11_USAGE_DYNAMIC;
-	materialDesc.ByteWidth = sizeof(MaterialProperties);
-	materialDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	materialDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	materialDesc.MiscFlags = 0;
-	materialDesc.StructureByteStride = 0;
+	bufferDesc.ByteWidth = sizeof(MaterialProperties);
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&materialDesc, NULL, &mMaterialBuffer);
+	result = device->CreateBuffer(&bufferDesc, NULL, &mMaterialBuffer);
 
 	if (result != S_OK)
 	{
