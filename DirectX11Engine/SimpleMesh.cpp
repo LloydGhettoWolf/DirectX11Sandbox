@@ -27,8 +27,8 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 	D3D11_SUBRESOURCE_DATA vertData, normalData, uvData, tangentData, indexData;
 	HRESULT result;
 
-	D3D11_BUFFER_DESC* float3BufferDesc = new D3D11_BUFFER_DESC;
-	D3D11_BUFFER_DESC* float2BufferDesc = new D3D11_BUFFER_DESC;
+	D3D11_BUFFER_DESC* vertBufferDesc = new D3D11_BUFFER_DESC;
+	
 	D3D11_BUFFER_DESC* indexBufferDesc = new D3D11_BUFFER_DESC;
 
 	mVertCount = mesh->numVerts;
@@ -38,59 +38,64 @@ bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
 	mVertCount = mesh->numVerts;
 	mIndexCount = mesh->numIndices;
 
-	float3BufferDesc->Usage = D3D11_USAGE_DEFAULT;
-	float3BufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	float3BufferDesc->CPUAccessFlags = 0;
-	float3BufferDesc->MiscFlags = 0;
-	float3BufferDesc->StructureByteStride = 0;
-	float3BufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
-
-	float2BufferDesc->Usage = D3D11_USAGE_DEFAULT;
-	float2BufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	float2BufferDesc->CPUAccessFlags = 0;
-	float2BufferDesc->MiscFlags = 0;
-	float2BufferDesc->StructureByteStride = 0;
-	float2BufferDesc->ByteWidth = sizeof(XMFLOAT2) * mVertCount;
+	vertBufferDesc->Usage = D3D11_USAGE_DEFAULT;
+	vertBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertBufferDesc->CPUAccessFlags = 0;
+	vertBufferDesc->MiscFlags = 0;
+	vertBufferDesc->StructureByteStride = 0;
+	vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
 
 	vertData.pSysMem = &mesh->vertices[0];
 	vertData.SysMemPitch = 0;
 	vertData.SysMemSlicePitch = 0;
 
 	// Now create the vertex buffer.
-	result = device->CreateBuffer(float3BufferDesc, &vertData, &mVertBuffer);
+	result = device->CreateBuffer(vertBufferDesc, &vertData, &mVertBuffer);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	normalData.pSysMem = &mesh->normals[0];
-	normalData.SysMemPitch = 0;
-	normalData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	result = device->CreateBuffer(float3BufferDesc, &normalData, &mNormalBuffer);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
+	
+	vertBufferDesc->ByteWidth = sizeof(XMFLOAT2) * mVertCount;
 	uvData.pSysMem = &mesh->uvs[0];
 	uvData.SysMemPitch = 0;
 	uvData.SysMemSlicePitch = 0;
 
-	// Now create the vertex buffer.
-	result = device->CreateBuffer(float2BufferDesc, &uvData, &mUvBuffer);
+	// Now create the uv buffer.
+	result = device->CreateBuffer(vertBufferDesc, &uvData, &mUvBuffer);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	// Give the subresource structure a pointer to the vertex data.
+	vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
+	normalData.pSysMem = &mesh->normals[0];
+	normalData.SysMemPitch = 0;
+	normalData.SysMemSlicePitch = 0;
+
+	// Now create the normal buffer.
+	result = device->CreateBuffer(vertBufferDesc, &normalData, &mNormalBuffer);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	
 	if (mesh->isNormalMapped)
 	{
+		vertBufferDesc->ByteWidth = sizeof(XMFLOAT4) * mVertCount;
 		tangentData.pSysMem = &mesh->tangents[0];
 		tangentData.SysMemPitch = 0;
 		tangentData.SysMemSlicePitch = 0;
+		mIsNormalMapped = true;
+
+		result = device->CreateBuffer(vertBufferDesc, &tangentData, &mTangentBuffer);
+		if (FAILED(result))
+		{
+			return false;
+		}
+
 	}
 
 	// Set up the description of the static index buffer.
@@ -200,7 +205,7 @@ bool SimpleMesh::InitBoundingBox(ID3D11Device* device)
 }
 
 
-void SimpleMesh::Render(ID3D11DeviceContext* deviceContext, bool bumped)
+void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int stride3, stride2;
 	unsigned int offset;
@@ -216,7 +221,7 @@ void SimpleMesh::Render(ID3D11DeviceContext* deviceContext, bool bumped)
 	deviceContext->IASetVertexBuffers(1, 1, &mNormalBuffer, &stride3, &offset);
 	deviceContext->IASetVertexBuffers(2, 1, &mUvBuffer, &stride2, &offset);
 
-	if (bumped)
+	if (mIsNormalMapped)
 	{
 		deviceContext->IASetVertexBuffers(3, 1, &mTangentBuffer, &stride3, &offset);
 	}

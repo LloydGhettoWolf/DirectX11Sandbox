@@ -19,12 +19,12 @@ public:
 
 	bool Init(ID3D11Device* device, ProcessedMeshData* mesh);
 	void Shutdown();
-	void Render(ID3D11DeviceContext* context, bool bumped = false);
+	void Render(ID3D11DeviceContext* context);
 	void RenderBoundingBox(ID3D11DeviceContext* context);
 
 	int GetIndexCount( ) const { return mIndexCount; }
 	int GetMaterialIndex() const { return mMaterialIndex; }
-	bool GetIsMapped() const { return misNormalMapped; }
+	bool GetIsMapped() const { return mIsNormalMapped; }
 	
 
 	ID3D11Buffer* GetVertBuffer()  { return mVertBuffer; }
@@ -51,7 +51,7 @@ private:
 	int mVertCount;
 	int mIndexCount;
 
-	bool misNormalMapped = false;
+	bool mIsNormalMapped = false;
 
 	XMFLOAT3 min;
 	XMFLOAT3 max;

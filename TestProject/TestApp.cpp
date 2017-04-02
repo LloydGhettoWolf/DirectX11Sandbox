@@ -13,6 +13,8 @@
 #include "TestApp.h"
 #include "DefaultDiffuseShader.h"
 #include "SpecMapShader.h"
+#include "NormalMapShader.h"
+#include "NormNoSpecMapShader.h"
 
 #define DIRECTINPUT_VERSION 0x0800
 
@@ -93,15 +95,15 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	delete[] textureNames;
 
 	// Create the color shader object.
-	mMeshShaders[0] = new DefaultDiffuseShader();
-	if (!mMeshShaders[0])
+	mMeshShaders[DIFF_SHADER] = new DefaultDiffuseShader();
+	if (!mMeshShaders[DIFF_SHADER])
 	{
 		return false;
 	}
 
 
 	// Initialize the color shader object.
-	result = mMeshShaders[0]->Init(mD3D->GetDevice(), hwnd);
+	result = mMeshShaders[DIFF_SHADER]->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
 		MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
@@ -117,16 +119,42 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
-	mMeshShaders[1] = new SpecMapShader();
-	if (!mMeshShaders[1])
+	mMeshShaders[SPEC_SHADER] = new SpecMapShader();
+	if (!mMeshShaders[SPEC_SHADER])
 	{
 		return false;
 	}
 
-	result = mMeshShaders[1]->Init(mD3D->GetDevice(), hwnd);
+	result = mMeshShaders[SPEC_SHADER]->Init(mD3D->GetDevice(), hwnd);
 	if (!result)
 	{
 		MessageBox(hwnd, "Could not initialize the spec shader object.", "Error", MB_OK);
+		return false;
+	}
+
+	mMeshShaders[NORMMAP_SHADER] = new NormalMapShader();
+	if (!mMeshShaders[NORMMAP_SHADER])
+	{
+		return false;
+	}
+
+	result = mMeshShaders[NORMMAP_SHADER]->Init(mD3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the norm shader object.", "Error", MB_OK);
+		return false;
+	}
+
+	mMeshShaders[NORM_NO_SPEC_SHADER] = new NormNoSpecMapShader();
+	if (!mMeshShaders[NORM_NO_SPEC_SHADER])
+	{
+		return false;
+	}
+
+	result = mMeshShaders[NORM_NO_SPEC_SHADER]->Init(mD3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the norm shader object.", "Error", MB_OK);
 		return false;
 	}
 
@@ -196,6 +224,15 @@ void TestApp::Shutdown()
 		delete mMeshShaders[1];
 	}
 
+	if (mMeshShaders[2])
+	{
+		delete mMeshShaders[2];
+	}
+
+	if (mMeshShaders[3])
+	{
+		delete mMeshShaders[3];
+	}
 
 	if (mOutlineShader)
 	{
@@ -305,6 +342,7 @@ bool TestApp::Render()
 	Shader* thisShader = nullptr;
 	ID3D11ShaderResourceView* diffSrv = nullptr;
 	ID3D11ShaderResourceView* specSrv = nullptr;
+	ID3D11ShaderResourceView* normSrv = nullptr;
 
 	for (unsigned int i = 0; i < numUnculledMeshes; i++)
 	{
@@ -312,15 +350,25 @@ bool TestApp::Render()
 		int materialIndex = unculledMeshes[i]->GetMaterialIndex();
 		materialInfo material = mMaterialProperties[materialIndex];
 
-		
-		if (material.specTexIndex != 0)
+		if (material.specTexIndex != 0 && material.normMapIndex != 0)
+		{
+			normSrv = mTextures[material.normMapIndex].GetTexture();
+			specSrv = mTextures[material.specTexIndex].GetTexture();
+			thisShader = mMeshShaders[NORMMAP_SHADER];
+		}
+		else if (material.normMapIndex != 0)
+		{
+			normSrv = mTextures[material.normMapIndex].GetTexture();
+			thisShader = mMeshShaders[NORM_NO_SPEC_SHADER];
+		}
+		else if (material.specTexIndex != 0)
 		{
 			specSrv = mTextures[material.specTexIndex].GetTexture();
-			thisShader = mMeshShaders[1];
+			thisShader = mMeshShaders[SPEC_SHADER];
 		}
 		else
 		{
-			thisShader = mMeshShaders[0];
+			thisShader = mMeshShaders[DIFF_SHADER];
 		}
 			
 		result = thisShader->PrepareShader(context);
@@ -336,20 +384,16 @@ bool TestApp::Render()
 
 		diffSrv = mTextures[material.diffTexIndex].GetTexture();
 
-		SpecShaderPerMeshStruct perMesh;
+		NormShaderPerMeshStruct perMesh;
 		perMesh.material = &materialProperties;
 		perMesh.sampler = mSamplerState;
 		perMesh.diffuseSrv = diffSrv;
 		perMesh.specSrv = specSrv;
+		perMesh.normSrv = normSrv;
 
 		thisShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
 		
-			
-		if (!unculledMeshes[i]->GetIsMapped())
-		{
-			unculledMeshes[i]->Render(context);
-		}
-		
+		unculledMeshes[i]->Render(context);
 	}
 
 

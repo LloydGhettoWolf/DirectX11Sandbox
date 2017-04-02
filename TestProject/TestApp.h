@@ -18,6 +18,11 @@ const float SCREEN_DEPTH = 3000.0f;
 const float SCREEN_NEAR = 1.0f;
 const bool FULL_SCREEN = false;
 
+const int DIFF_SHADER = 0;
+const int SPEC_SHADER = 1;
+const int NORMMAP_SHADER = 2;
+const int NORM_NO_SPEC_SHADER = 3;
+
 using namespace DirectX;
 
 class TestApp : public BaseApp
@@ -36,7 +41,7 @@ private:
 	bool ReadInput(DIMOUSESTATE& state);
 
 	SimpleMesh* mMesh;
-	Shader* mMeshShaders[2];
+	Shader* mMeshShaders[NORM_NO_SPEC_SHADER + 1];
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 

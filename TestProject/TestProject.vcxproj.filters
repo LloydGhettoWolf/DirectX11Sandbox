@@ -5,12 +5,16 @@
     <ClCompile Include="TestApp.cpp" />
     <ClCompile Include="DefaultDiffuseShader.cpp" />
     <ClCompile Include="SpecMapShader.cpp" />
+    <ClCompile Include="NormMapShader.cpp" />
+    <ClCompile Include="NormNoSpecMapShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestApp.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
     <ClInclude Include="SpecMapShader.h" />
+    <ClInclude Include="NormalMapShader.h" />
+    <ClInclude Include="NormNoSpecMapShader.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -28,6 +32,18 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SpecMapPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="NormalMapPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="NormNoSpecMapVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="NormNoSpecMapPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

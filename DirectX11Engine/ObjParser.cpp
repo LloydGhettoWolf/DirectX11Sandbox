@@ -32,7 +32,7 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 		data.read((char*)&info, sizeof(headerInfo));
 		data.read((char*)&isNormalMapped, sizeof(bool));
 
-		(*meshes)[i].isNormalMapped = false;
+		(*meshes)[i].isNormalMapped = isNormalMapped;
 		(*meshes)[i].vertices = new XMFLOAT3[info.numverts];
 		(*meshes)[i].normals = new XMFLOAT3[info.numverts];
 		(*meshes)[i].uvs = new XMFLOAT2[info.numverts];
@@ -40,7 +40,6 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 
 		if (isNormalMapped)
 		{
-			(*meshes)[i].isNormalMapped = true;
 			(*meshes)[i].tangents = new XMFLOAT3[info.numverts];
 		}
 		
