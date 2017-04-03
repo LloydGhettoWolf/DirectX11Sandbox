@@ -83,8 +83,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	{
 
 		wstring wstr(textureNames[i].begin(), textureNames[i].end());
-		//result = mTextures[i].Init(mD3D->GetDeviceContext(), mD3D->GetDevice(), &wstr[0], true);
-		mTextures[i].InitFromDDS(mD3D->GetDevice(), &wstr[0]);
+		result = mTextures[i].InitFromDDS(mD3D->GetDevice(), &wstr[0]);
 		if (!result)
 		{
 			MessageBox(hwnd, "Could not initialize the model object.", "Error", MB_OK);
@@ -348,14 +347,21 @@ bool TestApp::Render()
 	ID3D11ShaderResourceView* diffSrv = nullptr;
 	ID3D11ShaderResourceView* specSrv = nullptr;
 	ID3D11ShaderResourceView* normSrv = nullptr;
+	ID3D11ShaderResourceView* maskSrv = nullptr;
 
 	for (unsigned int i = 0; i < numUnculledMeshes; i++)
 	{
 		// Render the model using the color shader.
 		int materialIndex = unculledMeshes[i]->GetMaterialIndex();
 		materialInfo material = mMaterialProperties[materialIndex];
-
-		if (material.specTexIndex != 0 && material.normMapIndex != 0)
+		if (material.maskIndex != 0)
+		{
+			diffSrv = mTextures[material.maskIndex].GetTexture();
+			maskSrv = mTextures[material.maskIndex].GetTexture();
+			normSrv = mTextures[material.normMapIndex].GetTexture();
+			continue;
+		}
+		else if (material.specTexIndex != 0 && material.normMapIndex != 0)
 		{
 			normSrv = mTextures[material.normMapIndex].GetTexture();
 			specSrv = mTextures[material.specTexIndex].GetTexture();

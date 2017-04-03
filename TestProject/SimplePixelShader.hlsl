@@ -8,7 +8,8 @@ struct PixelType
 	float2 tex : TEXCOORD0;
 };
 
-Texture2D shaderTexture;
+Texture2D shaderTexture : register(t0);
+
 SamplerState SampleType;
 
 cbuffer LightPositions

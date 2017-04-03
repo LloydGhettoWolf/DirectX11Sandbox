@@ -2,7 +2,6 @@
 #include <D3D11.h>
 #include "SpecMapShader.h"
 #include "ObjParser.h"
-
 #include "Defines.h"
 
 
@@ -173,4 +172,3 @@ bool SpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* device
 	deviceContext->PSSetShaderResources(0, 1, &diffuseSrv);
 	deviceContext->PSSetShaderResources(1, 1, &specSrv);
 }
-
