@@ -25,6 +25,7 @@ struct materialInfo
 	unsigned int diffTexIndex = 0;
 	unsigned int specTexIndex = 0;
 	unsigned int normMapIndex = 0;
+	unsigned int maskIndex = 0;
 };
 
 struct ProcessedMeshData
