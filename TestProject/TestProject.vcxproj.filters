@@ -52,8 +52,13 @@
     <FxCompile Include="AlphaMaskPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="NormalPixelShaderHeader.h">
+    <FxCompile Include="VertexShaderDefines.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PixelShaderDefines.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
