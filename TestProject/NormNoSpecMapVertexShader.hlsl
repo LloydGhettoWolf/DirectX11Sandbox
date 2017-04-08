@@ -1,8 +1,8 @@
-#define NORM_MAP_VERTEX_INPUT
+#define NORM_MAPPING
 
 #include "VertexShaderDefines.hlsl"
 
-NormMapPixelInput main(NormMapVertexInput vertIn)
+PixelInput main(VertexInput vertIn)
 {
 	return  GenerateInput(vertIn);
 }

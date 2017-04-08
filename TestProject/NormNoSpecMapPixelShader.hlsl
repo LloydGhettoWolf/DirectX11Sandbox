@@ -1,67 +1,28 @@
 //SimplePixelShader
+#define NORMAL_MAP_PIXEL
 
-struct PixelType
-{
-	float4 pos : SV_POSITION;
-	float4 worldPos : POSITION;
-	float3 norm : NORMAL;
-	float2 tex : TEXCOORD0;
-	float3 tangent : TANGENT;
-};
+#include "PixelShaderDefines.hlsl"
 
 Texture2D diffTexture : register(t0);
 Texture2D normTexture : register(t1);
 
 SamplerState SampleType;
 
-cbuffer LightPositions
+
+float4 main(NormalMapPixelType input) : SV_TARGET0
 {
-	float3 eyePos;
-	float3 lightPos;
-	float4 lightCol;
-};
-
-cbuffer MaterialProperties
-{
-	float4 diffuseCol;
-	float4 specCol;
-	float specComponent;
-};
-
-float4 main(PixelType input) : SV_TARGET0
-{
-	float3 norm = normalize(input.norm);
-	float3 tan = normalize(input.tangent);
-	float3 biTan = normalize(cross(norm,tan));
-
-	float4x4 tangentSpace = float4x4(float4(tan, 0.0f),
-									 float4(biTan, 0.0f),
-									 float4(norm, 0.0f),
-									 float4(0.0f, 0.0f, 0.0f, 1.0f));
-
 	float3 lightVec = normalize(lightPos - input.worldPos);
 	float distance = length(lightPos - input.worldPos);
-	float3 eyeVec = normalize(eyePos - input.worldPos);
-	float3 halfVec = normalize(lightVec + eyeVec);
 
-	float4 normalSample = normTexture.Sample(SampleType, input.tex);
-
-	//expand normal
-	normalSample = (2.0f * normalSample) - 1.0f;
-	float4 newNorm = mul(normalSample, tangentSpace);
-
-	float intensity = saturate(dot(halfVec, newNorm.xyz));
-	float specCoeff = pow(intensity, specComponent);
-
-	float4 specFactor = specCoeff * lightCol;
-
-	float diffCoeff = saturate(dot(lightVec, newNorm.xyz));
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
-	float4 diffFactor = diffCoeff * diffuseCol * lightCol * diffSample;
+	float4 normSample = normTexture.Sample(SampleType, input.tex);
 
-	float lightIntensity = 1.0f - (distance / 4000.0f);
+	float4 norm = SampleNormalMap(input.norm, input.tangent, normSample);
 
-	float4 amb = float4(0.05f, 0.05f, 0.05f, 1.0f);
+	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
+	float4 amb = float4(0.2f, 0.2f, 0.2f, 1.0f) * diffSample;
 
-	return saturate(lightIntensity * (amb + specFactor + diffFactor));
+	float lightIntensity = AttenuateLight(distance);
+
+	return saturate(amb + lightIntensity * (diffFactor * diffColor));
 }

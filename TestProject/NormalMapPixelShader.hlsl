@@ -10,21 +10,23 @@ Texture2D normTexture : register(t2);
 
 SamplerState SampleType;
 
-
 float4 main(NormalMapPixelType input) : SV_TARGET0
 {
-	
-	float4 newNorm = SampleNormalMap(input.norm, input.tangent, input.tex, normTexture, SampleType);
-
 	float3 lightVec = normalize(lightPos - input.worldPos);
 	float distance = length(lightPos - input.worldPos);
 	float3 eyeVec = normalize(eyePos - input.worldPos);
 
-	float4 diffFactor = DiffFactor(lightVec, newNorm.xyz, input.tex, diffTexture, SampleType);
-	float4 specFactor = SpecFactorFromSample(eyeVec, lightVec, newNorm, input.tex, specTexture, SampleType);
-	float4 amb = float4(0.05f, 0.05f, 0.05f, 1.0f);
+	float4 specSample = specTexture.Sample(SampleType, input.tex);
+	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
+	float4 normSample = normTexture.Sample(SampleType, input.tex);
+
+	float4 norm = SampleNormalMap(input.norm, input.tangent, normSample);
+
+	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
+	float4 specFactor = SpecFactorFromSample(eyeVec, lightVec, norm, specSample);
+	float4 amb = float4(0.2f, 0.2f, 0.2f, 1.0f) * diffSample;
 
 	float lightIntensity = AttenuateLight(distance);
 
-	return saturate(lightIntensity * (amb + specFactor + diffFactor));
+	return saturate(amb + lightIntensity * (specFactor + diffFactor * diffColor));
 }

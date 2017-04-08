@@ -1,8 +1,8 @@
-#define STANDARD_VERTEX_INPUT
+#define STANDARD
 
 #include "VertexShaderDefines.hlsl"
 
-StandardPixelInput main(StandardVertexInput vertIn)
+PixelInput main(VertexInput vertIn)
 {
 	return  GenerateInput(vertIn);
 }
