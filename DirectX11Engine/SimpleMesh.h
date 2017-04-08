@@ -8,48 +8,49 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ProcessedMeshData;
 struct ProcessedNormalMappedMeshData;
+struct ResourceAllocator;
 
 class SimpleMesh
 {
 public:
 	SimpleMesh(): mVertBuffer(nullptr), mIndexBuffer(nullptr) {};
-	~SimpleMesh() {};
+	~SimpleMesh() { Shutdown(); }
 	SimpleMesh(const SimpleMesh&) = delete;
 	SimpleMesh(const SimpleMesh&&) = delete;
 
-	bool Init(ID3D11Device* device, ProcessedMeshData* mesh);
+	bool Init(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
 	void Shutdown();
-	void Render(ID3D11DeviceContext* context);
-	void RenderBoundingBox(ID3D11DeviceContext* context);
 
-	int GetIndexCount( ) const { return mIndexCount; }
-	int GetMaterialIndex() const { return mMaterialIndex; }
+	unsigned int GetIndexCount( ) const { return mIndexCount; }
+	unsigned int GetMaterialIndex() const { return mMaterialIndex; }
+	unsigned int GetNumBuffers() const { return mNumBuffers; }
+	const unsigned int* GetStrides() const  { return mStrides; }
 	bool GetIsMapped() const { return mIsNormalMapped; }
 	
-
-	ID3D11Buffer* GetVertBuffer()  { return mVertBuffer; }
+	ID3D11Buffer** GetVertBuffer()  { return mVertBuffer; }
 	ID3D11Buffer* GetIndexBuffer()  { return mIndexBuffer; }
+
+	ID3D11Buffer* GetBoundingBoxVertBuffer() { return mAABBVertBuffer; }
+	ID3D11Buffer* GetBoundingBoxIndexBuffer() { return mAABBIndexBuffer; }
 
 	XMFLOAT3 GetBoxMin() const { return min; }
 	XMFLOAT3 GetBoxMax() const { return max; }
 
 private:
 	bool InitBoundingBox(ID3D11Device* device);
-	bool InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh);
-	void ShutdownBuffers();
+	bool InitBuffers(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
 
-	ID3D11Buffer* mVertBuffer = nullptr;
-	ID3D11Buffer* mNormalBuffer = nullptr;
-	ID3D11Buffer* mUvBuffer = nullptr;
-	ID3D11Buffer* mTangentBuffer = nullptr;
+	ID3D11Buffer** mVertBuffer = nullptr;
 	ID3D11Buffer* mIndexBuffer = nullptr;
 
-	ID3D11Buffer* mAABBVertBuffer;
-	ID3D11Buffer* mAABBIndexBuffer;
+	ID3D11Buffer* mAABBVertBuffer = nullptr;
+	ID3D11Buffer* mAABBIndexBuffer = nullptr;
 
-	int mMaterialIndex;
-	int mVertCount;
-	int mIndexCount;
+	unsigned int mMaterialIndex;
+	unsigned int mVertCount;
+	unsigned int mIndexCount;
+	unsigned int mNumBuffers;
+	unsigned int mStrides[10];
 
 	bool mIsNormalMapped = false;
 
