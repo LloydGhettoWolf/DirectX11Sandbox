@@ -7,9 +7,9 @@ cbuffer Matrices
 	matrix proj;
 }
 
-#ifdef STANDARD_VERTEX_INPUT
+#ifdef STANDARD
 
-struct StandardVertexInput
+struct VertexInput
 {
 	float3 pos  : POSITION;
 	float3 norm : NORMAL;
@@ -17,7 +17,7 @@ struct StandardVertexInput
 };
 
 
-struct StandardPixelInput
+struct PixelInput
 {
 	float4 pos  : SV_POSITION;
 	float4 worldPos : POSITION;
@@ -26,9 +26,9 @@ struct StandardPixelInput
 };
 #endif
 
-#ifdef NORM_MAP_VERTEX_INPUT
+#ifdef NORM_MAPPING
 
-struct NormMapVertexInput
+struct VertexInput
 {
 	float3 pos  : POSITION;
 	float3 norm : NORMAL;
@@ -36,7 +36,7 @@ struct NormMapVertexInput
 	float3 tangent: TANGENT;
 };
 
-struct NormMapPixelInput
+struct PixelInput
 {
 	float4 pos  : SV_POSITION;
 	float4 worldPos : POSITION;
@@ -47,17 +47,12 @@ struct NormMapPixelInput
 
 #endif
 
-#ifdef STANDARD_VERTEX_INPUT
 
-StandardPixelInput GenerateInput(StandardVertexInput vertIn)
+PixelInput GenerateInput(VertexInput vertIn)
 {
-	StandardPixelInput output;
-#endif
+	PixelInput output;
 
-#ifdef NORM_MAP_VERTEX_INPUT
-NormMapPixelInput GenerateInput(NormMapVertexInput vertIn)
-{
-	NormMapPixelInput output;
+#ifdef NORM_MAPPING
 	output.tangent = vertIn.tangent;
 #endif
 

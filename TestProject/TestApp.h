@@ -11,7 +11,10 @@ class Shader;
 class OutlineShader;
 class Texture;
 struct ID3D11SamplerState;
+struct ID3D11BlendState;
 struct materialInfo;
+class Renderer;
+class ResourceAllocator;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
@@ -22,6 +25,7 @@ const int DIFF_SHADER = 0;
 const int SPEC_SHADER = 1;
 const int NORMMAP_SHADER = 2;
 const int NORM_NO_SPEC_SHADER = 3;
+const int MASK_SHADER = 4;
 
 using namespace DirectX;
 
@@ -41,9 +45,13 @@ private:
 	bool ReadInput(DIMOUSESTATE& state);
 
 	SimpleMesh* mMesh;
+	Renderer* mRenderer;
+	ResourceAllocator* mResourceAllocator;
+	
 	Shader* mMeshShaders[NORM_NO_SPEC_SHADER + 1];
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
+	ID3D11BlendState* mBlendState;
 
 	materialInfo* mMaterialProperties;
 

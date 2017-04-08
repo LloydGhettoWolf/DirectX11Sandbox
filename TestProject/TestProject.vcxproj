@@ -166,6 +166,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AlphaMaskShader.cpp" />
     <ClCompile Include="DefaultDiffuseShader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NormMapShader.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlphaMaskShader.h" />
     <ClInclude Include="DefaultDiffuseShader.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="NormalMapShader.h" />
