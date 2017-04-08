@@ -15,6 +15,9 @@
 #include "SpecMapShader.h"
 #include "NormalMapShader.h"
 #include "NormNoSpecMapShader.h"
+#include "AlphaMaskShader.h"
+#include <Renderer.h>
+#include <ResourceAllocator.h>
 
 #define DIRECTINPUT_VERSION 0x0800
 
@@ -40,6 +43,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
+	mResourceAllocator = new ResourceAllocator(mD3D->GetDevice());
 
 	// Initialize the model object.
 
@@ -48,7 +52,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	string strName(name.begin(), name.end());
 	string strPath(path.begin(), path.end());
 
-
+	mRenderer = new Renderer(mD3D->GetDevice(), mD3D->GetDeviceContext());
 
 	ProcessedMeshData* meshData;
 	string* textureNames;
@@ -64,7 +68,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	for (unsigned int i = 0; i < mNumMeshes; i++)
 	{
-		result = mMesh[i].Init(mD3D->GetDevice(), &meshData[i]);
+		result = mMesh[i].Init(mD3D->GetDevice(), mResourceAllocator, &meshData[i]);
 
 		if (!result)
 		{
@@ -157,6 +161,19 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
+	mMeshShaders[MASK_SHADER] = new AlphaMaskShader();
+	if (!mMeshShaders[MASK_SHADER])
+	{
+		return false;
+	}
+
+	result = mMeshShaders[MASK_SHADER]->Init(mD3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the norm no spec shader object.", "Error", MB_OK);
+		return false;
+	}
+
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR position = XMVectorSet(0.0f, 50.0f, 0.0f, 0.0f);
 	XMVECTOR lookAt = XMVectorSet(10.0f, 50.0f, 0.0f, 0.0f);
@@ -187,6 +204,25 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	// Create the texture sampler state.
 	result = mD3D->GetDevice()->CreateSamplerState(&samplerDesc, &mSamplerState);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	//create blend state
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+
+	blendDesc.RenderTarget[0].BlendEnable			= true;
+	blendDesc.RenderTarget[0].SrcBlend				= D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend				= D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp				= D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha			= D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha		= D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	result = mD3D->GetDevice()->CreateBlendState(&blendDesc, &mBlendState);
 	if (FAILED(result))
 	{
 		return false;
@@ -328,12 +364,12 @@ bool TestApp::Render()
 	LightPosBuffer lights;
 	XMStoreFloat3(&lights.eyePos, mCamera->GetPos());
 	static float theta = 0.0f;
-	float xPos = sin(theta) * 700.0f;
+	float xPos = sin(theta) * 1100.0f;
 
-	lights.lightPos = XMFLOAT3(xPos, 50.0f, 0.0f);
+	lights.lightPos = XMFLOAT3(xPos, 150.0f, 0.0f);
 	lights.lightCol = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 
-	theta += 0.05f;
+	theta += 0.01f;
 
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -347,19 +383,19 @@ bool TestApp::Render()
 	ID3D11ShaderResourceView* diffSrv = nullptr;
 	ID3D11ShaderResourceView* specSrv = nullptr;
 	ID3D11ShaderResourceView* normSrv = nullptr;
-	ID3D11ShaderResourceView* maskSrv = nullptr;
+	ID3D11ShaderResourceView* alphaSrv = nullptr;
 
-	for (unsigned int i = 0; i < numUnculledMeshes; i++)
+	//for (unsigned int i = 0; i < numUnculledMeshes; i++)
+	for (unsigned int i = 0; i < mNumMeshes; i++)
 	{
 		// Render the model using the color shader.
-		int materialIndex = unculledMeshes[i]->GetMaterialIndex();
+		int materialIndex = mMesh[i].GetMaterialIndex();//unculledMeshes[i]->GetMaterialIndex();
 		materialInfo material = mMaterialProperties[materialIndex];
 		if (material.maskIndex != 0)
 		{
 			diffSrv = mTextures[material.maskIndex].GetTexture();
-			maskSrv = mTextures[material.maskIndex].GetTexture();
-			normSrv = mTextures[material.normMapIndex].GetTexture();
-			continue;
+			alphaSrv = mTextures[material.maskIndex].GetTexture();
+			thisShader = mMeshShaders[MASK_SHADER];
 		}
 		else if (material.specTexIndex != 0 && material.normMapIndex != 0)
 		{
@@ -395,16 +431,35 @@ bool TestApp::Render()
 
 		diffSrv = mTextures[material.diffTexIndex].GetTexture();
 
-		NormShaderPerMeshStruct perMesh;
-		perMesh.material = &materialProperties;
-		perMesh.sampler = mSamplerState;
-		perMesh.diffuseSrv = diffSrv;
-		perMesh.specSrv = specSrv;
-		perMesh.normSrv = normSrv;
+		if (material.maskIndex != 0)
+		{
+			AlphaMaskShaderPerMeshStruct perMesh;
+			perMesh.material = &materialProperties;
+			perMesh.sampler = mSamplerState;
+			perMesh.diffuseSrv = diffSrv;
+			perMesh.alphaSrv = alphaSrv;
 
-		thisShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
-		
-		unculledMeshes[i]->Render(context);
+			context->OMSetBlendState(mBlendState, 0, 0xffffffff);
+			thisShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
+		}
+		else
+		{
+			NormShaderPerMeshStruct perMesh;
+			perMesh.material = &materialProperties;
+			perMesh.sampler = mSamplerState;
+			perMesh.diffuseSrv = diffSrv;
+			perMesh.specSrv = specSrv;
+			perMesh.normSrv = normSrv;
+
+			thisShader->SetPerMeshParameters(static_cast<void*>(&perMesh), mD3D->GetDeviceContext());
+		}
+
+		mRenderer->DrawIndexed(mMesh[i].GetVertBuffer(), mMesh[i].GetNumBuffers(), mMesh[i].GetStrides(), mMesh[i].GetIndexBuffer(), mMesh[i].GetIndexCount(), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		//unculledMeshes[i]->Render(context);
+		//mMesh[i].Render(context);
+
+		context->OMSetBlendState(NULL, 0, 0xffffffff);
 	}
 
 
