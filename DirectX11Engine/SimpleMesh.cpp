@@ -1,13 +1,12 @@
 //simpleMesh.cpp
 #include <d3d11.h>
 #include "SimpleMesh.h"
-#include "Texture.h"
 #include "ObjParser.h"
+#include "ResourceAllocator.h"
 
-
-bool SimpleMesh::Init(ID3D11Device* device,ProcessedMeshData* mesh)
+bool SimpleMesh::Init(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh)
 {
-	if (!InitBuffers(device, mesh))
+	if (!InitBuffers(device, resourceAllocator, mesh))
 		return false;
 
 	if (!InitBoundingBox(device))
@@ -16,110 +15,89 @@ bool SimpleMesh::Init(ID3D11Device* device,ProcessedMeshData* mesh)
 	return true;
 }
 
+void SimpleMesh::Shutdown() 
+{
+	// Release the index buffer.
+	if (mIndexBuffer)
+	{
+		mIndexBuffer->Release();
+	}
 
-void SimpleMesh::Shutdown() {
-	ShutdownBuffers();
+	// Release the vertex buffer.
+	if (mVertBuffer)
+	{
+		for (unsigned int i = 0; i < mNumBuffers; i++)
+		{
+			mVertBuffer[i]->Release();
+		}
+	}
+
+	if (mAABBVertBuffer)
+	{
+		mAABBVertBuffer->Release();
+	}
+
+	if (mAABBIndexBuffer)
+	{
+		mAABBIndexBuffer->Release();
+	}
 }
 
-
-bool SimpleMesh::InitBuffers(ID3D11Device* device, ProcessedMeshData* mesh)
+bool SimpleMesh::InitBuffers(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh)
 {
-	D3D11_SUBRESOURCE_DATA vertData, normalData, uvData, tangentData, indexData;
-	HRESULT result;
-
-	D3D11_BUFFER_DESC* vertBufferDesc = new D3D11_BUFFER_DESC;
-	
-	D3D11_BUFFER_DESC* indexBufferDesc = new D3D11_BUFFER_DESC;
-
 	mVertCount = mesh->numVerts;
 	mIndexCount = mesh->numIndices;
 
-	
-	mVertCount = mesh->numVerts;
-	mIndexCount = mesh->numIndices;
+	if (!mesh->isNormalMapped)
+	{
+		mNumBuffers = 3;
+		mVertBuffer = new ID3D11Buffer*[3];
+	}
+	else
+	{
+		mNumBuffers = 4;
+		mVertBuffer = new ID3D11Buffer*[4];
+		mStrides[3] = sizeof(XMFLOAT3);
+	}
 
-	vertBufferDesc->Usage = D3D11_USAGE_DEFAULT;
-	vertBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertBufferDesc->CPUAccessFlags = 0;
-	vertBufferDesc->MiscFlags = 0;
-	vertBufferDesc->StructureByteStride = 0;
-	vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
+	mStrides[0] = sizeof(XMFLOAT3);
+	mStrides[1] = sizeof(XMFLOAT3);
+	mStrides[2] = sizeof(XMFLOAT2);
 
-	vertData.pSysMem = &mesh->vertices[0];
-	vertData.SysMemPitch = 0;
-	vertData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	result = device->CreateBuffer(vertBufferDesc, &vertData, &mVertBuffer);
-	if (FAILED(result))
+	mVertBuffer[0] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->vertices[0]), mStrides[0], mVertCount);
+	if (mVertBuffer[0] == nullptr)
 	{
 		return false;
 	}
 
-	
-	vertBufferDesc->ByteWidth = sizeof(XMFLOAT2) * mVertCount;
-	uvData.pSysMem = &mesh->uvs[0];
-	uvData.SysMemPitch = 0;
-	uvData.SysMemSlicePitch = 0;
-
-	// Now create the uv buffer.
-	result = device->CreateBuffer(vertBufferDesc, &uvData, &mUvBuffer);
-	if (FAILED(result))
+	mVertBuffer[1] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->normals[0]), mStrides[1], mVertCount);
+	if (mVertBuffer[1] == nullptr)
 	{
 		return false;
 	}
 
-	vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
-	normalData.pSysMem = &mesh->normals[0];
-	normalData.SysMemPitch = 0;
-	normalData.SysMemSlicePitch = 0;
-
-	// Now create the normal buffer.
-	result = device->CreateBuffer(vertBufferDesc, &normalData, &mNormalBuffer);
-	if (FAILED(result))
+	mVertBuffer[2] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->uvs[0]), mStrides[2], mVertCount);
+	if (mVertBuffer[2] == nullptr)
 	{
 		return false;
 	}
 
-	
 	if (mesh->isNormalMapped)
 	{
-		vertBufferDesc->ByteWidth = sizeof(XMFLOAT3) * mVertCount;
-		tangentData.pSysMem = &mesh->tangents[0];
-		tangentData.SysMemPitch = 0;
-		tangentData.SysMemSlicePitch = 0;
-		mIsNormalMapped = true;
-
-		result = device->CreateBuffer(vertBufferDesc, &tangentData, &mTangentBuffer);
-		if (FAILED(result))
+		mVertBuffer[3] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->tangents[0]), mStrides[3], mVertCount);
+		if (mVertBuffer[3] == nullptr)
 		{
 			return false;
 		}
-
 	}
 
-	// Set up the description of the static index buffer.
-	indexBufferDesc->Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc->ByteWidth = sizeof(unsigned int) * mIndexCount;
-	indexBufferDesc->BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc->CPUAccessFlags = 0;
-	indexBufferDesc->MiscFlags = 0;
-	indexBufferDesc->StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = &mesh->indices[0];
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// Create the index buffer.
-	result = device->CreateBuffer(indexBufferDesc, &indexData, &mIndexBuffer);
-	if (FAILED(result))
+	mIndexBuffer = resourceAllocator->AllocateIndexBuffer(static_cast<void*>(&mesh->indices[0]), sizeof(unsigned int), mIndexCount);
+	if (mIndexBuffer == nullptr)
 	{
 		return false;
 	}
 
 	mMaterialIndex = mesh->materialIndex;
-
 	min = mesh->min;
 	max = mesh->max;
 
@@ -202,85 +180,4 @@ bool SimpleMesh::InitBoundingBox(ID3D11Device* device)
 	}
 
 	return true;
-}
-
-
-void SimpleMesh::Render(ID3D11DeviceContext* deviceContext)
-{
-	unsigned int stride3, stride2;
-	unsigned int offset;
-
-	// Set vertex buffer stride and offset.
-
-	stride3 = sizeof(XMFLOAT3);
-	stride2 = sizeof(XMFLOAT2);
-	offset = 0;
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &mVertBuffer, &stride3, &offset);
-	deviceContext->IASetVertexBuffers(1, 1, &mNormalBuffer, &stride3, &offset);
-	deviceContext->IASetVertexBuffers(2, 1, &mUvBuffer, &stride2, &offset);
-
-	if (mIsNormalMapped)
-	{
-		deviceContext->IASetVertexBuffers(3, 1, &mTangentBuffer, &stride3, &offset);
-	}
-
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//now we're set up, let's render!
-	deviceContext->DrawIndexed(mIndexCount, 0, 0);
-	
-	return;
-}
-
-void SimpleMesh::RenderBoundingBox(ID3D11DeviceContext* deviceContext)
-{
-	unsigned int offset;
-	unsigned int stride;
-	offset = 0;
-
-	// Set vertex buffer stride and offset.
-	stride = sizeof(XMFLOAT4);
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &mAABBVertBuffer, &stride, &offset);
-
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(mAABBIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
-	//now we're set up, let's render!
-	deviceContext->DrawIndexed(24, 0, 0);
-}
-
-void SimpleMesh::ShutdownBuffers()
-{
-	// Release the index buffer.
-	if (mIndexBuffer)
-	{
-		mIndexBuffer->Release();
-		//delete mIndexBuffer;
-	}
-
-	// Release the vertex buffer.
-	if (mVertBuffer)
-	{
-		mVertBuffer->Release();
-		mNormalBuffer->Release();
-		mUvBuffer->Release();
-		if (mTangentBuffer != nullptr)
-		{
-			mTangentBuffer->Release();
-		}
-		//delete mVertBuffer;
-	}
-
-	return;
 }

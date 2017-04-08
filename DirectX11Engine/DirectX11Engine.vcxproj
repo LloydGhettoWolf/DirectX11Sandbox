@@ -177,6 +177,8 @@
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="OutlineShader.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ResourceAllocator.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleMesh.cpp" />
     <ClCompile Include="SystemClass.cpp" />
@@ -191,6 +193,8 @@
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="OutlineShader.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ResourceAllocator.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SimpleMesh.h" />
     <ClInclude Include="SystemClass.h" />
