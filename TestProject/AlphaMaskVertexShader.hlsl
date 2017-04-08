@@ -1,4 +1,8 @@
-float4 main( float4 pos : POSITION ) : SV_POSITION
+#define STANDARD
+
+#include "VertexShaderDefines.hlsl"
+
+PixelInput main(VertexInput vertIn)
 {
-	return pos;
+	return  GenerateInput(vertIn);
 }
