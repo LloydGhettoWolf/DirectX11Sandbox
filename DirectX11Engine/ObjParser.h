@@ -8,6 +8,9 @@
 using namespace std;
 using namespace DirectX;
 
+class Shader;
+class ID3D11ShaderResourceView;
+
 struct headerInfo
 {
 	int numverts;
@@ -26,6 +29,19 @@ struct materialInfo
 	unsigned int specTexIndex = 0;
 	unsigned int normMapIndex = 0;
 	unsigned int maskIndex = 0;
+};
+
+struct processedMaterialInfo
+{
+	XMFLOAT3 diffuse;
+	XMFLOAT3 ambient;
+	XMFLOAT3 specular;
+	float specFactor;
+	ID3D11ShaderResourceView* diffSrv = 0;
+	ID3D11ShaderResourceView* specSrv = 0;
+	ID3D11ShaderResourceView* normSrv = 0;
+	ID3D11ShaderResourceView* maskSrv = 0;
+	Shader* shader = 0;
 };
 
 struct ProcessedMeshData
