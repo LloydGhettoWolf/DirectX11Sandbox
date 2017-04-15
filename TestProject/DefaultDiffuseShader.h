@@ -11,15 +11,6 @@ struct ID3D11SamplerState;
 struct ID3D11ShaderResourceView;
 struct ID3D11DeviceContext;
 
-// Description:
-// A
-
-struct DiffuseShaderPerMeshStruct
-{
-	MaterialProperties* material;
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* srv;
-};
 
 
 class DefaultDiffuseShader : public Shader

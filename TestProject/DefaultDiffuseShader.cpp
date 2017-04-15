@@ -15,7 +15,13 @@ bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
 
 	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleVertexShader.cso");
 	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimplePixelShader.cso");
-	Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 3);
+
+	HRESULT result = Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 3);
+
+	if (result != true)
+	{
+		return false;
+	}
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -26,7 +32,7 @@ bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
 	bufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &mMatrixBuffer);
+	result = device->CreateBuffer(&bufferDesc, NULL, &mMatrixBuffer);
 
 	if (result != S_OK)
 	{
@@ -144,10 +150,10 @@ bool DefaultDiffuseShader::SetPerMeshParameters(void* data, ID3D11DeviceContext*
 	MaterialProperties* meshPtr3;
 
 	//unpack data
-	DiffuseShaderPerMeshStruct* info = static_cast<DiffuseShaderPerMeshStruct*>(data);
+	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
 	MaterialProperties* matInfo = info->material;
 	ID3D11SamplerState* samplerState = info->sampler;
-	ID3D11ShaderResourceView* srv = info->srv;
+	ID3D11ShaderResourceView* srv = info->diffuseSrv;
 
 	HRESULT result = deviceContext->Map(mMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
