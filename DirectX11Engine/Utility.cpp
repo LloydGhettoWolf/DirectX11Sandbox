@@ -24,3 +24,25 @@ vector<SimpleMesh*> CullMeshesAgainstFrustum(SimpleMesh* meshes, unsigned int nu
 
 	return unculledMeshes;
 }
+
+bool CompareZAscend(SimpleMesh* first, SimpleMesh* second)
+{
+	return first->thisFrameZ < second->thisFrameZ;
+}
+
+bool CompareZDescend(SimpleMesh* first, SimpleMesh* second)
+{
+	return first->thisFrameZ > second->thisFrameZ;
+}
+
+void UpdateThisFrameZ(SimpleMesh* mesh, XMMATRIX* viewProj) 
+{
+	XMVECTOR center = XMLoadFloat3(&mesh->GetBoxCenter());
+
+	center = XMVector3Transform(center, *viewProj);
+
+	XMFLOAT3 newVec;
+	XMStoreFloat3(&newVec, center);
+
+	mesh->thisFrameZ = newVec.z;
+}
