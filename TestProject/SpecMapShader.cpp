@@ -149,7 +149,7 @@ bool SpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* device
 	MaterialProperties* meshPtr3;
 
 	//unpack data
-	SpecShaderPerMeshStruct* info = static_cast<SpecShaderPerMeshStruct*>(data);
+	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
 	MaterialProperties* matInfo = info->material;
 	ID3D11SamplerState* samplerState = info->sampler;
 	ID3D11ShaderResourceView* diffuseSrv = info->diffuseSrv;

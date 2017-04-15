@@ -9,13 +9,6 @@ struct ID3D11SamplerState;
 struct ID3D11ShaderResourceView;
 struct ID3D11DeviceContext;
 
-struct SpecShaderPerMeshStruct
-{
-	MaterialProperties* material;
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* diffuseSrv;
-	ID3D11ShaderResourceView* specSrv;
-};
 
 class SpecMapShader : public Shader
 {

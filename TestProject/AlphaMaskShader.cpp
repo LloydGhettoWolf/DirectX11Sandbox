@@ -157,11 +157,11 @@ bool AlphaMaskShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* devi
 	MaterialProperties* meshPtr3;
 
 	//unpack data
-	AlphaMaskShaderPerMeshStruct* info = static_cast<AlphaMaskShaderPerMeshStruct*>(data);
+	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
 	MaterialProperties* matInfo = info->material;
 	ID3D11SamplerState* samplerState = info->sampler;
 	ID3D11ShaderResourceView* diffuseSrv = info->diffuseSrv;
-	ID3D11ShaderResourceView* alphaSrv = info->alphaSrv;
+	ID3D11ShaderResourceView* alphaSrv = info->maskSrv;
 
 	HRESULT result = deviceContext->Map(mMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))

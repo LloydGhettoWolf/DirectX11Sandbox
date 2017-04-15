@@ -75,7 +75,7 @@ float4 SpecFactor(float3 eyeVec, float lightVec, float3 newNorm, float specCompo
 	float3 halfVec = normalize(lightVec + eyeVec);
 	float intensity = saturate(dot(halfVec, newNorm));
 	float specCoeff = pow(intensity, specComponent);
-	return  specCoeff * lightCol;
+	return  specCoeff * lightCol * specColor;
 }
 
 float4 SpecFactorFromSample(float3 eyeVec, float lightVec, float3 norm, float4 specSample)
@@ -83,11 +83,11 @@ float4 SpecFactorFromSample(float3 eyeVec, float lightVec, float3 norm, float4 s
 	float3 halfVec = normalize(lightVec + eyeVec);
 	float intensity = saturate(dot(halfVec, norm));
 	float specCoeff = pow(intensity, specComponent);
-	return specCoeff * specSample * lightCol;
+	return specSample * lightCol;
 }
 
 float AttenuateLight(float dist)
 {
-	dist *= 0.015f;
+	dist *= 0.05f;
 	return 1.0 / (1.0 + 0.1 * dist + 0.01 * dist * dist);
 }

@@ -22,7 +22,7 @@ bool NormNoSpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* 
 	MaterialProperties* meshPtr3;
 
 	//unpack data
-	NormShaderPerMeshStruct* info = static_cast<NormShaderPerMeshStruct*>(data);
+	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
 	MaterialProperties* matInfo = info->material;
 	ID3D11SamplerState* samplerState = info->sampler;
 	ID3D11ShaderResourceView* diffuseSrv = info->diffuseSrv;

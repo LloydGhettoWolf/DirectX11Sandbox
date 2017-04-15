@@ -11,14 +11,6 @@ struct ID3D11SamplerState;
 struct ID3D11ShaderResourceView;
 struct ID3D11DeviceContext;
 
-struct AlphaMaskShaderPerMeshStruct
-{
-	MaterialProperties* material;
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* diffuseSrv;
-	ID3D11ShaderResourceView* alphaSrv;
-};
-
 class AlphaMaskShader : public Shader
 {
 public:

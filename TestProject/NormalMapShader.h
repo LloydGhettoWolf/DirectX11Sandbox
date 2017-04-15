@@ -10,14 +10,6 @@ struct ID3D11SamplerState;
 struct ID3D11ShaderResourceView;
 struct ID3D11DeviceContext;
 
-struct NormShaderPerMeshStruct
-{
-	MaterialProperties* material;
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* diffuseSrv;
-	ID3D11ShaderResourceView* specSrv;
-	ID3D11ShaderResourceView* normSrv;
-};
 
 class NormalMapShader : public Shader
 {
