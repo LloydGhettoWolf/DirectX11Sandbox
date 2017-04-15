@@ -181,5 +181,6 @@ bool NormalMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* devi
 
 	ID3D11ShaderResourceView * textures[] = { diffuseSrv, specSrv, normSrv };
 	deviceContext->PSSetShaderResources(0, 3, textures);
+	return true;
 }
 
