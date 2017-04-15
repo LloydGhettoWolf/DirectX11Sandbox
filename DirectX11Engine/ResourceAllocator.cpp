@@ -55,3 +55,8 @@ ID3D11Buffer* ResourceAllocator::AllocateIndexBuffer(void* data, unsigned int el
 
 	return indexBuffer;
 }
+
+ID3D11Buffer* ResourceAllocator::AllocateVInstanceBuffer(void* data, unsigned int elemSize, unsigned int count)
+{
+	return AllocateVertexBuffer(data, elemSize, count);
+}

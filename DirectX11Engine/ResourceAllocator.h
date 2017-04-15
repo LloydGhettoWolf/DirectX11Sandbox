@@ -11,6 +11,7 @@ public:
 
 	ID3D11Buffer* AllocateVertexBuffer(void* data, unsigned int elemSize, unsigned int count);
 	ID3D11Buffer* AllocateIndexBuffer(void* data, unsigned int elemSize, unsigned int count);
+	ID3D11Buffer* AllocateVInstanceBuffer(void* data, unsigned int elemSize, unsigned int count);
 
 private:
 	ID3D11Device* mDevice;
