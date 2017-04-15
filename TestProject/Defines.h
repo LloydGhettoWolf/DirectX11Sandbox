@@ -34,3 +34,13 @@ struct ConstantsStruct
 	MatrixBufferType* matPtr;
 	LightPosBuffer* lightPtr;
 };
+
+struct ShaderPerMeshStruct
+{
+	MaterialProperties* material;
+	ID3D11SamplerState* sampler;
+	ID3D11ShaderResourceView* diffuseSrv;
+	ID3D11ShaderResourceView* specSrv;
+	ID3D11ShaderResourceView* normSrv;
+	ID3D11ShaderResourceView* maskSrv;
+};
