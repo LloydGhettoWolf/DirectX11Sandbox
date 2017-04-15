@@ -14,6 +14,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceAllocator.cpp" />
+    <ClCompile Include="PointSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SystemClass.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceAllocator.h" />
+    <ClInclude Include="PointSprite.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
