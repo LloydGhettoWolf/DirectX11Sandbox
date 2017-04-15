@@ -4,11 +4,10 @@
 using namespace DirectX;
 
 struct ID3D11Buffer;
-struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ProcessedMeshData;
 struct ProcessedNormalMappedMeshData;
-struct ResourceAllocator;
+class ResourceAllocator;
 
 class SimpleMesh
 {
@@ -18,7 +17,7 @@ public:
 	SimpleMesh(const SimpleMesh&) = delete;
 	SimpleMesh(const SimpleMesh&&) = delete;
 
-	bool Init(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
+	bool Init(ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
 	void Shutdown();
 
 	unsigned int GetIndexCount( ) const { return mIndexCount; }
@@ -35,10 +34,11 @@ public:
 
 	XMFLOAT3 GetBoxMin() const { return min; }
 	XMFLOAT3 GetBoxMax() const { return max; }
-
+	XMFLOAT3 GetBoxCenter() const { return center; }
+	float thisFrameZ;
 private:
-	bool InitBoundingBox(ID3D11Device* device);
-	bool InitBuffers(ID3D11Device* device, ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
+	//bool InitBoundingBox(ID3D11Device* device);
+	bool InitBuffers(ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
 
 	ID3D11Buffer** mVertBuffer = nullptr;
 	ID3D11Buffer* mIndexBuffer = nullptr;
@@ -56,4 +56,6 @@ private:
 
 	XMFLOAT3 min;
 	XMFLOAT3 max;
+	XMFLOAT3 center;
+	
 };
