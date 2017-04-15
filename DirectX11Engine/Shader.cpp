@@ -200,3 +200,22 @@ void Shader::CreatePosNormUvTangentLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayou
 	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[3].InstanceDataStepRate = 0;
 }
+
+void Shader::CreateInstancedPosLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout)
+{
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "INSTANCEPOS";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[1].InputSlot = 1;
+	polygonLayout[1].AlignedByteOffset = 0;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+	polygonLayout[1].InstanceDataStepRate = 1;
+}

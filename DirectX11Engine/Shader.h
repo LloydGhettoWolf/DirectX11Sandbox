@@ -10,6 +10,7 @@ struct ID3D11DeviceContext;
 struct ID3D10Blob;
 struct D3D11_INPUT_ELEMENT_DESC;
 
+
 class Shader
 {
 public:
@@ -31,6 +32,7 @@ protected:
 	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, LPCWSTR shaderFilename);
 
 	void CreatePosNormUvLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout);
+	void CreateInstancedPosLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout);
 	void CreatePosNormUvTangentLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout);
 
 	ID3D11VertexShader* mVertexShader;
