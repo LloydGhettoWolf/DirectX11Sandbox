@@ -39,6 +39,8 @@ void Renderer::DrawIndexed(ID3D11Buffer* const* vertexInfoStreams,
 
 	//now we're set up, let's render!
 	mDeviceContext->DrawIndexed(numIndices, 0, 0);
+
+	delete[] offsets;
 }
 
 void Renderer::DrawIndexedInstanced(ID3D11Buffer* const* vertexInfoStreams,
@@ -67,4 +69,6 @@ void Renderer::DrawIndexedInstanced(ID3D11Buffer* const* vertexInfoStreams,
 
 	//now we're set up, let's render!
 	mDeviceContext->DrawIndexedInstanced(numIndices, numInstances, 0, 0, 0);
+
+	delete[] offsets;
 }
