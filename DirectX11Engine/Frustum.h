@@ -6,6 +6,7 @@ using namespace DirectX;
 
 class Camera;
 struct ID3D11Buffer;
+struct ID3D11Device;
 
 class Frustum
 {
