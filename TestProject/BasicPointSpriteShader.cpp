@@ -7,13 +7,13 @@ bool PSShader::Init(ID3D11Device* device, HWND hwnd)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 
 	Shader::CreateInstancedPosLayout(polygonLayout);
 
 	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleInstanceVertexShader.cso");
 	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleInstancePixelShader.cso");
-	bool bResult = Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 2);
+	bool bResult = Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 3);
 	if (!bResult)
 	{
 		return false;
@@ -29,6 +29,15 @@ bool PSShader::Init(ID3D11Device* device, HWND hwnd)
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &mMatrixBuffer);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	bufferDesc.ByteWidth = sizeof(EyeBufferType);
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &mEyeBuffer);
 
 	if (result != S_OK)
 	{
@@ -56,7 +65,7 @@ bool PSShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext* devi
 
 	MatrixBufferType* matPtr;
 
-	ConstantsStruct* constants = static_cast<ConstantsStruct*>(data);
+	InstancedConstantsStruct* constants = static_cast<InstancedConstantsStruct*>(data);
 	MatrixBufferType* matrices = constants->matPtr;
 
 	// Lock the constant buffer so it can be written to.
@@ -78,14 +87,38 @@ bool PSShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext* devi
 	deviceContext->Unmap(mMatrixBuffer, 0);
 
 
-	// Finanly set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(MATRIX_BUFFER, 1, &mMatrixBuffer);
+	EyeBufferType* extEyePtr = constants->eyePtr;
+	result = deviceContext->Map(mEyeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
+	if (FAILED(result))
+	{
+		return false;
+	}
 
-	return true;
+	// Get a pointer to the data in the constant buffer.
+	EyeBufferType* eyePtr = (EyeBufferType*)mappedResource2.pData;
+
+	// Copy the matrices into the constant buffer.
+	eyePtr->eyePos = extEyePtr->eyePos;
+	
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(mEyeBuffer, 0);
+
+
+	// Finanly set the constant buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(EYE_BUFFER, 1, &mEyeBuffer);
+
 	return true;
 }
 
 bool PSShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext)
-{
+{	
+
+	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
+	ID3D11ShaderResourceView* srv = info->diffuseSrv;
+	ID3D11SamplerState* samplerState = info->sampler;
+
+	deviceContext->PSSetSamplers(0, 1, &samplerState);
+	deviceContext->PSSetShaderResources(0, 1, &srv);
 	return true;
 }

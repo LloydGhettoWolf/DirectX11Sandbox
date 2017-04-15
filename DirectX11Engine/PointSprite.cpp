@@ -5,12 +5,26 @@
 
 using namespace DirectX;
 
+const float WIDTH = 800;
+const float HEIGHT = 600;
+
+const float ASPECT = WIDTH / HEIGHT;
+const float RATIO = 1.0f / ASPECT;
+
 XMFLOAT3 vertices[4] = 
 {
-	XMFLOAT3(-100.0f, 100.0f, 0.0f),
-	XMFLOAT3(-100.0f, -100.0f, 0.0f),
-	XMFLOAT3(100.0f, -100.0f, 0.0f),
-	XMFLOAT3(100.0f, 100.0f, 0.0f)
+	XMFLOAT3(RATIO * -25.0f, 25.0f, 0.0f),
+	XMFLOAT3(RATIO * -25.0f, -25.0f, 0.0f),
+	XMFLOAT3(RATIO * 25.0f, -25.0f, 0.0f),
+	XMFLOAT3(RATIO * 25.0f, 25.0f, 0.0f)
+};
+
+XMFLOAT2 uvs[4] =
+{
+	XMFLOAT2(0.0f, 0.0f),
+	XMFLOAT2(0.0f, 1.0f),
+	XMFLOAT2(1.0f, 1.0f),
+	XMFLOAT2(1.0f, 0.0f)
 };
 
 unsigned int indices[6] =
@@ -23,6 +37,12 @@ bool PointSprite::Init(ResourceAllocator* resourceAllocator)
 {
 	mVertexBuffer = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&vertices[0]), sizeof(XMFLOAT3), 4);
 	if (mVertexBuffer == nullptr)
+	{
+		return false;
+	}
+
+	mUVBuffer = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&uvs[0]), sizeof(XMFLOAT2), 4);
+	if (mUVBuffer == nullptr)
 	{
 		return false;
 	}

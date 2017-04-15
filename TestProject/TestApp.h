@@ -13,6 +13,7 @@ class OutlineShader;
 class Texture;
 struct ID3D11SamplerState;
 struct ID3D11BlendState;
+struct ID3D11ShaderResourceView;
 struct materialInfo;
 class Renderer;
 class ResourceAllocator;
@@ -25,6 +26,8 @@ const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
 const float SCREEN_NEAR = 1.0f;
 const bool FULL_SCREEN = false;
+const float SCREEN_WIDTH = 800;
+const float SCREEN_HEIGHT = 600;
 
 const int DIFF_SHADER = 0;
 const int SPEC_SHADER = 1;
@@ -67,6 +70,7 @@ private:
 	processedMaterialInfo* mMaterials;
 
 	Texture* mTextures;
+	Texture* mPointSrv;
 
 	int mMouseRotateX, mMouseRotateY;
 	int mMouseVertY;

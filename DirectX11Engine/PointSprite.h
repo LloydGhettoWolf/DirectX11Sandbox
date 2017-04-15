@@ -22,12 +22,14 @@ public:
 	const XMFLOAT3* GetPositions() const { return mPositions; }
 
 	ID3D11Buffer* GetVertBuffer() { return mVertexBuffer; }
+	ID3D11Buffer* GetUVBuffer() { return mUVBuffer; }
 	ID3D11Buffer* GetIndexBuffer() { return mIndexBuffer; }
 	ID3D11Buffer* GetInstanceBuffer() { return mInstanceBuffer; }
 
 	void Update();
 private:
 	ID3D11Buffer* mVertexBuffer = nullptr;
+	ID3D11Buffer* mUVBuffer = nullptr;
 	ID3D11Buffer* mIndexBuffer = nullptr;
 	ID3D11Buffer* mInstanceBuffer = nullptr;
 

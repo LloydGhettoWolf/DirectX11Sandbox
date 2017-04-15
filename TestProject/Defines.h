@@ -12,6 +12,12 @@ struct MatrixBufferType
 	XMMATRIX projection;
 };
 
+struct EyeBufferType
+{
+	XMFLOAT3 eyePos;
+	float padding;
+};
+
 struct LightPosBuffer
 {
 	XMFLOAT3 eyePos;
@@ -33,6 +39,12 @@ struct ConstantsStruct
 {
 	MatrixBufferType* matPtr;
 	LightPosBuffer* lightPtr;
+};
+
+struct InstancedConstantsStruct
+{
+	MatrixBufferType* matPtr;
+	EyeBufferType* eyePtr;
 };
 
 struct ShaderPerMeshStruct

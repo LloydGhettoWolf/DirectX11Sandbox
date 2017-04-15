@@ -1,4 +1,8 @@
 //TestApp.cpp//TestApp.cpp
+#define _CRTDBG_MAP_ALLOC  
+#include <stdlib.h>  
+#include <crtdbg.h> 
+
 #include <d3d11.h>
 #include <D3DClass.h>
 #include <Frustum.h>
@@ -22,6 +26,8 @@
 #include <PointSprite.h>
 #include <algorithm>
 
+
+
 #define DIRECTINPUT_VERSION 0x0800
 
 using namespace std;
@@ -35,8 +41,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
-	mScreenHeight = 600;
-	mScreenWidth = 800;
+	mScreenHeight = SCREEN_HEIGHT;
+	mScreenWidth = SCREEN_WIDTH;
 
 	HRESULT result = mD3D->Init(mScreenWidth, mScreenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 
@@ -80,7 +86,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		}
 	}
 
-	delete[] meshData;
+	delete [] meshData;
 
 	
 
@@ -97,6 +103,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 			return false;
 		}
 	}
+
 	delete[] textureNames;
 
 	// Create the color shader object.
@@ -256,14 +263,22 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mFrustum = new Frustum();
 
 	//create point sprite
-	XMFLOAT3 pos[4] = { XMFLOAT3(0.0f, 0.0f, 0.0f), 
-						XMFLOAT3(0.0f, 0.0f, 0.0f), 
-						XMFLOAT3(0.0f, 0.0f, 0.0f), 
-						XMFLOAT3(0.0f, 0.0f, 0.0f) };
-	mPointSprite = new PointSprite(1, &pos[0]);
+	XMFLOAT3 pos[4] = { XMFLOAT3(100.0f, 100.0f, 0.0f), 
+						XMFLOAT3(-100.0f, 200.0f, 300.0f)};
+	mPointSprite = new PointSprite(2, &pos[0]);
 
 	if (!mPointSprite->Init(mResourceAllocator))
 	{
+		return false;
+	}
+
+	mPointSrv = new Texture();
+
+	wstring wstr(L"pointSprite.dds");
+	result = mPointSrv->InitFromDDS(mD3D->GetDevice(), &wstr[0]);
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the point sprite texture.", "Error", MB_OK);
 		return false;
 	}
 
@@ -385,6 +400,8 @@ void TestApp::Shutdown()
 		delete mPointSprite;
 	}
 
+	_CrtDumpMemoryLeaks();
+
 	return;
 }
 
@@ -449,6 +466,10 @@ bool TestApp::Render()
 
 	theta += 0.01f;
 
+	EyeBufferType eyeBuffer;
+	XMStoreFloat3(&eyeBuffer.eyePos, mCamera->GetPos());
+
+
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -499,22 +520,50 @@ bool TestApp::Render()
 
 	context->OMSetBlendState(mBlendState, 0, 0xffffffff);
 	
-	//RenderMeshList(unculledMeshes, &lights, &matrices);
+	RenderMeshList(alphaMeshes, &lights, &matrices);
 
-	context->OMSetBlendState(NULL, 0, 0xffffffff);
-
+	
 	//set shader for point sprite
+
 	mMeshShaders[INSTANCE_SHADER]->PrepareShader(mD3D->GetDeviceContext());
-	ConstantsStruct constants;
-	constants.lightPtr = &lights;
+	InstancedConstantsStruct constants;
 	constants.matPtr = &matrices;
+	constants.eyePtr = &eyeBuffer;
 	result = mMeshShaders[INSTANCE_SHADER]->SetConstantShaderParameters((void*)&constants, context);
 
+	ShaderPerMeshStruct perMesh;
+	perMesh.sampler = mSamplerState;
+	perMesh.diffuseSrv = mPointSrv->GetTexture();
+
+	mMeshShaders[INSTANCE_SHADER]->SetPerMeshParameters(static_cast<void*>(&perMesh), context);
+
 	ID3D11Buffer* pointVerts = mPointSprite->GetVertBuffer();
+	ID3D11Buffer* pointUVs = mPointSprite->GetUVBuffer();
 	ID3D11Buffer* instanceData = mPointSprite->GetInstanceBuffer();
-	ID3D11Buffer* vertBuffers[2] = { pointVerts, instanceData };
-	unsigned int strides[2] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT3) };
-	mRenderer->DrawIndexedInstanced(&vertBuffers[0], 2, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 1);
+	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3) };
+
+	//update instanced data
+
+	D3D11_MAPPED_SUBRESOURCE newPositionData;
+
+	// Lock the constant buffer so it can be written to.
+	result = context->Map(instanceData, 0, D3D11_MAP_WRITE_DISCARD, 0, &newPositionData);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	XMFLOAT3 positions[2] = { lights.lightPos, lights.lightPos };
+	XMFLOAT3* dataPtr;
+	dataPtr = (XMFLOAT3*)newPositionData.pData;
+	dataPtr[0] = positions[0];
+	dataPtr[1] = positions[1];
+	context->Unmap(instanceData, 0);
+
+	ID3D11Buffer* vertBuffers[3] = { pointVerts, pointUVs, instanceData };
+	mRenderer->DrawIndexedInstanced(&vertBuffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 2);
+
+	context->OMSetBlendState(NULL, 0, 0xffffffff);
 
 #if RENDER_AABB
 	result = mOutlineShader->PrepareShader(context);

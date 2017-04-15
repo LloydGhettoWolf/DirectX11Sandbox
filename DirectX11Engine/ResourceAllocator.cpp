@@ -58,5 +58,27 @@ ID3D11Buffer* ResourceAllocator::AllocateIndexBuffer(void* data, unsigned int el
 
 ID3D11Buffer* ResourceAllocator::AllocateVInstanceBuffer(void* data, unsigned int elemSize, unsigned int count)
 {
-	return AllocateVertexBuffer(data, elemSize, count);
+	D3D11_BUFFER_DESC vertBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertData;
+	ID3D11Buffer* vertBuffer;
+
+	vertBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertBufferDesc.MiscFlags = 0;
+	vertBufferDesc.StructureByteStride = 0;
+	vertBufferDesc.ByteWidth = elemSize * count;
+
+	vertData.pSysMem = data;
+	vertData.SysMemPitch = 0;
+	vertData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	HRESULT result = mDevice->CreateBuffer(&vertBufferDesc, &vertData, &vertBuffer);
+	if (FAILED(result))
+	{
+		return nullptr;
+	}
+
+	return vertBuffer;
 }

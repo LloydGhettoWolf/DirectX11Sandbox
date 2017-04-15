@@ -24,6 +24,8 @@ public:
 
 private:
 	ID3D11Buffer* mMatrixBuffer;
+	ID3D11Buffer* mEyeBuffer;
 
 	static const int MATRIX_BUFFER = 0;
+	static const int EYE_BUFFER = 1;
 };

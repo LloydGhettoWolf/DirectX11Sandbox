@@ -29,6 +29,7 @@ void SimpleMesh::Shutdown()
 		for (unsigned int i = 0; i < mNumBuffers; i++)
 		{
 			mVertBuffer[i]->Release();
+			delete mVertBuffer[i];
 		}
 	}
 
