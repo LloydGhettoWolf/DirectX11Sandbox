@@ -20,7 +20,7 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 	float4 norm = SampleNormalMap(input.norm, input.tangent, normSample);
 
 	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
-	float4 amb = float4(0.2f, 0.2f, 0.2f, 1.0f) * diffSample;
+	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
 
 	float lightIntensity = AttenuateLight(distance);
 

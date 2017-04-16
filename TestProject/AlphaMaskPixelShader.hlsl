@@ -13,7 +13,8 @@ float4 main(StandardPixelType input) : SV_TARGET
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
 
 	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
+	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
 	float4 alpha = alphaTexture.Sample(SampleType, input.tex);
 	float lightIntensity = AttenuateLight(distance);
-	return float4(lightIntensity * diffFactor.xyz, alpha.r);
+	return float4(amb + lightIntensity * (diffFactor.xyz), alpha.r);
 }
