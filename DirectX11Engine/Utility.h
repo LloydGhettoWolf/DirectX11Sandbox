@@ -14,3 +14,5 @@ bool CompareZAscend(SimpleMesh* first, SimpleMesh* second);
 bool CompareZDescend(SimpleMesh* first, SimpleMesh* second);
 
 void UpdateThisFrameZ(SimpleMesh* mesh, XMMATRIX* viewProj);
+
+void UpdateBoundingBoxes(SimpleMesh* meshes, unsigned int numMeshes, XMMATRIX* mWorld);

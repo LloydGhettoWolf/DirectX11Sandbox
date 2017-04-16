@@ -46,3 +46,31 @@ void UpdateThisFrameZ(SimpleMesh* mesh, XMMATRIX* viewProj)
 
 	mesh->thisFrameZ = newVec.z;
 }
+
+void UpdateBoundingBoxes(SimpleMesh* meshes, unsigned int numMeshes, XMMATRIX* mWorld)
+{
+	//update all the bounding boxes for the meshes according to the matrix
+	for (unsigned int i = 0; i < numMeshes; i++)
+	{
+		XMFLOAT3 min = meshes[i].GetBoxMin();
+		XMFLOAT3 max = meshes[i].GetBoxMax();
+
+		XMVECTOR tempMin = XMLoadFloat3(&min);
+		XMVECTOR tempMax = XMLoadFloat3(&max);
+
+		tempMin = XMVector3Transform(tempMin, *mWorld);
+		tempMax = XMVector3Transform(tempMax, *mWorld);
+
+		XMVECTOR tempCenter = tempMax - tempMin;
+
+		XMStoreFloat3(&min, tempMin);
+		XMStoreFloat3(&max, tempMax);
+
+		XMFLOAT3 center;
+		XMStoreFloat3(&center, tempCenter);
+
+		meshes[i].SetBoxMin(min);
+		meshes[i].SetBoxMax(max);
+		meshes[i].SetBoxCenter(center);
+	}
+}
