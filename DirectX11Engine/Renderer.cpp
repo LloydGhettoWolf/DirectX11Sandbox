@@ -59,7 +59,7 @@ void Renderer::DrawIndexedInstanced(ID3D11Buffer* const* vertexInfoStreams,
 	}
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	mDeviceContext->IASetVertexBuffers(0, numStreams, &vertexInfoStreams[0], &strides[0], &offsets[0]);
+	mDeviceContext->IASetVertexBuffers(0, numStreams, vertexInfoStreams, &strides[0], &offsets[0]);
 
 	// Set the index buffer to active in the input assembler so it can be rendered.
 	mDeviceContext->IASetIndexBuffer(indices, DXGI_FORMAT_R32_UINT, 0);
