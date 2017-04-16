@@ -39,3 +39,13 @@ protected:
 	ID3D11PixelShader* mPixelShader;
 	ID3D11InputLayout* mLayout;
 };
+
+
+template <class T>
+Shader* CreateShaderType()
+{
+	return new T();
+}
+
+
+typedef Shader* (*ShaderCreator)();
