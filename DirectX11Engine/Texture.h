@@ -19,7 +19,7 @@ class Texture
 {
 public:
 	Texture() : mTexture(nullptr) {};
-	~Texture() {}
+	~Texture() { Shutdown(); }
 	Texture(const Texture&) = delete;
 
 	bool Init(ID3D11DeviceContext* context, ID3D11Device* device, WCHAR* fileName, bool needMips = false);
