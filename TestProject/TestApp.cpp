@@ -1,4 +1,5 @@
 //TestApp.cpp//TestApp.cpp
+#include <memory>
 #include <d3d11.h>
 #include <D3DClass.h>
 #include <Frustum.h>
@@ -10,6 +11,10 @@
 #include <Utility.h>
 #include <vector>
 #include <SimpleMesh.h>
+#include <Renderer.h>
+#include <ResourceAllocator.h>
+#include <PointSprite.h>
+#include <algorithm>
 #include "TestApp.h"
 #include "DefaultDiffuseShader.h"
 #include "SpecMapShader.h"
@@ -17,15 +22,22 @@
 #include "NormNoSpecMapShader.h"
 #include "AlphaMaskShader.h"
 #include "BasicPointSpriteShader.h"
-#include <Renderer.h>
-#include <ResourceAllocator.h>
-#include <PointSprite.h>
-#include <algorithm>
+
 
 
 #define DIRECTINPUT_VERSION 0x0800
 
 using namespace std;
+
+ShaderCreator createShaders[] =
+{
+	CreateShaderType<DefaultDiffuseShader>,
+	CreateShaderType<SpecMapShader>,
+	CreateShaderType<NormalMapShader>,
+	CreateShaderType<NormNoSpecMapShader>,
+	CreateShaderType<AlphaMaskShader>,
+	CreateShaderType<PSShader>
+};
 
 bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInstance)
 {
@@ -51,7 +63,6 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mRenderer = new Renderer(mD3D->GetDevice(), mD3D->GetDeviceContext());
 
 	// Initialize the model object.
-
 	wstring path(L"C://Users/GhettoFett/Documents/processedMeshes/");
 	wstring name(L"sponza.boom");
 	string strName(name.begin(), name.end());
@@ -83,8 +94,6 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	delete [] meshData;
 
-	
-
 	//init textures
 	mTextures = new Texture[mNumTextures];
 	for (unsigned int i = 0; i < mNumTextures; i++)
@@ -101,114 +110,56 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	delete[] textureNames;
 
-	// Create the color shader object.
-	mMeshShaders[DIFF_SHADER] = new DefaultDiffuseShader();
-	if (!mMeshShaders[DIFF_SHADER])
+	////////////////////////////////////////////////////////////
+	//Create Shaders
+	for (unsigned int i = DIFF_SHADER; i <= INSTANCE_SHADER; i++)
 	{
-		return false;
+		// Create the color shader object.
+		mMeshShaders[i] = createShaders[i]();
+		if (!mMeshShaders[i])
+		{
+			return false;
+		}
+
+		// Initialize the color shader object.
+		result = mMeshShaders[i]->Init(mD3D->GetDevice(), hwnd);
+		if (!result)
+		{
+			MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
+			return false;
+		}
 	}
 
-	// Initialize the color shader object.
-	result = mMeshShaders[DIFF_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
-		return false;
-	}
 
 	mOutlineShader = new OutlineShader();
 
-	result = mOutlineShader->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the outline shader object.", "Error", MB_OK);
-		return false;
-	}
-
-	mMeshShaders[SPEC_SHADER] = new SpecMapShader();
-	if (!mMeshShaders[SPEC_SHADER])
-	{
-		return false;
-	}
-
-	result = mMeshShaders[SPEC_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the spec shader object.", "Error", MB_OK);
-		return false;
-	}
-
-	mMeshShaders[NORMMAP_SHADER] = new NormalMapShader();
-	if (!mMeshShaders[NORMMAP_SHADER])
-	{
-		return false;
-	}
-
-	result = mMeshShaders[NORMMAP_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the norm shader object.", "Error", MB_OK);
-		return false;
-	}
-
-	mMeshShaders[NORM_NO_SPEC_SHADER] = new NormNoSpecMapShader();
-	if (!mMeshShaders[NORM_NO_SPEC_SHADER])
-	{
-		return false;
-	}
-
-	result = mMeshShaders[NORM_NO_SPEC_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the norm no spec shader object.", "Error", MB_OK);
-		return false;
-	}
-
-	mMeshShaders[MASK_SHADER] = new AlphaMaskShader();
-	if (!mMeshShaders[MASK_SHADER])
-	{
-		return false;
-	}
-
-	result = mMeshShaders[MASK_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the norm no spec shader object.", "Error", MB_OK);
-		return false;
-	}
-
-	mMeshShaders[INSTANCE_SHADER] = new PSShader();
-	if (!mMeshShaders[INSTANCE_SHADER])
-	{
-		return false;
-	}
-
-	result = mMeshShaders[INSTANCE_SHADER]->Init(mD3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the point sprite shader object.", "Error", MB_OK);
-		return false;
-	}
-
-
+	////////////////////////////////////////////////////////////////////
 	//now meshes, textures and materials are created, we really should try and pair materials with shaders
 	PairMaterialsWithShaders(materialProperties);
 	delete[] materialProperties;
 
+
+	/////////////////////////////////////////////////////////////////////
+	//Create camera and frustum info
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR position = XMVectorSet(0.0f, 50.0f, 0.0f, 0.0f);
-	XMVECTOR lookAt = XMVectorSet(10.0f, 50.0f, 0.0f, 0.0f);
+	XMVECTOR position = XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f);
+	XMVECTOR lookAt = XMVectorSet(10.0f, 10.0f, 0.0f, 0.0f);
 
 	float fieldOfView = (float)XM_PI / 4.0f;
 
 	mCamera = new Camera();
 	mCamera->Init(position, lookAt, up, SCREEN_NEAR, SCREEN_DEPTH, screenWidth, screenHeight, fieldOfView);
+	mFrustum = new Frustum();
 
 	// Initialize the world matrix to the identity matrix.
-	mWorld = XMMatrixIdentity();
+	mWorld = XMMatrixScaling(0.05f, 0.05f, 0.05f);
 
+	//update all the bounding boxes for the meshes according to the matrix
+	UpdateBoundingBoxes(mMesh, mNumMeshes, &mWorld);
+
+	///////////////////////////////////////////////////////////////
+	//Descriptors for samples, blends etc
 	D3D11_SAMPLER_DESC samplerDesc;
-
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -222,7 +173,6 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	samplerDesc.BorderColor[3] = 0;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
 	// Create the texture sampler state.
 	result = mD3D->GetDevice()->CreateSamplerState(&samplerDesc, &mSamplerState);
 	if (FAILED(result))
@@ -233,7 +183,6 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	//create blend state
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
-
 	blendDesc.RenderTarget[0].BlendEnable			= true;
 	blendDesc.RenderTarget[0].SrcBlend				= D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend				= D3D11_BLEND_INV_SRC_ALPHA;
@@ -242,40 +191,25 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	blendDesc.RenderTarget[0].DestBlendAlpha		= D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
-
 	result = mD3D->GetDevice()->CreateBlendState(&blendDesc, &mBlendState);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	//input creation
-
-	mMouseRotateX = 0;
-	mMouseRotateY = 0;
-	mMouseVertY = 0;
-
-	mFrustum = new Frustum();
-
 	//create point sprite
-	XMFLOAT3 pos[4] = { XMFLOAT3(100.0f, 100.0f, 0.0f), 
-						XMFLOAT3(-100.0f, 200.0f, 300.0f)};
-	mPointSprite = new PointSprite(2, &pos[0]);
+	XMFLOAT3 pos[1] = { XMFLOAT3(100.0f, 100.0f, 0.0f)};
+	XMFLOAT3 col[1] = { XMFLOAT3(1.0f, 0.0f, 0.0f) };
+	mPointSprite = new PointSprite(1, &pos[0], &col[0]);
 
-	if (!mPointSprite->Init(mResourceAllocator))
+	if (!mPointSprite->Init(mResourceAllocator, mD3D->GetDevice(), L"pointSprite.dds"))
 	{
+		MessageBox(hwnd, "Could not initialize the point sprite.", "Error", MB_OK);
 		return false;
 	}
-
-	mPointSrv = new Texture();
-
-	wstring wstr(L"pointSprite.dds");
-	result = mPointSrv->InitFromDDS(mD3D->GetDevice(), &wstr[0]);
-	if (!result)
-	{
-		MessageBox(hwnd, "Could not initialize the point sprite texture.", "Error", MB_OK);
-		return false;
-	}
+	
+	//get initial time for timer
+	mLastTime = chrono::high_resolution_clock::now();
 
 	return true;
 }
@@ -332,30 +266,8 @@ void TestApp::Shutdown()
 	}
 
 	// Release the color shader object.
-	if (mMeshShaders[0])
-	{
-		delete mMeshShaders[0];
-	}
-
-	if (mMeshShaders[1])
-	{
-		delete mMeshShaders[1];
-	}
-
-	if (mMeshShaders[2])
-	{
-		delete mMeshShaders[2];
-	}
-
-	if (mMeshShaders[3])
-	{
-		delete mMeshShaders[3];
-	}
-
-	if (mMeshShaders[4])
-	{
-		delete mMeshShaders[4];
-	}
+	if (mMeshShaders)
+		delete [] mMeshShaders;
 
 	/*if (mOutlineShader)
 	{
@@ -365,35 +277,26 @@ void TestApp::Shutdown()
 
 	// Release the model object.
 	if (mMesh)
-	{
 		delete[] mMesh;
-	}
 
 	if (mSamplerState)
-	{
 		mSamplerState->Release();
-	}
+
+	if (mBlendState)
+		mBlendState->Release();
+
 
 	if (mCamera)
-	{
 		delete mCamera;
-	}
 
 	if (mTextures)
-	{
-		for (unsigned int i = 0; i < mNumTextures; i++)
-			mTextures[i].Shutdown();
-	}
+		delete[] mTextures;
 
 	if (mMaterials)
-	{
 		delete[] mMaterials;
-	}
 
 	if (mPointSprite)
-	{
 		delete mPointSprite;
-	}
 
 	return;
 }
@@ -404,14 +307,20 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 	chrono::high_resolution_clock::time_point currentTime = chrono::high_resolution_clock::now();
 	chrono::duration<double, std::milli> span = currentTime - mLastTime;
 	mLastTime = currentTime;
-	double delta = span.count();
-	delta *= 0.001;
-	ReadInput(state);
+	double frameTime = span.count();
+	frameTime *= 0.001; //count() is in millis, so divide by 1000 to get time in secs
 
-	//update camera
-	mCamera->ComboRotate((float)mMouseRotateX * delta * 0.1f, (float)mMouseRotateY * delta * 0.1f);
-	mCamera->MoveCameraVertically((float)mMouseVertY * delta * VERT_MOVEMENT_SPEED);
-	mCamera->MoveCameraForward((float)mMouseHorizZ * delta * FORWARD_MOVEMENT_SPEED);
+	while (frameTime > 0.0)
+	{
+		float delta = min(frameTime, DELTA_TIME);
+		ReadInput(state);
+
+		//update camera
+		mCamera->ComboRotate((float)mMouseRotateX * delta * 0.1f, (float)mMouseRotateY * delta * 0.1f);
+		mCamera->MoveCameraVertically((float)mMouseVertY * delta * VERT_MOVEMENT_SPEED);
+		mCamera->MoveCameraForward((float)mMouseHorizZ * delta * FORWARD_MOVEMENT_SPEED);
+		frameTime -= delta;
+	}
 
 	mFrustum->UpdateFrustum(mCamera);
 
@@ -433,24 +342,14 @@ bool TestApp::ReadInput(DIMOUSESTATE& state)
 	}
 
 	if (state.rgbButtons[1] & 0x80)
-	{
 		mMouseHorizZ = state.lY;
-	}
 	else
-	{
 		mMouseHorizZ = 0;
-	}
-
 
 	if (state.rgbButtons[2] & 0x80)
-	{
 		mMouseVertY = state.lY;
-	}
 	else
-	{
 		mMouseVertY = 0;
-	}
-
 
 	return true;
 }
@@ -472,20 +371,17 @@ bool TestApp::Render()
 	LightPosBuffer lights;
 	XMStoreFloat3(&lights.eyePos, mCamera->GetPos());
 	static float theta = 0.0f;
-	float xPos = sin(theta) * 1100.0f;
+	float xPos = sin(theta) * 60.0f;
 
-	lights.lightPos = XMFLOAT3(xPos, 150.0f, 0.0f);
-	lights.lightCol = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	lights.lightPos = XMFLOAT3(xPos, 10.0f, 0.0f);
 
-	theta += 0.01f;
+	theta += 0.005f;
 
 	EyeBufferType eyeBuffer;
 	XMStoreFloat3(&eyeBuffer.eyePos, mCamera->GetPos());
 
-
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
 
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
 	XMMATRIX projView = mCamera->GetProjection() * mCamera->GetView();
@@ -535,7 +431,6 @@ bool TestApp::Render()
 	
 	RenderMeshList(alphaMeshes, &lights, &matrices);
 
-	
 	//set shader for point sprite
 
 	mMeshShaders[INSTANCE_SHADER]->PrepareShader(mD3D->GetDeviceContext());
@@ -546,35 +441,16 @@ bool TestApp::Render()
 
 	ShaderPerMeshStruct perMesh;
 	perMesh.sampler = mSamplerState;
-	perMesh.diffuseSrv = mPointSrv->GetTexture();
+	perMesh.diffuseSrv = mPointSprite->GetTexture();
 
 	mMeshShaders[INSTANCE_SHADER]->SetPerMeshParameters(static_cast<void*>(&perMesh), context);
+	
+	unsigned int strides[4] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3), sizeof(XMFLOAT3)};
+	XMFLOAT3 positions[2] = { lights.lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
+	mPointSprite->Update(context, &positions[0]);
 
-	ID3D11Buffer* pointVerts = mPointSprite->GetVertBuffer();
-	ID3D11Buffer* pointUVs = mPointSprite->GetUVBuffer();
-	ID3D11Buffer* instanceData = mPointSprite->GetInstanceBuffer();
-	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3) };
-
-	//update instanced data
-
-	D3D11_MAPPED_SUBRESOURCE newPositionData;
-
-	// Lock the constant buffer so it can be written to.
-	result = context->Map(instanceData, 0, D3D11_MAP_WRITE_DISCARD, 0, &newPositionData);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	XMFLOAT3 positions[2] = { lights.lightPos, lights.lightPos };
-	XMFLOAT3* dataPtr;
-	dataPtr = (XMFLOAT3*)newPositionData.pData;
-	dataPtr[0] = positions[0];
-	dataPtr[1] = positions[1];
-	context->Unmap(instanceData, 0);
-
-	ID3D11Buffer* vertBuffers[3] = { pointVerts, pointUVs, instanceData };
-	mRenderer->DrawIndexedInstanced(&vertBuffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 2);
+	ID3D11Buffer* buffers[4] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
+	mRenderer->DrawIndexedInstanced(&buffers[0], 4, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 1);
 
 	context->OMSetBlendState(NULL, 0, 0xffffffff);
 

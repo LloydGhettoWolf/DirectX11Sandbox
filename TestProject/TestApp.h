@@ -30,15 +30,21 @@ const bool FULL_SCREEN = false;
 const float SCREEN_WIDTH = 800;
 const float SCREEN_HEIGHT = 600;
 
-const int DIFF_SHADER = 0;
-const int SPEC_SHADER = 1;
-const int NORMMAP_SHADER = 2;
-const int NORM_NO_SPEC_SHADER = 3;
-const int MASK_SHADER = 4;
-const int INSTANCE_SHADER = 5;
+enum ShaderTypes{ DIFF_SHADER = 0,
+				  SPEC_SHADER,
+				  NORMMAP_SHADER,
+				  NORM_NO_SPEC_SHADER,
+				  MASK_SHADER,
+				  INSTANCE_SHADER
+				};
+
 
 const float VERT_MOVEMENT_SPEED = 10.0f;
 const float FORWARD_MOVEMENT_SPEED = 20.0f;
+
+const float FRAMES_PER_SEC = 24.0f;
+//ideal delta time
+const float DELTA_TIME = 1.0f / FRAMES_PER_SEC;
 
 using namespace DirectX;
 using namespace std;
@@ -66,7 +72,7 @@ private:
 	Renderer* mRenderer;
 	ResourceAllocator* mResourceAllocator;
 	
-	Shader* mMeshShaders[INSTANCE_SHADER];
+	Shader* mMeshShaders[INSTANCE_SHADER+1];
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 	ID3D11BlendState* mBlendState;
@@ -74,7 +80,6 @@ private:
 	processedMaterialInfo* mMaterials;
 
 	Texture* mTextures;
-	Texture* mPointSrv;
 
 	int mMouseRotateX, mMouseRotateY;
 	int mMouseVertY;
