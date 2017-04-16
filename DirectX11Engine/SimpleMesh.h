@@ -36,6 +36,11 @@ public:
 	XMFLOAT3 GetBoxMin() const { return min; }
 	XMFLOAT3 GetBoxMax() const { return max; }
 	XMFLOAT3 GetBoxCenter() const { return center; }
+
+	void SetBoxMin(XMFLOAT3& newMin) { min = newMin; }
+	void SetBoxMax(XMFLOAT3& newMax) { max = newMax; }
+	void SetBoxCenter(XMFLOAT3& newCenter) { center = newCenter; }
+
 	float thisFrameZ;
 private:
 	bool InitBoundingBox(ID3D11Device* device);
