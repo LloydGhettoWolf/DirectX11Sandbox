@@ -4,6 +4,7 @@
 using namespace DirectX;
 
 struct ID3D11Buffer;
+struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ProcessedMeshData;
 struct ProcessedNormalMappedMeshData;
@@ -37,7 +38,7 @@ public:
 	XMFLOAT3 GetBoxCenter() const { return center; }
 	float thisFrameZ;
 private:
-	//bool InitBoundingBox(ID3D11Device* device);
+	bool InitBoundingBox(ID3D11Device* device);
 	bool InitBuffers(ResourceAllocator* resourceAllocator, ProcessedMeshData* mesh);
 
 	ID3D11Buffer** mVertBuffer = nullptr;
