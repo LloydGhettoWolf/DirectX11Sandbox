@@ -55,9 +55,6 @@ void   Camera::MoveCameraTrackPoint(XMVECTOR& pos, XMVECTOR& focus)
 
 void Camera::ComboRotate(float amountX, float amountY)
 {
-	amountX *= 0.001f;
-	amountY *= 0.001f;
-
 	yRotation += XMConvertToRadians(-amountY);
 
 	if (yRotation > 0.0f)

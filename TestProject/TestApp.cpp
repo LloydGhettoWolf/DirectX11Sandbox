@@ -1,8 +1,4 @@
 //TestApp.cpp//TestApp.cpp
-#define _CRTDBG_MAP_ALLOC  
-#include <stdlib.h>  
-#include <crtdbg.h> 
-
 #include <d3d11.h>
 #include <D3DClass.h>
 #include <Frustum.h>
@@ -25,7 +21,6 @@
 #include <ResourceAllocator.h>
 #include <PointSprite.h>
 #include <algorithm>
-
 
 
 #define DIRECTINPUT_VERSION 0x0800
@@ -400,20 +395,23 @@ void TestApp::Shutdown()
 		delete mPointSprite;
 	}
 
-	_CrtDumpMemoryLeaks();
-
 	return;
 }
 
 
 bool TestApp::Frame(DIMOUSESTATE& state)
 {
+	chrono::high_resolution_clock::time_point currentTime = chrono::high_resolution_clock::now();
+	chrono::duration<double, std::milli> span = currentTime - mLastTime;
+	mLastTime = currentTime;
+	double delta = span.count();
+	delta *= 0.001;
 	ReadInput(state);
 
 	//update camera
-	mCamera->ComboRotate((float)mMouseRotateX, (float)mMouseRotateY);
-	mCamera->MoveCameraVertically((float)mMouseVertY);
-	mCamera->MoveCameraForward((float)mMouseHorizZ);
+	mCamera->ComboRotate((float)mMouseRotateX * delta * 0.1f, (float)mMouseRotateY * delta * 0.1f);
+	mCamera->MoveCameraVertically((float)mMouseVertY * delta * VERT_MOVEMENT_SPEED);
+	mCamera->MoveCameraForward((float)mMouseHorizZ * delta * FORWARD_MOVEMENT_SPEED);
 
 	mFrustum->UpdateFrustum(mCamera);
 
@@ -428,16 +426,31 @@ bool TestApp::ReadInput(DIMOUSESTATE& state)
 		mMouseRotateX = state.lX;
 		mMouseRotateY = state.lY;
 	}
+	else
+	{
+		mMouseRotateX = 0;
+		mMouseRotateY = 0;
+	}
 
 	if (state.rgbButtons[1] & 0x80)
 	{
 		mMouseHorizZ = state.lY;
 	}
+	else
+	{
+		mMouseHorizZ = 0;
+	}
+
 
 	if (state.rgbButtons[2] & 0x80)
 	{
 		mMouseVertY = state.lY;
 	}
+	else
+	{
+		mMouseVertY = 0;
+	}
+
 
 	return true;
 }

@@ -3,6 +3,7 @@
 #include <BaseApp.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <chrono>
 
 class D3DClass;
 class SimpleMesh;
@@ -35,6 +36,9 @@ const int NORMMAP_SHADER = 2;
 const int NORM_NO_SPEC_SHADER = 3;
 const int MASK_SHADER = 4;
 const int INSTANCE_SHADER = 5;
+
+const float VERT_MOVEMENT_SPEED = 10.0f;
+const float FORWARD_MOVEMENT_SPEED = 20.0f;
 
 using namespace DirectX;
 using namespace std;
@@ -87,4 +91,6 @@ private:
 	unsigned int mNumMappedMeshes = 0;
 	unsigned int mNumMaterials = 0;
 	unsigned int mNumTextures = 0;
+
+	chrono::high_resolution_clock::time_point mLastTime;
 };
