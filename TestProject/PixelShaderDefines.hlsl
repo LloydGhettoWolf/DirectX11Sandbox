@@ -66,25 +66,18 @@ float4 SampleNormalMap(float3 normal, float3 tangent, float4 normalSample)
 float4 DiffFactor(float3 lightVec, float3 newNorm, float4 diffSample)
 {
 	float diffCoeff = saturate(dot(lightVec, newNorm));
-	float4 diffFactor = diffCoeff * lightCol * diffSample;
+	float4 diffFactor = diffCoeff * diffSample;
 	return diffFactor;
 }
 
-float4 SpecFactor(float3 eyeVec, float lightVec, float3 newNorm, float specComponent)
-{
-	float3 halfVec = normalize(lightVec + eyeVec);
-	float intensity = saturate(dot(halfVec, newNorm));
-	float specCoeff = pow(intensity, specComponent);
-	return  specCoeff * lightCol * specColor;
-}
-
-float4 SpecFactorFromSample(float3 eyeVec, float lightVec, float3 norm, float4 specSample)
+float SpecFactor(float3 eyeVec, float3 lightVec, float3 norm, float specComponent)
 {
 	float3 halfVec = normalize(lightVec + eyeVec);
 	float intensity = saturate(dot(halfVec, norm));
 	float specCoeff = pow(intensity, specComponent);
-	return specSample * lightCol;
+	return specCoeff;
 }
+
 
 float AttenuateLight(float dist)
 {

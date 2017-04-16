@@ -13,6 +13,7 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 {
 	float3 lightVec = normalize(lightPos - input.worldPos);
 	float distance = length(lightPos - input.worldPos);
+	float3 eyeVec = normalize(eyePos - input.worldPos);
 
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
 	float4 normSample = normTexture.Sample(SampleType, input.tex);
@@ -21,7 +22,6 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 
 	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
 	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
-
 	float lightIntensity = AttenuateLight(distance);
 
 	return saturate(amb + lightIntensity * (diffFactor * diffColor));

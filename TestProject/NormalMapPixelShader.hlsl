@@ -23,10 +23,10 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 	float4 norm = SampleNormalMap(input.norm, input.tangent, normSample);
 
 	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
-	float4 specFactor = SpecFactorFromSample(eyeVec, lightVec, norm, specSample);
+	float4 specFactor = SpecFactor(eyeVec, lightVec, norm, specComponent);
 	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
 
 	float lightIntensity = AttenuateLight(distance);
 
-	return saturate(amb + lightIntensity * (specFactor + diffFactor * diffColor));
+	return saturate(amb + lightIntensity * (specFactor * specSample + diffFactor * diffColor));
 }

@@ -11,18 +11,18 @@ SamplerState SampleType;
 float4 main(StandardPixelType input) : SV_TARGET0
 {
 	float3 norm = normalize(input.norm);
-	float3 lightVec = normalize(lightPos - input.worldPos);
-	float distance = length(lightPos - input.worldPos);
-	float3 eyeVec = normalize(eyePos - input.worldPos);
+	float3 lightVec = normalize(lightPos - input.worldPos.xyz);
+	float distance = length(lightPos - input.worldPos.xyz);
+	float3 eyeVec = normalize(eyePos - input.worldPos.xyz);
 
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
 	float4 specSample = specTexture.Sample(SampleType, input.tex);
 
-	float4 specFactor = SpecFactorFromSample(eyeVec, lightVec, norm, specSample);
+	float specFactor = SpecFactor(eyeVec, lightVec, norm, specComponent);
 	
 	float4 diffFactor = DiffFactor(lightVec, input.norm, diffSample);
 	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
 
 	float lightIntensity = AttenuateLight(distance);
-	return  saturate(amb + lightIntensity * (specFactor + diffFactor));
+	return saturate(amb + lightIntensity * (specFactor * specSample + diffFactor * diffColor));
 }
