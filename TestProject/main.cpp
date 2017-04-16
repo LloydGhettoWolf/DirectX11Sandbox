@@ -22,7 +22,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, 
 		return 1;
 	}
 
-	result = sysClass->Init(app, 800, 600);
+	result = sysClass->Init(app, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	if (!result)
 	{
@@ -33,7 +33,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, 
 		sysClass->Run();
 	}
 
-	sysClass->Shutdown();
 	delete sysClass;
 
 	return 0;
