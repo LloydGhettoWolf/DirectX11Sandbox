@@ -9,7 +9,7 @@ class BaseApp
 public:
 	BaseApp() : mD3D(nullptr) {};
 	BaseApp(const BaseApp&) = delete;
-	~BaseApp() {};
+	virtual ~BaseApp() {};
 
 	virtual bool Init(int, int, HWND, HINSTANCE) = 0;
 	virtual void Shutdown() = 0;

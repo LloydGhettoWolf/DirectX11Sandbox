@@ -40,12 +40,6 @@ void SystemClass::Shutdown()
 		delete mInput;
 	}
 
-	if (mApp)
-	{
-		mApp->Shutdown();
-		delete mApp;
-	}
-
 	ShutdownWindows();
 }
 

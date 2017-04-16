@@ -11,15 +11,15 @@ class SystemClass
 public:
 	SystemClass(bool fullScreen = false) : mAppName(L"DirectX11App"), mInput(nullptr), mApp(nullptr), mFullScreen(fullScreen){};
 	SystemClass(const SystemClass&) = delete;
-	~SystemClass() {};
+	~SystemClass() { Shutdown(); }
 
 	bool Init(BaseApp* app, int width, int height);
 	void Run();
-	void Shutdown();
 
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
+	void Shutdown();
 	bool Frame();
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
