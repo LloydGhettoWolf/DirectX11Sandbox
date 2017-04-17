@@ -7,13 +7,13 @@ bool PSShader::Init(ID3D11Device* device, HWND hwnd)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[4];
 
 	Shader::CreateInstancedPosLayout(polygonLayout);
 
 	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleInstanceVertexShader.cso");
 	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/SimpleInstancePixelShader.cso");
-	bool bResult = Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 3);
+	bool bResult = Shader::InitShaderData(device, hwnd, vsName, psName, polygonLayout, 4);
 	if (!bResult)
 	{
 		return false;
@@ -36,7 +36,6 @@ bool PSShader::Init(ID3D11Device* device, HWND hwnd)
 	}
 
 	bufferDesc.ByteWidth = sizeof(EyeBufferType);
-
 	result = device->CreateBuffer(&bufferDesc, NULL, &mEyeBuffer);
 
 	if (result != S_OK)
@@ -86,7 +85,6 @@ bool PSShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext* devi
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mMatrixBuffer, 0);
 
-
 	EyeBufferType* extEyePtr = constants->eyePtr;
 	result = deviceContext->Map(mEyeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
 	if (FAILED(result))
@@ -100,14 +98,11 @@ bool PSShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext* devi
 	// Copy the matrices into the constant buffer.
 	eyePtr->eyePos = extEyePtr->eyePos;
 	
-
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mEyeBuffer, 0);
 
-
 	// Finanly set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(EYE_BUFFER, 1, &mEyeBuffer);
-
 	return true;
 }
 

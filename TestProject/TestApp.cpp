@@ -374,6 +374,7 @@ bool TestApp::Render()
 	float xPos = sin(theta) * 60.0f;
 
 	lights.lightPos = XMFLOAT3(xPos, 10.0f, 0.0f);
+	lights.lightCol = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	theta += 0.005f;
 
@@ -445,12 +446,12 @@ bool TestApp::Render()
 
 	mMeshShaders[INSTANCE_SHADER]->SetPerMeshParameters(static_cast<void*>(&perMesh), context);
 	
-	unsigned int strides[4] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3), sizeof(XMFLOAT3)};
-	XMFLOAT3 positions[2] = { lights.lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
-	mPointSprite->Update(context, &positions[0]);
+	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3) * 2};
+	XMFLOAT3 data[2] = { lights.lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
+	mPointSprite->Update(context, &data[0]);
 
-	ID3D11Buffer* buffers[4] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
-	mRenderer->DrawIndexedInstanced(&buffers[0], 4, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 1);
+	ID3D11Buffer* buffers[3] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
+	mRenderer->DrawIndexedInstanced(&buffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 1);
 
 	context->OMSetBlendState(NULL, 0, 0xffffffff);
 

@@ -1,4 +1,5 @@
 #include <d3d11.h>
+#include "Texture.h"
 #include "PointSprite.h"
 #include "ResourceAllocator.h"
 
@@ -33,7 +34,7 @@ unsigned int indices[6] =
 	0,2,3
 };
 
-bool PointSprite::Init(ResourceAllocator* resourceAllocator)
+bool PointSprite::Init(ResourceAllocator* resourceAllocator, ID3D11Device* device, WCHAR* fileName)
 {
 	mVertexBuffer = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&vertices[0]), sizeof(XMFLOAT3), 4);
 	if (mVertexBuffer == nullptr)
@@ -53,11 +54,17 @@ bool PointSprite::Init(ResourceAllocator* resourceAllocator)
 		return false;
 	}
 
-	mInstanceBuffer = resourceAllocator->AllocateVInstanceBuffer(static_cast<void*>(&mPositions[0]), sizeof(XMFLOAT3), mNumSprites);
+	mInstanceBuffer = resourceAllocator->AllocateVInstanceBuffer(static_cast<void*>(&mPositions[0]), sizeof(XMFLOAT3) * 2, mNumSprites);
 	if (mInstanceBuffer == nullptr)
 	{
 		return false;
 	}
+
+
+	mPointTexture = new Texture();
+	bool result = mPointTexture->InitFromDDS(device, &fileName[0]);
+	if (!result)
+		return false;
 
 	return true;
 }
@@ -81,7 +88,34 @@ void PointSprite::Shutdown()
 
 }
 
-	
-void PointSprite::Update()
+ID3D11Buffer** PointSprite::GetAllBuffers()
 {
+	ID3D11Buffer* vertBuffers[3] = { mVertexBuffer, mUVBuffer, mInstanceBuffer };
+	return &vertBuffers[0];
+}
+
+ID3D11ShaderResourceView* PointSprite::GetTexture()
+{
+	return mPointTexture->GetTexture();
+}
+	
+bool PointSprite::Update(ID3D11DeviceContext* context, XMFLOAT3* positions)
+{
+	//update instanced data
+	D3D11_MAPPED_SUBRESOURCE newPositionData;
+
+	// Lock the constant buffer so it can be written to.
+	HRESULT result = context->Map(mInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &newPositionData);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	XMFLOAT3* dataPtr;
+	dataPtr = (XMFLOAT3*)newPositionData.pData;
+	dataPtr[0] = positions[0];
+	dataPtr[1] = positions[1];
+	context->Unmap(mInstanceBuffer, 0);
 };
+
+

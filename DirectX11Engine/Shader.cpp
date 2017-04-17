@@ -226,4 +226,12 @@ void Shader::CreateInstancedPosLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout)
 	polygonLayout[2].AlignedByteOffset = 0;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 	polygonLayout[2].InstanceDataStepRate = 1;
+
+	polygonLayout[3].SemanticName = "INSTANCECOL";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[3].InputSlot = 2;
+	polygonLayout[3].AlignedByteOffset = 12;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+	polygonLayout[3].InstanceDataStepRate = 1;
 }
