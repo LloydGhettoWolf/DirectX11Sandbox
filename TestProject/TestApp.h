@@ -21,6 +21,7 @@ class ResourceAllocator;
 class PointSprite;
 struct LightPosBuffer;
 struct MatrixBufferType;
+struct EyeBufferType;
 struct processedMaterialInfo;
 
 const bool VSYNC_ENABLED = true;
@@ -29,6 +30,8 @@ const float SCREEN_NEAR = 1.0f;
 const bool FULL_SCREEN = false;
 const float SCREEN_WIDTH = 800;
 const float SCREEN_HEIGHT = 600;
+
+const int NUM_LIGHTS = 100;
 
 enum ShaderTypes{ DIFF_SHADER = 0,
 				  SPEC_SHADER,
@@ -61,9 +64,10 @@ public:
 	bool Frame(DIMOUSESTATE& state);
 
 private:
+	bool InitLights();
 	bool PairMaterialsWithShaders(materialInfo* materials);
 	bool Render();
-	void RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights, MatrixBufferType* matrices);
+	void RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights, MatrixBufferType* matrices, EyeBufferType* eye);
 	bool ReadInput(DIMOUSESTATE& state);
 
 	SimpleMesh* mMesh;
@@ -91,6 +95,7 @@ private:
 	Frustum* mFrustum;
 
 	XMMATRIX mWorld;
+	LightPosBuffer* mLights;
 
 	unsigned int mNumMeshes = 0;
 	unsigned int mNumMappedMeshes = 0;

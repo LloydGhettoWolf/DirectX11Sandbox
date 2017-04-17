@@ -130,14 +130,12 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		}
 	}
 
-
 	mOutlineShader = new OutlineShader();
 
 	////////////////////////////////////////////////////////////////////
 	//now meshes, textures and materials are created, we really should try and pair materials with shaders
 	PairMaterialsWithShaders(materialProperties);
 	delete[] materialProperties;
-
 
 	/////////////////////////////////////////////////////////////////////
 	//Create camera and frustum info
@@ -197,20 +195,31 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
+
+	result = InitLights();
+	if (!result)
+	{
+		MessageBox(hwnd, "Could not initialize the lights.", "Error", MB_OK);
+		return false;
+	}
+
 	//create point sprite
-	XMFLOAT3 pos[1] = { XMFLOAT3(100.0f, 100.0f, 0.0f)};
-	XMFLOAT3 col[1] = { XMFLOAT3(1.0f, 0.0f, 0.0f) };
-	mPointSprite = new PointSprite(1, &pos[0], &col[0]);
+	mPointSprite = new PointSprite(1, &mLights->lightPos);
 
 	if (!mPointSprite->Init(mResourceAllocator, mD3D->GetDevice(), L"pointSprite.dds"))
 	{
 		MessageBox(hwnd, "Could not initialize the point sprite.", "Error", MB_OK);
 		return false;
 	}
-	
+
 	//get initial time for timer
 	mLastTime = chrono::high_resolution_clock::now();
+	return true;
+}
 
+bool TestApp::InitLights()
+{
+	mLights = new LightPosBuffer();
 	return true;
 }
 
@@ -368,13 +377,11 @@ bool TestApp::Render()
 	matrices.projection = XMMatrixTranspose(mCamera->GetProjection());
 	matrices.view = XMMatrixTranspose(mCamera->GetView());
 
-	LightPosBuffer lights;
-	XMStoreFloat3(&lights.eyePos, mCamera->GetPos());
 	static float theta = 0.0f;
 	float xPos = sin(theta) * 60.0f;
 
-	lights.lightPos = XMFLOAT3(xPos, 10.0f, 0.0f);
-	lights.lightCol = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	mLights->lightPos = XMFLOAT3(xPos, 10.0f, 0.0f);
+	mLights->lightCol = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
 	theta += 0.005f;
 
@@ -419,7 +426,7 @@ bool TestApp::Render()
 		i++;
 	}
 
-	RenderMeshList(unculledMeshes, &lights, &matrices);
+	RenderMeshList(unculledMeshes, mLights, &matrices, &eyeBuffer);
 
 	unsigned int numAlphaMeshes = (unsigned int)alphaMeshes.size();
 	for (unsigned int i = 0; i < numAlphaMeshes; i++)
@@ -430,7 +437,7 @@ bool TestApp::Render()
 
 	context->OMSetBlendState(mBlendState, 0, 0xffffffff);
 	
-	RenderMeshList(alphaMeshes, &lights, &matrices);
+	RenderMeshList(alphaMeshes, mLights, &matrices, &eyeBuffer);
 
 	//set shader for point sprite
 
@@ -447,7 +454,7 @@ bool TestApp::Render()
 	mMeshShaders[INSTANCE_SHADER]->SetPerMeshParameters(static_cast<void*>(&perMesh), context);
 	
 	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3) * 2};
-	XMFLOAT3 data[2] = { lights.lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
+	XMFLOAT3 data[2] = { mLights->lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
 	mPointSprite->Update(context, &data[0]);
 
 	ID3D11Buffer* buffers[3] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
@@ -481,7 +488,7 @@ bool TestApp::Render()
 	return true;
 }
 
-void TestApp::RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights, MatrixBufferType* matrices)
+void TestApp::RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights, MatrixBufferType* matrices, EyeBufferType* eye)
 {
 	unsigned int numMeshesInList = meshes.size();
 	ID3D11DeviceContext* context = mD3D->GetDeviceContext();
@@ -497,6 +504,7 @@ void TestApp::RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights
 		ConstantsStruct constants;
 		constants.lightPtr = lights;
 		constants.matPtr = matrices;
+		constants.eyePtr = eye;
 		result = info->shader->SetConstantShaderParameters((void*)&constants, context);
 
 		MaterialProperties materialProperties;

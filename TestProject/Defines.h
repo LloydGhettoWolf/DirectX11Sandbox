@@ -20,11 +20,10 @@ struct EyeBufferType
 
 struct LightPosBuffer
 {
-	XMFLOAT3 eyePos;
-	float padding;
 	XMFLOAT3 lightPos;
-	float padding1;
-	XMFLOAT4 lightCol;
+	float padding;
+	XMFLOAT3 lightCol;
+	float padding2;
 };
 
 struct MaterialProperties
@@ -39,6 +38,7 @@ struct ConstantsStruct
 {
 	MatrixBufferType* matPtr;
 	LightPosBuffer* lightPtr;
+	EyeBufferType* eyePtr;
 };
 
 struct InstancedConstantsStruct

@@ -32,9 +32,11 @@ protected:
 
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mLightBuffer;
+	ID3D11Buffer* mEyeBuffer;
 	ID3D11Buffer* mMaterialBuffer;
 
 	static const int MATRIX_BUFFER = 0;
 	static const int LIGHT_BUFFER = 0;
-	static const int MATERIAL_BUFFER = 1;
+	static const int EYE_BUFFER = 1;
+	static const int MATERIAL_BUFFER = 2;
 };

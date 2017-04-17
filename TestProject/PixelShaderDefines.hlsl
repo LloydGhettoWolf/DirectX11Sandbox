@@ -29,14 +29,18 @@ struct StandardPixelType
 
 //CONSTANT BUFFER TYPES/////////////////////////////////////////////////////////////////////////////
 
-cbuffer LightPositions
+cbuffer LightPositions : register(b0)
 {
-	float3 eyePos;
 	float3 lightPos;
 	float4 lightColor;
 };
 
-cbuffer MaterialProperties
+cbuffer Eye : register(b1)
+{
+	float3 eyePos;
+};
+
+cbuffer MaterialProperties : register(b2)
 {
 	float4 diffColor;
 	float4 specColor;

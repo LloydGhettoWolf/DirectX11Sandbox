@@ -59,6 +59,8 @@ bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
 		return false;
 	}
 
+	bufferDesc.ByteWidth = sizeof(EyeBufferType);
+
 	return true;
 }
 
@@ -100,10 +102,12 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(void* data, ID3D11DeviceC
 	
 	MatrixBufferType* matPtr;
 	LightPosBuffer* lightPtr;
+	EyeBufferType* eyePtr;
 
 	ConstantsStruct* constants = static_cast<ConstantsStruct*>(data);
 	MatrixBufferType* matrices = constants->matPtr;
 	LightPosBuffer* lights = constants->lightPtr;
+	EyeBufferType* eye = constants->eyePtr;
 
 	// Lock the constant buffer so it can be written to.
 	HRESULT result = deviceContext->Map(mMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -136,8 +140,7 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(void* data, ID3D11DeviceC
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);
 
-
-	// Finanly set the constant buffer in the vertex shader with the updated values.
+	// Finally set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(MATRIX_BUFFER, 1, &mMatrixBuffer);
 	deviceContext->PSSetConstantBuffers(LIGHT_BUFFER, 1, &mLightBuffer);
 
