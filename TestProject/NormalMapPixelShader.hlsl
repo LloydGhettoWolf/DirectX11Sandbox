@@ -28,5 +28,5 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 
 	float lightIntensity = AttenuateLight(distance);
 
-	return saturate(amb + lightIntensity * (specFactor * specSample + diffFactor * diffColor));
+	return saturate(amb + lightIntensity * lightColor * (specFactor * specSample + diffFactor * diffColor));
 }

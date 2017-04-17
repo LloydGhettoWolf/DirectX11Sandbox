@@ -20,5 +20,5 @@ float4 main(StandardPixelType input) : SV_TARGET0
 	float distance = length(lightPos - input.worldPos);
 	float lightIntensity = AttenuateLight(distance);
 
-	return  saturate(amb + (diffFactor * diffColor ) * lightIntensity);
+	return  saturate(amb + (lightColor * diffFactor * diffColor ) * lightIntensity);
 }

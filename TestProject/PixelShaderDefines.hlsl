@@ -33,7 +33,7 @@ cbuffer LightPositions
 {
 	float3 eyePos;
 	float3 lightPos;
-	float4 lightCol;
+	float4 lightColor;
 };
 
 cbuffer MaterialProperties
