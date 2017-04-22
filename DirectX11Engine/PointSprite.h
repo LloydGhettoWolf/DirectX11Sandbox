@@ -13,15 +13,14 @@ using namespace DirectX;
 class PointSprite
 {
 public:
-	PointSprite(unsigned int numSprites, XMFLOAT3* positions, XMFLOAT3* colors) : mNumSprites(numSprites), mPositions(positions), mColors(colors) {};
+	PointSprite(unsigned int numSprites, XMFLOAT4* data) : mNumSprites(numSprites), mData(data) {};
 	~PointSprite() { Shutdown(); }
 
 	bool Init(ResourceAllocator* resourceAllocator, ID3D11Device* device, WCHAR* fileName);
 	void Shutdown();
 
 	unsigned int GetNumberSprites() const { return mNumSprites; }
-	const XMFLOAT3* GetPositions() const { return mPositions; }
-	const XMFLOAT3* GetColors() const { return mColors; }
+	const XMFLOAT4* GetPositions() const { return mData; }
 
 	ID3D11Buffer* GetVertBuffer() { return mVertexBuffer; }
 	ID3D11Buffer* GetUVBuffer() { return mUVBuffer; }
@@ -32,7 +31,7 @@ public:
 
 	ID3D11ShaderResourceView* GetTexture();
 
-	bool Update(ID3D11DeviceContext* context, XMFLOAT3* positions);
+	bool Update(ID3D11DeviceContext* context, XMFLOAT4* data);
 private:
 	ID3D11Buffer* mVertexBuffer = nullptr;
 	ID3D11Buffer* mUVBuffer = nullptr;
@@ -41,8 +40,7 @@ private:
 
 	Texture* mPointTexture = nullptr;
 
-	XMFLOAT3* mPositions;
-	XMFLOAT3* mColors;
+	XMFLOAT4* mData;
 
 	unsigned int mNumSprites;
 };

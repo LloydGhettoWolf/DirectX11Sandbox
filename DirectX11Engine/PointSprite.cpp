@@ -54,7 +54,7 @@ bool PointSprite::Init(ResourceAllocator* resourceAllocator, ID3D11Device* devic
 		return false;
 	}
 
-	mInstanceBuffer = resourceAllocator->AllocateVInstanceBuffer(static_cast<void*>(&mPositions[0]), sizeof(XMFLOAT3) * 2, mNumSprites);
+	mInstanceBuffer = resourceAllocator->AllocateVInstanceBuffer(static_cast<void*>(&mData[0]), sizeof(XMFLOAT4) * 2, mNumSprites);
 	if (mInstanceBuffer == nullptr)
 	{
 		return false;
@@ -99,7 +99,7 @@ ID3D11ShaderResourceView* PointSprite::GetTexture()
 	return mPointTexture->GetTexture();
 }
 	
-bool PointSprite::Update(ID3D11DeviceContext* context, XMFLOAT3* positions)
+bool PointSprite::Update(ID3D11DeviceContext* context, XMFLOAT4* data)
 {
 	//update instanced data
 	D3D11_MAPPED_SUBRESOURCE newPositionData;
@@ -111,10 +111,9 @@ bool PointSprite::Update(ID3D11DeviceContext* context, XMFLOAT3* positions)
 		return false;
 	}
 
-	XMFLOAT3* dataPtr;
-	dataPtr = (XMFLOAT3*)newPositionData.pData;
-	dataPtr[0] = positions[0];
-	dataPtr[1] = positions[1];
+	XMFLOAT4* dataPtr;
+	dataPtr = (XMFLOAT4*)newPositionData.pData;
+	memcpy(dataPtr, data, sizeof(XMFLOAT4) * 2 * mNumSprites);
 	context->Unmap(mInstanceBuffer, 0);
 };
 
