@@ -5,7 +5,7 @@
 #include "Defines.h"
 
 
-bool SpecMapShader::Init(ID3D11Device* device, HWND hwnd)
+bool SpecMapShader::Init(ID3D11Device* device, HWND hwnd, unsigned int numLights)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
@@ -37,7 +37,7 @@ bool SpecMapShader::Init(ID3D11Device* device, HWND hwnd)
 		return false;
 	}
 
-	bufferDesc.ByteWidth = sizeof(LightPosBuffer);
+	bufferDesc.ByteWidth = sizeof(LightPosBuffer) * numLights;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&bufferDesc, NULL, &mLightBuffer);
@@ -141,8 +141,7 @@ bool SpecMapShader::SetConstantShaderParameters(void* data, ID3D11DeviceContext*
 	}
 
 	lightPtr = (LightPosBuffer*)mappedResource2.pData;
-	lightPtr->lightPos = lights->lightPos;
-	lightPtr->lightCol = lights->lightCol;
+	memcpy(lightPtr, lights, sizeof(LightPosBuffer) * 200);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);
@@ -193,6 +192,7 @@ bool SpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* device
 
 	deviceContext->PSSetConstantBuffers(MATERIAL_BUFFER, 1, &mMaterialBuffer);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
-	deviceContext->PSSetShaderResources(0, 1, &diffuseSrv);
-	deviceContext->PSSetShaderResources(1, 1, &specSrv);
+
+	ID3D11ShaderResourceView * textures[] = { diffuseSrv, specSrv };
+	deviceContext->PSSetShaderResources(0, 2, textures);
 }

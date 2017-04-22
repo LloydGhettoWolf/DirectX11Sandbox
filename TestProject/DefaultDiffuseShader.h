@@ -24,7 +24,7 @@ public:
 	DefaultDiffuseShader(const DefaultDiffuseShader&) = delete;
 	~DefaultDiffuseShader() { Shutdown(); };
 
-	bool Init(ID3D11Device* device, HWND hwnd);
+	bool Init(ID3D11Device* device, HWND hwnd,unsigned int numLights);
 	void Shutdown();
 	bool PrepareShader(ID3D11DeviceContext* deviceContext);
 	bool SetConstantShaderParameters(void* data, ID3D11DeviceContext* deviceContext);

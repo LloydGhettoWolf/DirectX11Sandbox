@@ -20,10 +20,8 @@ struct EyeBufferType
 
 struct LightPosBuffer
 {
-	XMFLOAT3 lightPos;
-	float padding;
-	XMFLOAT3 lightCol;
-	float padding2;
+	XMFLOAT4 lightPos;
+	XMFLOAT4 lightCol;
 };
 
 struct MaterialProperties

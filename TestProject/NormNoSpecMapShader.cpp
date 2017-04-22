@@ -7,12 +7,12 @@
 #include "Defines.h"
 
 
-bool NormNoSpecMapShader::Init(ID3D11Device* device, HWND hwnd)
+bool NormNoSpecMapShader::Init(ID3D11Device* device, HWND hwnd, unsigned int numLights)
 {
 	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/NormNoSpecMapVertexShader.cso");
 	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/NormNoSpecMapPixelShader.cso");
 
-	return InitNormalMapShader(device, hwnd, &vsName, &psName);
+	return InitNormalMapShader(device, hwnd, numLights, &vsName, &psName);
 }
 
 
@@ -44,7 +44,7 @@ bool NormNoSpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* 
 	deviceContext->PSSetConstantBuffers(MATERIAL_BUFFER, 1, &mMaterialBuffer);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
-	ID3D11ShaderResourceView * textures[] = { diffuseSrv, normSrv };
+	ID3D11ShaderResourceView *textures[] = { diffuseSrv, normSrv };
 	deviceContext->PSSetShaderResources(0, 2, textures);
 }
 

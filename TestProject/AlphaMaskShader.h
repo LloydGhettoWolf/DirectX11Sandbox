@@ -1,5 +1,3 @@
-#pragma once
-#pragma once
 //AlphaMaskShader.h
 #pragma once
 #include "Defines.h"
@@ -21,14 +19,14 @@ public:
 	AlphaMaskShader(const AlphaMaskShader&) = delete;
 	~AlphaMaskShader() { Shutdown(); }
 
-	bool Init(ID3D11Device* device, HWND hwnd);
+	bool Init(ID3D11Device* device, HWND hwnd, unsigned int numLights);
 	void Shutdown();
 	bool PrepareShader(ID3D11DeviceContext* deviceContext);
 	bool SetConstantShaderParameters(void* data, ID3D11DeviceContext* deviceContext);
 	bool SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext);
 
 protected:
-	bool InitAlphaMaskShader(ID3D11Device* device, HWND hwnd, LPCWSTR* vsName, LPCWSTR* psName);
+	bool InitAlphaMaskShader(ID3D11Device* device, HWND hwnd, unsigned int numLights, LPCWSTR* vsName, LPCWSTR* psName);
 
 	ID3D11Buffer* mMatrixBuffer;
 	ID3D11Buffer* mLightBuffer;

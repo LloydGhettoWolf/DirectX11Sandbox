@@ -3,7 +3,7 @@
 #include <D3D11.h>
 #include <DirectXMath.h>
 
-bool PSShader::Init(ID3D11Device* device, HWND hwnd)
+bool PSShader::Init(ID3D11Device* device, HWND hwnd, unsigned int numLights)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 

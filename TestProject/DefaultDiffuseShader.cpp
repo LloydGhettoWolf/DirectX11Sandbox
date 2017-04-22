@@ -5,7 +5,7 @@
 #include "ObjParser.h"
 
 
-bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
+bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd, unsigned int numLights)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 
@@ -39,7 +39,7 @@ bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd)
 		return false;
 	}
 
-	bufferDesc.ByteWidth = sizeof(LightPosBuffer);
+	bufferDesc.ByteWidth = sizeof(LightPosBuffer) * numLights;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&bufferDesc, NULL, &mLightBuffer);
@@ -134,8 +134,7 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(void* data, ID3D11DeviceC
 	}
 
 	lightPtr = (LightPosBuffer*)mappedResource2.pData;
-	lightPtr->lightPos = lights->lightPos;
-	lightPtr->lightCol = lights->lightCol;
+	memcpy(lightPtr, lights, sizeof(LightPosBuffer) * 200);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);

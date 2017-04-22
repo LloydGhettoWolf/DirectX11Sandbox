@@ -6,15 +6,15 @@
 #include "Defines.h"
 
 
-bool AlphaMaskShader::Init(ID3D11Device* device, HWND hwnd)
+bool AlphaMaskShader::Init(ID3D11Device* device, HWND hwnd, unsigned int numLights)
 {
 	LPCWSTR vsName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/AlphaMaskVertexShader.cso");
 	LPCWSTR psName(L"C://Users/GhettoFett/Documents/Visual Studio 2015/Projects/DirectX11Engine/Debug/AlphaMaskPixelShader.cso");
 
-	return InitAlphaMaskShader(device, hwnd, &vsName, &psName);
+	return InitAlphaMaskShader(device, hwnd, numLights, &vsName, &psName);
 }
 
-bool AlphaMaskShader::InitAlphaMaskShader(ID3D11Device* device, HWND hwnd, LPCWSTR* vsName, LPCWSTR* psName)
+bool AlphaMaskShader::InitAlphaMaskShader(ID3D11Device* device, HWND hwnd, unsigned int numLights, LPCWSTR* vsName, LPCWSTR* psName)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 
@@ -45,7 +45,7 @@ bool AlphaMaskShader::InitAlphaMaskShader(ID3D11Device* device, HWND hwnd, LPCWS
 		return false;
 	}
 
-	bufferDesc.ByteWidth = sizeof(LightPosBuffer);
+	bufferDesc.ByteWidth = sizeof(LightPosBuffer) * numLights;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&bufferDesc, NULL, &mLightBuffer);
@@ -147,8 +147,7 @@ bool AlphaMaskShader::SetConstantShaderParameters(void* data, ID3D11DeviceContex
 	}
 
 	lightPtr = (LightPosBuffer*)mappedResource2.pData;
-	lightPtr->lightPos = lights->lightPos;
-	lightPtr->lightCol = lights->lightCol;
+	memcpy(lightPtr, lights, sizeof(LightPosBuffer) * 100);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);
