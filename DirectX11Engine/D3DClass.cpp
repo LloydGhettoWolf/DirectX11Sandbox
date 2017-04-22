@@ -6,21 +6,22 @@
 #include "SimpleMesh.h"
 #include "Camera.h"
 #include "D3DClass.h"
+#include "Shader.h"
 
 D3DClass::D3DClass() :  mSwapChain(0),
 						mDevice (0),
 						mDeviceContext (0),
-						mRenderTargetView (0),
 						mDepthStencilBuffer (0),
 						mDepthStencilState (0),
 						mDepthStencilView (0),
-						mRasterState (0)
+						mRasterState (0),
+						mNumRenderTargets(0)
 {
 
 }
 
 bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen,
-					float screenDepth, float screenNear)
+					float screenDepth, float screenNear, int numSamples, int numRenderTargets)
 {
 	HRESULT result;
 	IDXGIFactory* factory;
@@ -39,51 +40,38 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	D3D11_VIEWPORT viewport;
 	float fieldOfView, screenAspect;
 
-
 	// Store the vsync setting.
 	mVSyncEnabled = vsync;
 
 	// Create a DirectX graphics interface factory.
 	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Use the factory to create an adapter for the primary graphics interface (video card).
 	result = factory->EnumAdapters(0, &adapter);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Enumerate the primary adapter output (monitor).
 	result = adapter->EnumOutputs(0, &adapterOutput);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
 	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Create a list to hold all the possible display modes for this monitor/video card combination.
 	displayModeList = new DXGI_MODE_DESC[numModes];
 	if (!displayModeList)
-	{
 		return false;
-	}
 
 	// Now fill the display mode list structures.
 	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Now go through all the display modes and find the one that matches the screen width and height.
 	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
@@ -102,36 +90,18 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Get the adapter (video card) description.
 	result = adapter->GetDesc(&adapterDesc);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Store the dedicated video card memory in megabytes.
 	mVideoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
 
-	// Convert the name of the video card to a character array and store it.
-	//error = wcstombs_s(&stringLength, mVideoCardDescription, 128, adapterDesc.Description, 128);
-	//if (error != 0)
-	//{
-	//	return false;
-	//}
-
-	
 	// Release the display mode list.
 	delete[] displayModeList;
-	displayModeList = 0;
 
-	// Release the adapter output.
+	// release interfaces
 	adapterOutput->Release();
-	adapterOutput = 0;
-
-	// Release the adapter.
 	adapter->Release();
-	adapter = 0;
-
-	// Release the factory.
 	factory->Release();
-	factory = 0;
 
 	// Initialize the swap chain description.
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
@@ -164,18 +134,14 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Set the handle for the window to render to.
 	swapChainDesc.OutputWindow = hwnd;
 
-	swapChainDesc.SampleDesc.Count = 8;
+	swapChainDesc.SampleDesc.Count = numSamples;
 	swapChainDesc.SampleDesc.Quality = 0;
 
 	// Set to full screen or windowed mode.
 	if (fullscreen)
-	{
 		swapChainDesc.Windowed = false;
-	}
 	else
-	{
 		swapChainDesc.Windowed = true;
-	}
 
 	// Set the scan line ordering and scaling to unspecified.
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -195,23 +161,23 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 		D3D11_SDK_VERSION, &swapChainDesc, &mSwapChain, &mDevice, NULL, &mDeviceContext);
 
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Get the pointer to the back buffer.
 	result = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
 	if (FAILED(result))
-	{
 		return false;
-	}
+
+	mNumRenderTargets = numRenderTargets;
+	mRenderTargetView = new ID3D11RenderTargetView*[mNumRenderTargets];
+	mRenderSRV = new ID3D11ShaderResourceView*[mNumRenderTargets - 1];
 
 	// Create the render target view with the back buffer pointer.
-	result = mDevice->CreateRenderTargetView(backBufferPtr, NULL, &mRenderTargetView);
+	//create render targets / buffers
+	
+	result = mDevice->CreateRenderTargetView(backBufferPtr, NULL, &mRenderTargetView[mNumRenderTargets-1]);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Release pointer to the back buffer as we no longer need it.
 	backBufferPtr->Release();
@@ -225,19 +191,46 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	depthBufferDesc.Height = screenHeight;
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
-	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = 8;
+	depthBufferDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	depthBufferDesc.SampleDesc.Count = numSamples;
 	depthBufferDesc.SampleDesc.Quality = 0;
 	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
 	// Create the texture for the depth buffer using the filled out description.
 	result = mDevice->CreateTexture2D(&depthBufferDesc, NULL, &mDepthStencilBuffer);
 	if (FAILED(result))
-	{
 		return false;
+
+	//Create a 2d texture for a second render target view
+	depthBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	depthBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+	for (unsigned int i = 0; i < mNumRenderTargets-1; i++)
+	{
+		ID3D11Texture2D* renderBuffer;
+		result = mDevice->CreateTexture2D(&depthBufferDesc, NULL, &renderBuffer);
+		if (FAILED(result))
+			return false;
+
+		// Create the render target view with the back buffer pointer.
+		result = mDevice->CreateRenderTargetView(renderBuffer, NULL, &mRenderTargetView[i]);
+		if (FAILED(result))
+			return false;
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC render_srv;
+		render_srv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		render_srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+		render_srv.Texture2D.MostDetailedMip = 0;
+		render_srv.Texture2D.MipLevels = 1;
+
+		result = mDevice->CreateShaderResourceView(renderBuffer, &render_srv, &mRenderSRV[i]);
+		if (FAILED(result))
+			return false;
+
+		renderBuffer->Release();
 	}
 
 	// Initialize the description of the stencil state.
@@ -264,17 +257,19 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
+
 	// Create the depth stencil state.
 	result = mDevice->CreateDepthStencilState(&depthStencilDesc, &mDepthStencilState);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
-	// Set the depth stencil state.
-	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	// Create the depth stencil state.
+	result = mDevice->CreateDepthStencilState(&depthStencilDesc, &mDepthStencilStateAlpha);
+	if (FAILED(result))
+		return false;
 
-	// Initailze the depth stencil view.
+
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
 	// Set up the depth stencil view description.
@@ -285,12 +280,20 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Create the depth stencil view.
 	result = mDevice->CreateDepthStencilView(mDepthStencilBuffer, &depthStencilViewDesc, &mDepthStencilView);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
-	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
+	D3D11_SHADER_RESOURCE_VIEW_DESC depth_srv;
+	depth_srv.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	depth_srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	depth_srv.Texture2D.MostDetailedMip = 0;
+	depth_srv.Texture2D.MipLevels = 1;
+
+	result = mDevice->CreateShaderResourceView(mDepthStencilBuffer, &depth_srv, &mDepthSRV);
+	if (FAILED(result))
+		return false;
+
+	// Set the depth stencil state.
+	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
 
 	// Setup the raster description which will determine how and what polygons will be drawn.
 	rasterDesc.AntialiasedLineEnable = true;
@@ -307,9 +310,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	// Create the rasterizer state from the description we just filled out.
 	result = mDevice->CreateRasterizerState(&rasterDesc, &mRasterState);
 	if (FAILED(result))
-	{
 		return false;
-	}
 
 	// Now set the rasterizer state.
 	mDeviceContext->RSSetState(mRasterState);
@@ -329,8 +330,19 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	fieldOfView = (float) XM_PI/ 4.0f;
 	screenAspect = (float)screenWidth / (float)screenHeight;
 	
-
 	return true;
+}
+
+void D3DClass::SetRenderTarget(int index, bool depth)
+{
+	assert(index < mNumRenderTargets && "index out of range for render target");
+
+	if(depth)
+		mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView[index], mDepthStencilView);
+	else
+		mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView[index], NULL);
+
+	currentView = mRenderTargetView[index];
 }
 
 void D3DClass::Shutdown()
@@ -367,8 +379,10 @@ void D3DClass::Shutdown()
 
 	if (mRenderTargetView)
 	{
-		mRenderTargetView->Release();
-		mRenderTargetView = 0;
+		mRenderTargetView[0]->Release();
+		mRenderTargetView[0] = 0;
+		mRenderTargetView[1]->Release();
+		mRenderTargetView[1] = 0;
 	}
 
 	if (mDeviceContext)
@@ -390,10 +404,9 @@ void D3DClass::Shutdown()
 	}	 
 }
 
-void D3DClass::BeginScene(float red, float green, float blue, float alpha)
+void D3DClass::BeginScene(float red, float green, float blue, float alpha, bool depth)
 {
 	float color[4];
-
 
 	// Setup the color to clear the buffer to.
 	color[0] = red;
@@ -402,10 +415,11 @@ void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 	color[3] = alpha;
 
 	// Clear the back buffer.
-	mDeviceContext->ClearRenderTargetView(mRenderTargetView, color);
+	mDeviceContext->ClearRenderTargetView(currentView, color);
 
 	// Clear the depth buffer->
-	mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	if(depth)
+		mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
 }
@@ -415,25 +429,36 @@ void D3DClass::EndScene()
 {
 	// Present the back buffer to the screen since rendering is complete->
 	if (mVSyncEnabled)
-	{
 		// Lock to screen refresh rate->
 		mSwapChain->Present(1, 0);
-	}
 	else
-	{
 		// Present as fast as possible->
 		mSwapChain->Present(0, 0);
-	}
 
 	return;
 }
 
-
-void D3DClass::RenderOpaque(SimpleMesh* meshes, unsigned int numMeshes, Camera* cam)
+void D3DClass::SwitchOffDepthWrites()
 {
-	//cull against frustum
-	
-	//sort along z
+	// Set the depth stencil state.
+	mDeviceContext->OMSetDepthStencilState(mDepthStencilStateAlpha, 1);
+}
 
-	//draw!
+void D3DClass::SwitchOnDepthWrites()
+{
+	// Set the depth stencil state.
+	mDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
+}
+
+void D3DClass::RenderToFullScreenTriangle(Shader* shader, void* data)
+{
+	mDeviceContext->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+	mDeviceContext->IASetIndexBuffer(NULL, (DXGI_FORMAT)0, NULL);
+	mDeviceContext->IASetInputLayout(NULL);
+
+	shader->PrepareShader(mDeviceContext);
+	shader->SetPerMeshParameters(data, mDeviceContext);
+
+	mDeviceContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mDeviceContext->Draw(3, 0);
 }
