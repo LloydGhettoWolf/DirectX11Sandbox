@@ -8,8 +8,8 @@ SamplerState SampleType;
 float4 main(StandardPixelType input) : SV_TARGET
 {
 	float3 norm = normalize(input.norm);
-	float3 lightVec = normalize(lightPos - input.worldPos);
-	float distance = length(lightPos - input.worldPos);
+	float3 lightVec = normalize(lights[0].lightPos - input.worldPos);
+	float distance = length(lights[0].lightPos - input.worldPos);
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
 
 	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);

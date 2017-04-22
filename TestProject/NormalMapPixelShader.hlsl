@@ -12,21 +12,26 @@ SamplerState SampleType;
 
 float4 main(NormalMapPixelType input) : SV_TARGET0
 {
-	float3 lightVec = normalize(lightPos - input.worldPos);
-	float distance = length(lightPos - input.worldPos);
-	float3 eyeVec = normalize(eyePos - input.worldPos);
-
+	float3 eyeVec = normalize(eyePos - input.worldPos.xyz);
 	float4 specSample = specTexture.Sample(SampleType, input.tex);
 	float4 diffSample = diffTexture.Sample(SampleType, input.tex);
 	float4 normSample = normTexture.Sample(SampleType, input.tex);
 
 	float4 norm = SampleNormalMap(input.norm, input.tangent, normSample);
+	float4 accum = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	float4 diffFactor = DiffFactor(lightVec, norm.xyz, diffSample);
-	float4 specFactor = SpecFactor(eyeVec, lightVec, norm, specComponent);
+	for (int i = 0; i < 200; i++)
+	{
+		float3 lightVec = normalize(lights[i].lightPos.xyz - input.worldPos.xyz);
+		float distance = length(lights[i].lightPos.xyz - input.worldPos.xyz);
+		float specFactor = saturate(SpecFactor(eyeVec, lightVec, norm.xyz, specComponent));
+		float4 diffFactor = saturate(DiffFactor(lightVec, norm.xyz, diffSample));
+		float lightIntensity = AttenuateLight(distance);
+
+		accum += lightIntensity * lights[i].lightColor * (diffFactor * diffColor + (specFactor * specSample));
+	}
+
 	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
 
-	float lightIntensity = AttenuateLight(distance);
-
-	return saturate(amb + lightIntensity * lightColor * (specFactor * specSample + diffFactor * diffColor));
+	return  saturate(amb + accum);
 }
