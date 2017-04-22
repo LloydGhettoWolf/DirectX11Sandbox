@@ -67,6 +67,58 @@ bool Shader::InitShaderData(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename,
 	return true;
 }
 
+bool Shader::InitShaderDataNoLayout(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename, LPCWSTR psFilename)
+{
+	HRESULT result;
+
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	result = D3DReadFileToBlob(vsFilename, &vertexShaderBuffer);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	result = D3DReadFileToBlob(psFilename, &pixelShaderBuffer);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &mVertexShader);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &mPixelShader);
+
+	if (result != S_OK)
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer->Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer->Release();
+	pixelShaderBuffer = 0;
+
+	return true;
+}
+
 void Shader::Shutdown()
 {
 	// Shutdown the vertex and pixel shaders as well as the related objects.
@@ -221,7 +273,7 @@ void Shader::CreateInstancedPosLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout)
 
 	polygonLayout[2].SemanticName = "INSTANCEPOS";
 	polygonLayout[2].SemanticIndex = 0;
-	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[2].InputSlot = 2;
 	polygonLayout[2].AlignedByteOffset = 0;
 	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
@@ -229,9 +281,9 @@ void Shader::CreateInstancedPosLayout(D3D11_INPUT_ELEMENT_DESC* polygonLayout)
 
 	polygonLayout[3].SemanticName = "INSTANCECOL";
 	polygonLayout[3].SemanticIndex = 0;
-	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[3].InputSlot = 2;
-	polygonLayout[3].AlignedByteOffset = 12;
+	polygonLayout[3].AlignedByteOffset = 16;
 	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 	polygonLayout[3].InstanceDataStepRate = 1;
 }
