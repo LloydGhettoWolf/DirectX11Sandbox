@@ -9,6 +9,7 @@
     <ClCompile Include="NormNoSpecMapShader.cpp" />
     <ClCompile Include="AlphaMaskShader.cpp" />
     <ClCompile Include="BasicPointSpriteShader.cpp" />
+    <ClCompile Include="SimpleFullScreenShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestApp.h" />
@@ -19,6 +20,7 @@
     <ClInclude Include="NormNoSpecMapShader.h" />
     <ClInclude Include="AlphaMaskShader.h" />
     <ClInclude Include="BasicPointSpriteShader.h" />
+    <ClInclude Include="SimpleFullScreenShader.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -60,6 +62,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SimpleInstancePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SimpleFullScreenVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SimpleFullScreenPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

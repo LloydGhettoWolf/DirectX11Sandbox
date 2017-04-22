@@ -22,6 +22,7 @@
 #include "NormNoSpecMapShader.h"
 #include "AlphaMaskShader.h"
 #include "BasicPointSpriteShader.h"
+#include "SimpleFullScreenShader.h"
 
 
 
@@ -36,7 +37,8 @@ ShaderCreator createShaders[] =
 	CreateShaderType<NormalMapShader>,
 	CreateShaderType<NormNoSpecMapShader>,
 	CreateShaderType<AlphaMaskShader>,
-	CreateShaderType<PSShader>
+	CreateShaderType<PSShader>,
+	CreateShaderType<SimpleFullScreenShader>
 };
 
 bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInstance)
@@ -51,7 +53,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mScreenHeight = SCREEN_HEIGHT;
 	mScreenWidth = SCREEN_WIDTH;
 
-	HRESULT result = mD3D->Init(mScreenWidth, mScreenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	HRESULT result = mD3D->Init(mScreenWidth, mScreenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR, NUM_SAMPLES, NUM_RENDER_TARGETS);
 
 	if (!result)
 	{
@@ -112,7 +114,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	////////////////////////////////////////////////////////////
 	//Create Shaders
-	for (unsigned int i = DIFF_SHADER; i <= INSTANCE_SHADER; i++)
+	for (unsigned int i = DIFF_SHADER; i <= FULL_SCREEN_SHADER; i++)
 	{
 		// Create the color shader object.
 		mMeshShaders[i] = createShaders[i]();
@@ -122,7 +124,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		}
 
 		// Initialize the color shader object.
-		result = mMeshShaders[i]->Init(mD3D->GetDevice(), hwnd);
+		result = mMeshShaders[i]->Init(mD3D->GetDevice(), hwnd, NUM_LIGHTS);
 		if (!result)
 		{
 			MessageBox(hwnd, "Could not initialize the color shader object.", "Error", MB_OK);
@@ -130,7 +132,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		}
 	}
 
-	mOutlineShader = new OutlineShader();
+	//mOutlineShader = new OutlineShader();
 
 	////////////////////////////////////////////////////////////////////
 	//now meshes, textures and materials are created, we really should try and pair materials with shaders
@@ -149,8 +151,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mCamera->Init(position, lookAt, up, SCREEN_NEAR, SCREEN_DEPTH, screenWidth, screenHeight, fieldOfView);
 	mFrustum = new Frustum();
 
-	// Initialize the world matrix to the identity matrix.
-	mWorld = XMMatrixScaling(0.05f, 0.05f, 0.05f);
+	// Initialize the world matrix scale
+	mWorld = XMMatrixScaling(0.1f, 0.1f, 0.1f);
 
 	//update all the bounding boxes for the meshes according to the matrix
 	UpdateBoundingBoxes(mMesh, mNumMeshes, &mWorld);
@@ -158,12 +160,12 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	///////////////////////////////////////////////////////////////
 	//Descriptors for samples, blends etc
 	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter   = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.MaxAnisotropy = 8;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	samplerDesc.BorderColor[0] = 0;
 	samplerDesc.BorderColor[1] = 0;
@@ -204,7 +206,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	}
 
 	//create point sprite
-	mPointSprite = new PointSprite(1, &mLights->lightPos);
+	mPointSprite = new PointSprite(NUM_LIGHTS, &mLights->lightPos);
 
 	if (!mPointSprite->Init(mResourceAllocator, mD3D->GetDevice(), L"pointSprite.dds"))
 	{
@@ -219,7 +221,27 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 bool TestApp::InitLights()
 {
-	mLights = new LightPosBuffer();
+	mLights = new LightPosBuffer[NUM_LIGHTS];
+	lightsStartPos = new XMFLOAT4[NUM_LIGHTS];
+
+	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
+	{
+		// color
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		mLights[i].lightCol = XMFLOAT4(r, g, b, 1.0f);
+
+		// position
+		float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		x = x * 220.0f - 110.0f;
+		float y = 5.0f * (float)(i/10 + 1);
+		float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		z = z * 100.0f - 50.0f;
+		mLights[i].lightPos = XMFLOAT4(x, y, z, 1.0f);
+		lightsStartPos[i] = mLights[i].lightPos;
+	}
+
 	return true;
 }
 
@@ -278,12 +300,6 @@ void TestApp::Shutdown()
 	if (mMeshShaders)
 		delete [] mMeshShaders;
 
-	/*if (mOutlineShader)
-	{
-		mOutlineShader->Shutdown();
-		delete mOutlineShader;
-	}*/
-
 	// Release the model object.
 	if (mMesh)
 		delete[] mMesh;
@@ -331,6 +347,17 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 		frameTime -= delta;
 	}
 
+	static float theta = 0.0f;
+
+	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
+	{
+		XMMATRIX rotate = XMMatrixRotationY(theta);
+		XMVECTOR vec = XMVector3Transform(XMLoadFloat4(&lightsStartPos[i]),rotate);
+		XMStoreFloat4(&mLights[i].lightPos, vec);
+	}
+
+	theta += 0.005f;
+
 	mFrustum->UpdateFrustum(mCamera);
 
 	return Render();
@@ -366,6 +393,8 @@ bool TestApp::ReadInput(DIMOUSESTATE& state)
 
 bool TestApp::Render()
 {
+	mD3D->SetRenderTarget(0, true);
+
 	XMMATRIX viewMatrix, projMatrix, worldMatrix;
 	bool result;
 
@@ -377,19 +406,11 @@ bool TestApp::Render()
 	matrices.projection = XMMatrixTranspose(mCamera->GetProjection());
 	matrices.view = XMMatrixTranspose(mCamera->GetView());
 
-	static float theta = 0.0f;
-	float xPos = sin(theta) * 60.0f;
-
-	mLights->lightPos = XMFLOAT3(xPos, 10.0f, 0.0f);
-	mLights->lightCol = XMFLOAT3(1.0f, 0.0f, 0.0f);
-
-	theta += 0.005f;
-
 	EyeBufferType eyeBuffer;
 	XMStoreFloat3(&eyeBuffer.eyePos, mCamera->GetPos());
 
 	// Clear the buffers to begin the scene.
-	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f, true);
 
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
 	XMMATRIX projView = mCamera->GetProjection() * mCamera->GetView();
@@ -441,7 +462,7 @@ bool TestApp::Render()
 
 	//set shader for point sprite
 
-	mMeshShaders[INSTANCE_SHADER]->PrepareShader(mD3D->GetDeviceContext());
+	mMeshShaders[INSTANCE_SHADER]->PrepareShader(context);
 	InstancedConstantsStruct constants;
 	constants.matPtr = &matrices;
 	constants.eyePtr = &eyeBuffer;
@@ -453,14 +474,18 @@ bool TestApp::Render()
 
 	mMeshShaders[INSTANCE_SHADER]->SetPerMeshParameters(static_cast<void*>(&perMesh), context);
 	
-	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT3) * 2};
-	XMFLOAT3 data[2] = { mLights->lightPos, XMFLOAT3(1.0f, 0.0f, 0.0f) };
-	mPointSprite->Update(context, &data[0]);
+	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT4) * 2};
+	mPointSprite->Update(context, (XMFLOAT4*)&mLights[0]);
+
+	mD3D->SwitchOffDepthWrites();
 
 	ID3D11Buffer* buffers[3] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
-	mRenderer->DrawIndexedInstanced(&buffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 1);
+	mRenderer->DrawIndexedInstanced(&buffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, NUM_LIGHTS);
+
+	mD3D->SwitchOnDepthWrites();
 
 	context->OMSetBlendState(NULL, 0, 0xffffffff);
+
 
 #if RENDER_AABB
 	result = mOutlineShader->PrepareShader(context);
@@ -483,6 +508,12 @@ bool TestApp::Render()
 	}
 #endif
 
+	mD3D->SetRenderTarget(1, false);
+
+	//// Clear the buffers to begin the scene.
+	mD3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f, false);
+	perMesh.diffuseSrv = mD3D->GetDepthTexture();
+	mD3D->RenderToFullScreenTriangle(mMeshShaders[FULL_SCREEN_SHADER], static_cast<void*>(&perMesh));
 	mD3D->EndScene();
 
 	return true;

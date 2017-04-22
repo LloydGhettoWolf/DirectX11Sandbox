@@ -25,27 +25,30 @@ struct EyeBufferType;
 struct processedMaterialInfo;
 
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 3000.0f;
-const float SCREEN_NEAR = 1.0f;
+const float SCREEN_DEPTH = 300.0f;
+const float SCREEN_NEAR = 2.0f;
 const bool FULL_SCREEN = false;
 const float SCREEN_WIDTH = 800;
 const float SCREEN_HEIGHT = 600;
+const int NUM_SAMPLES = 8;
+const int NUM_RENDER_TARGETS = 2;
 
-const int NUM_LIGHTS = 100;
+const int NUM_LIGHTS = 200;
 
 enum ShaderTypes{ DIFF_SHADER = 0,
 				  SPEC_SHADER,
 				  NORMMAP_SHADER,
 				  NORM_NO_SPEC_SHADER,
 				  MASK_SHADER,
-				  INSTANCE_SHADER
+				  INSTANCE_SHADER,
+				  FULL_SCREEN_SHADER
 				};
 
 
 const float VERT_MOVEMENT_SPEED = 10.0f;
 const float FORWARD_MOVEMENT_SPEED = 20.0f;
 
-const float FRAMES_PER_SEC = 24.0f;
+const float FRAMES_PER_SEC = 60.0f;
 //ideal delta time
 const float DELTA_TIME = 1.0f / FRAMES_PER_SEC;
 
@@ -76,7 +79,7 @@ private:
 	Renderer* mRenderer;
 	ResourceAllocator* mResourceAllocator;
 	
-	Shader* mMeshShaders[INSTANCE_SHADER+1];
+	Shader* mMeshShaders[FULL_SCREEN_SHADER+1];
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 	ID3D11BlendState* mBlendState;
@@ -96,6 +99,7 @@ private:
 
 	XMMATRIX mWorld;
 	LightPosBuffer* mLights;
+	XMFLOAT4* lightsStartPos;
 
 	unsigned int mNumMeshes = 0;
 	unsigned int mNumMappedMeshes = 0;
