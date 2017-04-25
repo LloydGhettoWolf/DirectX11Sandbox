@@ -82,7 +82,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\GhettoFett\Documents\Visual Studio 2015\Projects\DirectX11Engine\DirectX11Engine;$(IncludePath);C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include;$(DXSDK_DIR)Include</IncludePath>
-    <LibraryPath>C:\Users\GhettoFett\Documents\Visual Studio 2015\Projects\DirectX11Engine\Debug;$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <LibraryPath>C:\Users\GhettoFett\Documents\Visual Studio 2015\Projects\DirectX11Engine\Release;$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

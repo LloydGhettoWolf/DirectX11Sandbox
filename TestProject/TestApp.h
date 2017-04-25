@@ -97,7 +97,7 @@ private:
 	Camera* mCamera;
 	Frustum* mFrustum;
 
-	XMMATRIX mWorld;
+	XMFLOAT4X4 mWorld;
 	LightPosBuffer* mLights;
 	XMFLOAT4* lightsStartPos;
 

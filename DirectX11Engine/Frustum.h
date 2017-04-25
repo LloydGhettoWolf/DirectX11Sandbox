@@ -22,6 +22,6 @@ class Frustum
 		ID3D11Buffer* mVertBuffer;
 		ID3D11Buffer* mIndexBuffer;
 
-		XMMATRIX mFrustum;
+		XMFLOAT4X4 mFrustum;
 		float mPlanes[6][4];
 };

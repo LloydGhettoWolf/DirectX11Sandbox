@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 using namespace DirectX;
 
+const float DEGS_PER_SEC = 60.0f;
+
 class Camera 
 {
 	public:
@@ -12,24 +14,22 @@ class Camera
 		void   MoveCameraForward(float amount);
 		void   MoveCameraHorizontally(float amount);
 		void   MoveCameraVertically(float amount);
-		void   MoveCameraCustom(XMVECTOR& pos);
-		void   MoveCameraTrackPoint(XMVECTOR& pos, XMVECTOR& focus);
 		void   ComboRotate(float amountX, float amountY);
 
-		XMMATRIX GetView() const { return mViewMatrix; }
-		XMMATRIX GetProjection() const { return mProjectionMatrix; }
+		const XMFLOAT4X4& GetView() const { return mViewMatrix; }
+		const XMFLOAT4X4& GetProjection() const { return mProjectionMatrix; }
 
-		XMVECTOR GetPos() const { return mPos; }
+		const XMFLOAT3& GetPos() const { return mPos; }
 
 	private:
-		XMVECTOR mLookVec;
-		XMVECTOR mUpVec;
-		XMVECTOR mRightVec;
-		XMVECTOR mPos;
+		XMFLOAT3 mLookVec;
+		XMFLOAT3 mUpVec;
+		XMFLOAT3 mRightVec;
+		XMFLOAT3 mPos;
+
+		XMFLOAT4X4 mViewMatrix;
+		XMFLOAT4X4 mProjectionMatrix;
 
 		float yRotation = -3.14129f / 4.0f;
-
-		XMMATRIX mViewMatrix;
-		XMMATRIX mProjectionMatrix;
 };
 

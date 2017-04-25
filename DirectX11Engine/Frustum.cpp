@@ -84,10 +84,10 @@ bool Frustum::InitFrustum(ID3D11Device* device)
 
 bool Frustum::UpdateFrustum(Camera* cam)
 {
-	XMMATRIX view = cam->GetView();
-	XMMATRIX projection = cam->GetProjection();
+	XMMATRIX view = XMLoadFloat4x4( &cam->GetView());
+	XMMATRIX projection = XMLoadFloat4x4( &cam->GetProjection());
 
-	XMMATRIX viewProj = XMMatrixMultiply(view, projection);
+	XMMATRIX viewProj = view * projection;
 
 	XMFLOAT4X4 frustumMatrix;
 	XMStoreFloat4x4(&frustumMatrix, viewProj);
