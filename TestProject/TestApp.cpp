@@ -152,7 +152,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mFrustum = new Frustum();
 
 	// Initialize the world matrix scale
-	mWorld = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+	mWorld = XMMatrixScaling(0.3f, 0.3f, 0.3f);
 
 	//update all the bounding boxes for the meshes according to the matrix
 	UpdateBoundingBoxes(mMesh, mNumMeshes, &mWorld);
@@ -183,6 +183,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	//create blend state
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+	blendDesc.AlphaToCoverageEnable					= true;
 	blendDesc.RenderTarget[0].BlendEnable			= true;
 	blendDesc.RenderTarget[0].SrcBlend				= D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend				= D3D11_BLEND_INV_SRC_ALPHA;
@@ -190,7 +191,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	blendDesc.RenderTarget[0].SrcBlendAlpha			= D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlendAlpha		= D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
 	result = mD3D->GetDevice()->CreateBlendState(&blendDesc, &mBlendState);
 	if (FAILED(result))
 	{
@@ -234,10 +235,10 @@ bool TestApp::InitLights()
 
 		// position
 		float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		x = x * 220.0f - 110.0f;
-		float y = 5.0f * (float)(i/10 + 1);
+		x = x * 550.0f - 275.0f;
+		float y = 6.0f * (float)(i/10 + 1);
 		float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		z = z * 100.0f - 50.0f;
+		z = z * 200.0f - 100.0f;
 		mLights[i].lightPos = XMFLOAT4(x, y, z, 1.0f);
 		lightsStartPos[i] = mLights[i].lightPos;
 	}
@@ -477,12 +478,12 @@ bool TestApp::Render()
 	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT4) * 2};
 	mPointSprite->Update(context, (XMFLOAT4*)&mLights[0]);
 
-	mD3D->SwitchOffDepthWrites();
+	//mD3D->SwitchOffDepthWrites();
 
 	ID3D11Buffer* buffers[3] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
 	mRenderer->DrawIndexedInstanced(&buffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, NUM_LIGHTS);
 
-	mD3D->SwitchOnDepthWrites();
+	//mD3D->SwitchOnDepthWrites();
 
 	context->OMSetBlendState(NULL, 0, 0xffffffff);
 
@@ -512,7 +513,7 @@ bool TestApp::Render()
 
 	//// Clear the buffers to begin the scene.
 	mD3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f, false);
-	perMesh.diffuseSrv = mD3D->GetDepthTexture();
+	perMesh.diffuseSrv = mD3D->GetRenderTarget(0);
 	mD3D->RenderToFullScreenTriangle(mMeshShaders[FULL_SCREEN_SHADER], static_cast<void*>(&perMesh));
 	mD3D->EndScene();
 

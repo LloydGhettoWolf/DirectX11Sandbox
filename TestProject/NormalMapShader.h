@@ -39,4 +39,6 @@ protected:
 	static const int LIGHT_BUFFER = 0;
 	static const int EYE_BUFFER = 1;
 	static const int MATERIAL_BUFFER = 2;
+
+	int mNumLights;
 };

@@ -10,5 +10,5 @@ SamplerState samplerType;
 float4 main(PSInput input) : SV_TARGET
 {
 	float4 depth = tex.Sample(samplerType, input.uv);
-	return float4(depth.xxx, 1.0f);
+	return depth;
 }

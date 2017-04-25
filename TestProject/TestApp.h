@@ -25,15 +25,15 @@ struct EyeBufferType;
 struct processedMaterialInfo;
 
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 300.0f;
-const float SCREEN_NEAR = 2.0f;
+const float SCREEN_DEPTH = 3000.0f;
+const float SCREEN_NEAR = 10.0f;
 const bool FULL_SCREEN = false;
 const float SCREEN_WIDTH = 800;
 const float SCREEN_HEIGHT = 600;
 const int NUM_SAMPLES = 8;
 const int NUM_RENDER_TARGETS = 2;
 
-const int NUM_LIGHTS = 200;
+const int NUM_LIGHTS = 400;
 
 enum ShaderTypes{ DIFF_SHADER = 0,
 				  SPEC_SHADER,

@@ -39,7 +39,8 @@ bool DefaultDiffuseShader::Init(ID3D11Device* device, HWND hwnd, unsigned int nu
 		return false;
 	}
 
-	bufferDesc.ByteWidth = sizeof(LightPosBuffer) * numLights;
+	mNumLights = numLights;
+	bufferDesc.ByteWidth = sizeof(LightPosBuffer) * mNumLights;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	result = device->CreateBuffer(&bufferDesc, NULL, &mLightBuffer);
@@ -134,7 +135,7 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(void* data, ID3D11DeviceC
 	}
 
 	lightPtr = (LightPosBuffer*)mappedResource2.pData;
-	memcpy(lightPtr, lights, sizeof(LightPosBuffer) * 200);
+	memcpy(lightPtr, lights, sizeof(LightPosBuffer) * mNumLights);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(mLightBuffer, 0);

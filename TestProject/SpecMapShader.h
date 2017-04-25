@@ -37,4 +37,5 @@ private:
 	static const int EYE_BUFFER = 1;
 	static const int MATERIAL_BUFFER = 2;
 
+	int mNumLights;
 };

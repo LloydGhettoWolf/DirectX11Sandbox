@@ -23,7 +23,7 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 	float4 accum = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	[loop]
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < NUM_LIGHTS; i++)
 	{
 		float3 lightVec = normalize(lights[i].lightPos.xyz - input.worldPos.xyz);
 		float distance = length(lights[i].lightPos.xyz - input.worldPos.xyz);
@@ -33,7 +33,7 @@ float4 main(NormalMapPixelType input) : SV_TARGET0
 		accum += lights[i].lightColor * lightIntensity *  (diffFactor * diffColor);
 	}
 
-	float4 amb = float4(0.1f, 0.1f, 0.1f, 1.0f) * diffSample;
+	float4 amb = float4(0.05f, 0.05f, 0.05f, 1.0f) * diffSample;
 
-	return saturate(amb + accum);
+	return saturate(accum);
 }

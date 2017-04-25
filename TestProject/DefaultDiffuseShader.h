@@ -35,6 +35,8 @@ private:
 	ID3D11Buffer* mLightBuffer;
 	ID3D11Buffer* mMaterialBuffer;
 
+	int mNumLights;
+
 	static const int MATRIX_BUFFER = 0;
 	static const int LIGHT_BUFFER = 0;
 	static const int MATERIAL_BUFFER = 1;

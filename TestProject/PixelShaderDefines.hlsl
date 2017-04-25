@@ -35,9 +35,11 @@ struct Light
 	float4 lightColor;
 };
 
+static const int NUM_LIGHTS = 400;
+
 cbuffer LightPositions : register(b0)
 {
-	Light lights[200];
+	Light lights[400];
 };
 
 cbuffer Eye : register(b1)
@@ -90,5 +92,5 @@ float SpecFactor(float3 eyeVec, float3 lightVec, float3 norm, float specComponen
 
 float AttenuateLight(float dist)
 {
-	return 1.0f / (1.0f + 0.1f * dist + 0.01f * dist * dist);
+	return 1.0f / (1.0f + 0.2f * dist + 0.005f * dist * dist);
 }
