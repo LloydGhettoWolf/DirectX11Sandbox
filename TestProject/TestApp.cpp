@@ -50,8 +50,8 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
-	mScreenHeight = SCREEN_HEIGHT;
-	mScreenWidth = SCREEN_WIDTH;
+	mScreenHeight = static_cast<int>(SCREEN_HEIGHT);
+	mScreenWidth = static_cast<int>(SCREEN_WIDTH);
 
 	HRESULT result = mD3D->Init(mScreenWidth, mScreenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR, NUM_SAMPLES, NUM_RENDER_TARGETS);
 
@@ -72,7 +72,6 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	ProcessedMeshData* meshData;
 	string* textureNames;
-	ProcessedNormalMappedMeshData* mappedMeshData;
 	materialInfo* materialProperties;
 	ReadBoomFile(strPath, strName, mNumMeshes, mNumMappedMeshes, mNumMaterials, mNumTextures, &textureNames, &meshData, &materialProperties);
 
@@ -152,10 +151,11 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mFrustum = new Frustum();
 
 	// Initialize the world matrix scale
-	mWorld = XMMatrixScaling(0.3f, 0.3f, 0.3f);
+	XMMATRIX World = XMMatrixScaling(0.3f, 0.3f, 0.3f);
+	XMStoreFloat4x4(&mWorld, World);
 
 	//update all the bounding boxes for the meshes according to the matrix
-	UpdateBoundingBoxes(mMesh, mNumMeshes, &mWorld);
+	UpdateBoundingBoxes(mMesh, mNumMeshes, &World);
 
 	///////////////////////////////////////////////////////////////
 	//Descriptors for samples, blends etc
@@ -338,7 +338,7 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 
 	while (frameTime > 0.0)
 	{
-		float delta = min(frameTime, DELTA_TIME);
+		double delta = min(frameTime, DELTA_TIME);
 		ReadInput(state);
 
 		//update camera
@@ -400,21 +400,25 @@ bool TestApp::Render()
 	bool result;
 
 	ID3D11DeviceContext* context = mD3D->GetDeviceContext();
-
 	MatrixBufferType matrices;
 
-	matrices.world = XMMatrixTranspose(mWorld);
-	matrices.projection = XMMatrixTranspose(mCamera->GetProjection());
-	matrices.view = XMMatrixTranspose(mCamera->GetView());
+	XMMATRIX world, view, proj;
+	world = XMLoadFloat4x4(&mWorld);
+	proj = XMLoadFloat4x4(&mCamera->GetProjection());
+	view = XMLoadFloat4x4(&mCamera->GetView());
+
+	matrices.world = XMMatrixTranspose(world);
+	matrices.projection = XMMatrixTranspose(proj);
+	matrices.view = XMMatrixTranspose(view);
 
 	EyeBufferType eyeBuffer;
-	XMStoreFloat3(&eyeBuffer.eyePos, mCamera->GetPos());
+	eyeBuffer.eyePos = mCamera->GetPos();
 
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f, true);
 
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
-	XMMATRIX projView = mCamera->GetProjection() * mCamera->GetView();
+	XMMATRIX projView = view * proj;
 	unsigned int numUnculledMeshes = (unsigned int)unculledMeshes.size();
 
 	for (unsigned int i = 0; i < numUnculledMeshes; i++)

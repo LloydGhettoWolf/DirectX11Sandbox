@@ -103,7 +103,6 @@ bool DefaultDiffuseShader::SetConstantShaderParameters(void* data, ID3D11DeviceC
 	
 	MatrixBufferType* matPtr;
 	LightPosBuffer* lightPtr;
-	EyeBufferType* eyePtr;
 
 	ConstantsStruct* constants = static_cast<ConstantsStruct*>(data);
 	MatrixBufferType* matrices = constants->matPtr;
@@ -174,5 +173,7 @@ bool DefaultDiffuseShader::SetPerMeshParameters(void* data, ID3D11DeviceContext*
 	deviceContext->PSSetConstantBuffers(MATERIAL_BUFFER, 1, &mMaterialBuffer);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 	deviceContext->PSSetShaderResources(0, 1, &srv);
+
+	return true;
 }
 

@@ -22,6 +22,8 @@ void ReadBoomFile(string& filePath, string& fileName, unsigned int& numMeshes, u
 	data.read((char*)&numMeshes, sizeof(unsigned int));
 	data.read((char*)&numMaterials, sizeof(unsigned int));
 
+	numMeshes -= 1;
+
 	*meshes = new ProcessedMeshData[numMeshes];
 	
 	// Copy across information about submeshes

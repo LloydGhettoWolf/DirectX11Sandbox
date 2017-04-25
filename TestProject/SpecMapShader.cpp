@@ -196,4 +196,6 @@ bool SpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* device
 
 	ID3D11ShaderResourceView * textures[] = { diffuseSrv, specSrv };
 	deviceContext->PSSetShaderResources(0, 2, textures);
+
+	return true;
 }

@@ -46,5 +46,7 @@ bool NormNoSpecMapShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* 
 
 	ID3D11ShaderResourceView *textures[] = { diffuseSrv, normSrv };
 	deviceContext->PSSetShaderResources(0, 2, textures);
+	
+	return true;
 }
 

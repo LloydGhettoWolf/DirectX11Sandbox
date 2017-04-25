@@ -202,5 +202,7 @@ bool AlphaMaskShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* devi
 
 	ID3D11ShaderResourceView * textures[] = { diffuseSrv, alphaSrv };
 	deviceContext->PSSetShaderResources(0, 2, textures);
+
+	return true;
 }
 

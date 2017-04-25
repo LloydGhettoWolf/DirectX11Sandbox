@@ -115,6 +115,8 @@ bool PointSprite::Update(ID3D11DeviceContext* context, XMFLOAT4* data)
 	dataPtr = (XMFLOAT4*)newPositionData.pData;
 	memcpy(dataPtr, data, sizeof(XMFLOAT4) * 2 * mNumSprites);
 	context->Unmap(mInstanceBuffer, 0);
+
+	return true;
 };
 
 

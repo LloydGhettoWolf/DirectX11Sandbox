@@ -5,8 +5,8 @@
 #include <DirectXMath.h>
 
 struct ID3D11Buffer;
-struct ResourceAllocator;
-struct Texture;
+class ResourceAllocator;
+class Texture;
 
 using namespace DirectX;
 

@@ -13,7 +13,7 @@ class InputClass
 		void Update();
 		void KeyDown(unsigned int input);
 		void KeyUp(unsigned int input);
-		bool IsKeyDown(unsigned int key);
+		unsigned int IsKeyDown(unsigned int key);
 		const DIMOUSESTATE& GetMouseState() const { return mMouseState;  }
 
 	private:

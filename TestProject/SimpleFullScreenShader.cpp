@@ -16,8 +16,6 @@ bool SimpleFullScreenShader::Init(ID3D11Device* device, HWND hwnd, unsigned int 
 
 bool SimpleFullScreenShader::InitSimpleFullScreenShader(ID3D11Device* device, HWND hwnd, LPCWSTR* vsName, LPCWSTR* psName)
 {
-	D3D11_BUFFER_DESC bufferDesc;
-
 	HRESULT result = Shader::InitShaderDataNoLayout(device, hwnd, *vsName, *psName);
 
 	if (!result)
@@ -48,8 +46,6 @@ bool SimpleFullScreenShader::SetConstantShaderParameters(void* data, ID3D11Devic
 
 bool SimpleFullScreenShader::SetPerMeshParameters(void* data, ID3D11DeviceContext* deviceContext)
 {
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-
 	//unpack data
 	ShaderPerMeshStruct* info = static_cast<ShaderPerMeshStruct*>(data);
 	ID3D11SamplerState* samplerState = info->sampler;

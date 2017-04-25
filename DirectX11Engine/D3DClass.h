@@ -47,7 +47,7 @@ class D3DClass
 		bool mVSyncEnabled;
 		int mVideoCardMemory;
 		char mVideoCardDescription[128];
-		int mNumRenderTargets;
+		unsigned int mNumRenderTargets;
 
 		IDXGISwapChain* mSwapChain;
 		ID3D11Device* mDevice;
