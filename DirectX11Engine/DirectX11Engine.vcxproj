@@ -178,6 +178,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComputeShader.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="D3DClass.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="PointSprite.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceAllocator.cpp" />
+    <ClCompile Include="ScreenRectangle.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleMesh.cpp" />
     <ClCompile Include="SystemClass.cpp" />
@@ -195,6 +197,7 @@
   <ItemGroup>
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="D3DClass.h" />
@@ -203,6 +206,7 @@
     <ClInclude Include="PointSprite.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceAllocator.h" />
+    <ClInclude Include="ScreenRectangle.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SimpleMesh.h" />
     <ClInclude Include="SystemClass.h" />
