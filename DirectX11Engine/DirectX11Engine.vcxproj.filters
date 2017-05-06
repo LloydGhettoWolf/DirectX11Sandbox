@@ -17,6 +17,7 @@
     <ClCompile Include="PointSprite.cpp" />
     <ClCompile Include="ComputeShader.cpp" />
     <ClCompile Include="ScreenRectangle.cpp" />
+    <ClCompile Include="OrthoShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SystemClass.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="PointSprite.h" />
     <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="ScreenRectangle.h" />
+    <ClInclude Include="OrthoShader.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -47,6 +49,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="OutlineVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="OrthoPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="OrthoVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

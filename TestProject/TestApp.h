@@ -11,6 +11,7 @@ class Camera;
 class Frustum;
 class Shader;
 class OutlineShader;
+class OrthoShader;
 class Texture;
 struct ID3D11SamplerState;
 struct ID3D11BlendState;
@@ -23,15 +24,16 @@ struct LightPosBuffer;
 struct MatrixBufferType;
 struct EyeBufferType;
 struct processedMaterialInfo;
+class ScreenRectangle;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
 const float SCREEN_NEAR = 10.0f;
-const bool FULL_SCREEN = false;
-const float SCREEN_WIDTH = 800;
-const float SCREEN_HEIGHT = 600;
+const bool FULL_SCREEN = true;
+const float SCREEN_WIDTH = 1920;
+const float SCREEN_HEIGHT = 1080;
 const int NUM_SAMPLES = 8;
-const int NUM_RENDER_TARGETS = 2;
+const int NUM_RENDER_TARGETS = 1;
 
 const int NUM_LIGHTS = 400;
 
@@ -60,7 +62,7 @@ class TestApp : public BaseApp
 public:
 	TestApp() : mMesh(nullptr) {};
 	TestApp(const TestApp&) = delete;
-	~TestApp() {};
+	~TestApp() { Shutdown(); };
 
 	bool Init(int, int, HWND, HINSTANCE);
 	void Shutdown();
@@ -71,6 +73,7 @@ private:
 	bool PairMaterialsWithShaders(materialInfo* materials);
 	bool Render();
 	void RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights, MatrixBufferType* matrices, EyeBufferType* eye);
+	void RenderUI();
 	bool ReadInput(DIMOUSESTATE& state);
 
 	SimpleMesh* mMesh;
@@ -80,6 +83,7 @@ private:
 	ResourceAllocator* mResourceAllocator;
 	
 	Shader* mMeshShaders[FULL_SCREEN_SHADER+1];
+	OrthoShader* mOrthoShader;
 	OutlineShader* mOutlineShader;
 	ID3D11SamplerState* mSamplerState;
 	ID3D11BlendState* mBlendState;
@@ -87,6 +91,8 @@ private:
 	processedMaterialInfo* mMaterials;
 
 	Texture* mTextures;
+
+	ScreenRectangle* mScreenRect;
 
 	int mMouseRotateX, mMouseRotateY;
 	int mMouseVertY;
@@ -97,7 +103,7 @@ private:
 	Camera* mCamera;
 	Frustum* mFrustum;
 
-	XMFLOAT4X4 mWorld;
+	XMFLOAT4X4 mWorld, mOrtho;
 	LightPosBuffer* mLights;
 	XMFLOAT4* lightsStartPos;
 
@@ -107,4 +113,6 @@ private:
 	unsigned int mNumTextures = 0;
 
 	chrono::high_resolution_clock::time_point mLastTime;
+
+	std::vector<double> secs;
 };

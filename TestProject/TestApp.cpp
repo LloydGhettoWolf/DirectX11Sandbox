@@ -4,6 +4,7 @@
 #include <D3DClass.h>
 #include <Frustum.h>
 #include <OutlineShader.h>
+#include <OrthoShader.h>
 #include <ObjParser.h>
 #include <Texture.h>
 #include <dinput.h>
@@ -14,7 +15,9 @@
 #include <Renderer.h>
 #include <ResourceAllocator.h>
 #include <PointSprite.h>
+#include <ScreenRectangle.h>
 #include <algorithm>
+#include <fstream>
 #include "TestApp.h"
 #include "DefaultDiffuseShader.h"
 #include "SpecMapShader.h"
@@ -23,6 +26,7 @@
 #include "AlphaMaskShader.h"
 #include "BasicPointSpriteShader.h"
 #include "SimpleFullScreenShader.h"
+
 
 
 
@@ -215,6 +219,22 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 		return false;
 	}
 
+	//create screen rectangle
+
+	mScreenRect = new ScreenRectangle();
+
+	if (!mScreenRect->Init(300, 100 , -SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT/2 -200, mResourceAllocator))
+	{
+		MessageBox(hwnd, "Could not initialize the screen rect.", "Error", MB_OK);
+		return false;
+	}
+
+	XMMATRIX ortho =  XMMatrixOrthographicRH(SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 1.0f);
+	XMStoreFloat4x4(&mOrtho, ortho);
+
+	mOrthoShader = new OrthoShader();
+	mOrthoShader->Init(mD3D->GetDevice(), hwnd, 0);
+
 	//get initial time for timer
 	mLastTime = chrono::high_resolution_clock::now();
 	return true;
@@ -298,12 +318,12 @@ void TestApp::Shutdown()
 	}
 
 	// Release the color shader object.
-	if (mMeshShaders)
-		delete [] mMeshShaders;
+	//if (mMeshShaders)
+		//delete [] mMeshShaders;
 
 	// Release the model object.
-	if (mMesh)
-		delete[] mMesh;
+	//if (mMesh)
+		//delete[] mMesh;
 
 	if (mSamplerState)
 		mSamplerState->Release();
@@ -323,6 +343,12 @@ void TestApp::Shutdown()
 
 	if (mPointSprite)
 		delete mPointSprite;
+
+	if (mScreenRect)
+		delete mScreenRect;
+
+	if (mOrthoShader)
+		delete mOrthoShader;
 
 	return;
 }
@@ -359,7 +385,7 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 
 	theta += 0.005f;
 
-	mFrustum->UpdateFrustum(mCamera);
+	mFrustum->UpdateFrustumFast(mCamera);
 
 	return Render();
 }
@@ -417,7 +443,12 @@ bool TestApp::Render()
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f, true);
 
+	chrono::high_resolution_clock::time_point currentTime = chrono::high_resolution_clock::now();
+	
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
+	chrono::high_resolution_clock::time_point newTime = chrono::high_resolution_clock::now();
+	chrono::duration<double, std::milli> span = newTime - currentTime;
+	secs.emplace_back(span.count()); 
 	XMMATRIX projView = view * proj;
 	unsigned int numUnculledMeshes = (unsigned int)unculledMeshes.size();
 
@@ -482,15 +513,16 @@ bool TestApp::Render()
 	unsigned int strides[3] = { sizeof(XMFLOAT3) , sizeof(XMFLOAT2), sizeof(XMFLOAT4) * 2};
 	mPointSprite->Update(context, (XMFLOAT4*)&mLights[0]);
 
-	//mD3D->SwitchOffDepthWrites();
+	mD3D->SwitchOffDepthWrites();
 
 	ID3D11Buffer* buffers[3] = { mPointSprite->GetVertBuffer(), mPointSprite->GetUVBuffer(), mPointSprite->GetInstancePosBuffer() };
 	mRenderer->DrawIndexedInstanced(&buffers[0], 3, strides, mPointSprite->GetIndexBuffer(), 6, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, NUM_LIGHTS);
 
-	//mD3D->SwitchOnDepthWrites();
+	mD3D->SwitchOnDepthWrites();
 
+	RenderUI();
 	context->OMSetBlendState(NULL, 0, 0xffffffff);
-
+	mD3D->EndScene();
 
 #if RENDER_AABB
 	result = mOutlineShader->PrepareShader(context);
@@ -513,13 +545,13 @@ bool TestApp::Render()
 	}
 #endif
 
-	mD3D->SetRenderTarget(1, false);
+	//mD3D->SetRenderTarget(1, false);
 
-	//// Clear the buffers to begin the scene.
-	mD3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f, false);
-	perMesh.diffuseSrv = mD3D->GetRenderTarget(0);
+	////// Clear the buffers to begin the scene.
+	//mD3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f, false);
+	//perMesh.diffuseSrv = mD3D->GetRenderTarget(0);
 	mD3D->RenderToFullScreenTriangle(mMeshShaders[FULL_SCREEN_SHADER], static_cast<void*>(&perMesh));
-	mD3D->EndScene();
+	//mD3D->EndScene();
 
 	return true;
 }
@@ -565,4 +597,19 @@ void TestApp::RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights
 			meshes[i]->GetIndexCount(),
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
+}
+
+void TestApp::RenderUI()
+{
+	mOrthoShader->PrepareShader(mD3D->GetDeviceContext());
+	mOrthoShader->SetConstantShaderParameters((void*)&mOrtho, mD3D->GetDeviceContext());
+
+	unsigned int stride = sizeof(float) * 3;
+
+	mRenderer->DrawIndexed(mScreenRect->GetVertBuffer(),
+							1,
+							&stride,
+							mScreenRect->GetIndexBuffer(),
+							6,
+							D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

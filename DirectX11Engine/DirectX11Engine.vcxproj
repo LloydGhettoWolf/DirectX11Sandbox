@@ -183,6 +183,7 @@
     <ClCompile Include="ObjParser.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="InputClass.cpp" />
+    <ClCompile Include="OrthoShader.cpp" />
     <ClCompile Include="OutlineShader.cpp" />
     <ClCompile Include="PointSprite.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="InputClass.h" />
+    <ClInclude Include="OrthoShader.h" />
     <ClInclude Include="OutlineShader.h" />
     <ClInclude Include="PointSprite.h" />
     <ClInclude Include="Renderer.h" />
@@ -214,6 +216,18 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="OrthoPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="OrthoVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="OutlinePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

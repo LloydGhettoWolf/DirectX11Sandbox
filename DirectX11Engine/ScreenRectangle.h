@@ -14,7 +14,7 @@ public:
 	bool Init(float width, float height, float xPos, float yPos, ResourceAllocator* resourceAllocator);
 	void Shutdown();
 
-	ID3D11Buffer* GetVertBuffer() { return mVertices; }
+	ID3D11Buffer** GetVertBuffer() { return &mVertices; }
 	ID3D11Buffer* GetIndexBuffer() { return mIndices; }
 
 private:
