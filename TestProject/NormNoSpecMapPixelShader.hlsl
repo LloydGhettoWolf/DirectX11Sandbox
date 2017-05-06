@@ -8,7 +8,7 @@ Texture2D normTexture : register(t1);
 
 SamplerState SampleType;
 
-
+[earlydepthstencil]
 float4 main(NormalMapPixelType input) : SV_TARGET0
 {
 	float3 lightVec = normalize(lights[0].lightPos.xyz - input.worldPos.xyz);

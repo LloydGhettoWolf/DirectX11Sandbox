@@ -10,6 +10,7 @@ Texture2D normTexture : register(t2);
 
 SamplerState SampleType;
 
+[earlydepthstencil]
 float4 main(NormalMapPixelType input) : SV_TARGET0
 {
 	float3 eyeVec = normalize(eyePos - input.worldPos.xyz);

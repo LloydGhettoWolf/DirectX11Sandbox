@@ -7,7 +7,7 @@ Texture2D diffTexture : register(t0);
 Texture2D specTexture : register(t1);
 SamplerState SampleType;
 
-
+[earlydepthstencil]
 float4 main(StandardPixelType input) : SV_TARGET0
 {
 	float3 norm = normalize(input.norm);
