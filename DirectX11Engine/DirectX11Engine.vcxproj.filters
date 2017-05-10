@@ -16,8 +16,8 @@
     <ClCompile Include="ResourceAllocator.cpp" />
     <ClCompile Include="PointSprite.cpp" />
     <ClCompile Include="ComputeShader.cpp" />
-    <ClCompile Include="ScreenRectangle.cpp" />
     <ClCompile Include="OrthoShader.cpp" />
+    <ClCompile Include="TextBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SystemClass.h" />
@@ -36,8 +36,8 @@
     <ClInclude Include="ResourceAllocator.h" />
     <ClInclude Include="PointSprite.h" />
     <ClInclude Include="ComputeShader.h" />
-    <ClInclude Include="ScreenRectangle.h" />
     <ClInclude Include="OrthoShader.h" />
+    <ClInclude Include="TextBox.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

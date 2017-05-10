@@ -1,11 +1,11 @@
 #include <D3D11.h>
 #include <DirectXMath.h>
-#include "ScreenRectangle.h"
+#include "TextBox.h"
 #include "ResourceAllocator.h"
 
 using namespace DirectX;
 
-bool ScreenRectangle::Init(float width, float height, float xPos, float yPos, ResourceAllocator* resourceAllocator)
+bool TextBox::Init(float width, float height, float xPos, float yPos, ResourceAllocator* resourceAllocator)
 {
 	mRectHeight = height;
 	mRectWidth = width;
@@ -19,14 +19,14 @@ bool ScreenRectangle::Init(float width, float height, float xPos, float yPos, Re
 	return true;
 }
 
-bool ScreenRectangle::InitBuffers(ResourceAllocator* resourceAllocator)
+bool TextBox::InitBuffers(ResourceAllocator* resourceAllocator)
 {
 	float vertices[12] =
 	{
+		mXPos, mYPos - mRectHeight, 0.0f,
 		mXPos, mYPos, 0.0f,
-		mXPos, mYPos + mRectHeight, 0.0f,
-		mXPos + mRectWidth, mYPos + mRectHeight, 0.0f,
-		mXPos + mRectWidth, mYPos, 0.0f
+		mXPos + mRectWidth, mYPos, 0.0f,
+		mXPos + mRectWidth, mYPos - mRectHeight, 0.0f
 	};
 
 	unsigned int indices[6] =
@@ -46,7 +46,7 @@ bool ScreenRectangle::InitBuffers(ResourceAllocator* resourceAllocator)
 	return true;
 }
 
-void ScreenRectangle::Shutdown()
+void TextBox::Shutdown()
 {
 	if (mVertices)
 		mVertices->Release();

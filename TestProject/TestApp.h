@@ -24,7 +24,7 @@ struct LightPosBuffer;
 struct MatrixBufferType;
 struct EyeBufferType;
 struct processedMaterialInfo;
-class ScreenRectangle;
+class TextBox;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
@@ -92,7 +92,7 @@ private:
 
 	Texture* mTextures;
 
-	ScreenRectangle* mScreenRect;
+	TextBox* mScreenRect;
 
 	int mMouseRotateX, mMouseRotateY;
 	int mMouseVertY;

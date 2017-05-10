@@ -15,7 +15,7 @@
 #include <Renderer.h>
 #include <ResourceAllocator.h>
 #include <PointSprite.h>
-#include <ScreenRectangle.h>
+#include <TextBox.h>
 #include <algorithm>
 #include <fstream>
 #include "TestApp.h"
@@ -221,9 +221,9 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	//create screen rectangle
 
-	mScreenRect = new ScreenRectangle();
+	mScreenRect = new TextBox();
 
-	if (!mScreenRect->Init(300, 100 , -SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT/2 -200, mResourceAllocator))
+	if (!mScreenRect->Init(300, 100 , -SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, mResourceAllocator))
 	{
 		MessageBox(hwnd, "Could not initialize the screen rect.", "Error", MB_OK);
 		return false;
