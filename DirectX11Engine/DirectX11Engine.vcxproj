@@ -199,6 +199,7 @@
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ComputeShader.h" />
+    <ClInclude Include="FontInfo.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="ObjParser.h" />
     <ClInclude Include="D3DClass.h" />

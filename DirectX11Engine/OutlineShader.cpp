@@ -1,5 +1,4 @@
 #include <D3D11.h>
-#include <fstream>
 #include "OutlineShader.h"
 
 bool OutlineShader::Init(ID3D11Device* device, HWND hwnd)

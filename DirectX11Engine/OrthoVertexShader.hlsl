@@ -1,10 +1,25 @@
+struct VertIn
+{
+	float3 pos : POSITION;
+	float2 uv : TEXCOORD;
+};
+
+struct VertOut
+{
+	float4 pos : SV_POSITION;
+	float2 uv : TEXCOORD;
+};
+
 cbuffer Matrices
 {
 	matrix proj;
 };
 
-float4 main( float4 pos : POSITION ) : SV_POSITION
+VertOut main(VertIn vIn)
 {
-	pos = mul(pos, proj);
-	return pos;
+	VertOut vOut;
+	float4 pos = float4(vIn.pos, 1.0f);
+	vOut.pos = mul(pos, proj);
+	vOut.uv = vIn.uv;
+	return vOut;
 }

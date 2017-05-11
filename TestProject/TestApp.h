@@ -29,9 +29,9 @@ class TextBox;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
 const float SCREEN_NEAR = 10.0f;
-const bool FULL_SCREEN = true;
-const float SCREEN_WIDTH = 1920;
-const float SCREEN_HEIGHT = 1080;
+const bool FULL_SCREEN = false;
+const float SCREEN_WIDTH = 800;
+const float SCREEN_HEIGHT = 600;
 const int NUM_SAMPLES = 8;
 const int NUM_RENDER_TARGETS = 1;
 

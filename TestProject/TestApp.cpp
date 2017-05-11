@@ -26,6 +26,7 @@
 #include "AlphaMaskShader.h"
 #include "BasicPointSpriteShader.h"
 #include "SimpleFullScreenShader.h"
+#include <FontInfo.h>
 
 
 
@@ -223,7 +224,9 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	mScreenRect = new TextBox();
 
-	if (!mScreenRect->Init(300, 100 , -SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, mResourceAllocator))
+	if (!mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 1.0f, "Hi my name is...Lloyd", 
+							L"C://Users/GhettoFett/Documents/Fonts/Arial/font.dds", characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH, 
+							mResourceAllocator, mD3D->GetDevice()))
 	{
 		MessageBox(hwnd, "Could not initialize the screen rect.", "Error", MB_OK);
 		return false;
@@ -604,12 +607,16 @@ void TestApp::RenderUI()
 	mOrthoShader->PrepareShader(mD3D->GetDeviceContext());
 	mOrthoShader->SetConstantShaderParameters((void*)&mOrtho, mD3D->GetDeviceContext());
 
-	unsigned int stride = sizeof(float) * 3;
+	unsigned int stride[2] = { sizeof(float) * 3, sizeof(float) * 2 };
+
+	mD3D->GetDeviceContext()->PSSetSamplers(0, 1, &mSamplerState);
+	ID3D11ShaderResourceView* srv = mScreenRect->GetTexture();
+	mD3D->GetDeviceContext()->PSSetShaderResources(0, 1, &srv);
 
 	mRenderer->DrawIndexed(mScreenRect->GetVertBuffer(),
-							1,
-							&stride,
+							2,
+							stride,
 							mScreenRect->GetIndexBuffer(),
-							6,
+							mScreenRect->GetNumIndices(),
 							D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
