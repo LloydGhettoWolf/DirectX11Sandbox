@@ -8,60 +8,38 @@
 
 using namespace DirectX;
 
-bool TextBox::Init(float xPos, float yPos, float scale, char* text, WCHAR* texturePath, Character* set, int fontHeight, int fontWidth,
-	               ResourceAllocator* resourceAllocator, ID3D11Device* device)
+bool TextBox::Init(float xPos, float yPos, float scale, char* text, Character* set, int fontHeight, int fontWidth,
+					ResourceAllocator* resourceAllocator, Texture* fontTexture)
 {
 	mXPos = xPos;
 	mYPos = yPos;
 
-	// Load Texture
-	if (mTexture == nullptr)
-	{
-		mTexture = new Texture();
-		if (!mTexture->InitFromDDS(device, texturePath))
-			return false;
-	}
+	if(fontTexture != nullptr)
+		mTexture = fontTexture;
 
+	if (mTexture == nullptr)
+		return false;
+	
 	//get info about the string to present to screen
 	int numChars = strlen(text);
-	BufferInfo* info = new BufferInfo[numChars];
-
-	for (int i = 0; i < numChars; i++)
-	{
-		int index = text[i] - INDEX_OFFSET;
-		info[i].width = set[index].width;
-		info[i].height = set[index].height;
-		info[i].offsetX = set[index].x;
-		info[i].offsetY = set[index].y;
-	}
 
 	mNumVerts = 4 * numChars;
 	mNumIndices = 6 * numChars;
 
-	if (!InitBuffers(info, scale, fontHeight, fontWidth, resourceAllocator))
-		return false;
-	
-	delete[] info;
-
-	return true;
-}
-
-bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int fontWidth, ResourceAllocator* resourceAllocator)
-{
 	int individualVerts = mNumVerts * 3;
 	float* vertices = new float[individualVerts];
 
 	float startOffsetX = 0;
 
 	int index = 0;
-	
+
 	for (int i = 0; i < individualVerts; i += 12)
 	{
-		float height = scale * infos[index].height;
-		float width =  scale * infos[index].width;
-		index++;
+		int charIndex = text[index++] - 32;
+		float height = scale * set[charIndex].height;
+		float width = scale * set[charIndex].width;
 
-		vertices[i]     = mXPos + startOffsetX;
+		vertices[i] = mXPos + startOffsetX;
 		vertices[i + 1] = mYPos - height;
 		vertices[i + 2] = 0.0f;
 
@@ -77,8 +55,6 @@ bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int f
 		vertices[i + 10] = mYPos - height;
 		vertices[i + 11] = 0.0f;
 
-
-
 		startOffsetX += width;
 	}
 
@@ -88,26 +64,23 @@ bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int f
 	index = 0;
 	for (int i = 0; i < numUVs; i += 8)
 	{
-
-		float height = (float)infos[index].height/(float)fontHeight;
-		float width  = (float)infos[index].width/(float)fontWidth;
-		float startX = (float)infos[index].offsetX/(float)fontWidth;
-		float startY = (float)infos[index].offsetY/(float)fontHeight;
-		index++;
+		int charIndex = text[index++] - 32;
+		float height = (float)set[charIndex].height / (float)fontHeight;
+		float width  = (float)set[charIndex].width / (float)fontWidth;
+		float startX = (float)set[charIndex].x / (float)fontWidth;
+		float startY = (float)set[charIndex].y / (float)fontHeight;
 
 		uvs[i] = startX;
 		uvs[i + 1] = startY + height;
-		
+
 		uvs[i + 2] = startX;
 		uvs[i + 3] = startY;
-		
+
 		uvs[i + 4] = startX + width;
 		uvs[i + 5] = startY;
-	
+
 		uvs[i + 6] = startX + width;
 		uvs[i + 7] = startY + height;
-		
-		startOffsetX += width;
 	}
 
 	unsigned int* indices = new unsigned int[mNumIndices];
@@ -115,7 +88,7 @@ bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int f
 	int j = 0;
 	for (int i = 0; i < mNumIndices; i += 6)
 	{
-		
+
 		indices[i] = j;
 		indices[i + 1] = j + 1;
 		indices[i + 2] = j + 2;
@@ -132,7 +105,7 @@ bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int f
 		mVertices[0]->Release();
 		mVertices[1]->Release();
 	}
-		
+
 	mVertices = new ID3D11Buffer*[2];
 	mVertices[0] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(vertices), sizeof(float) * 3, mNumVerts);
 	if (mVertices[0] == nullptr)
@@ -149,18 +122,17 @@ bool TextBox::InitBuffers( BufferInfo* infos, float scale, int fontHeight, int f
 	if (mIndices == nullptr)
 		return false;
 
+	delete[] vertices;
+	delete[] indices;
+	delete[] uvs;
 	
-
-	delete [] vertices;
-	delete [] indices;
-	delete [] uvs;
-
 	return true;
 }
 
-ID3D11ShaderResourceView* TextBox::GetTexture()
+
+Texture* TextBox::GetTexture()
 {
-	return mTexture->GetTexture();
+	return mTexture;
 }
 
 void TextBox::Shutdown()

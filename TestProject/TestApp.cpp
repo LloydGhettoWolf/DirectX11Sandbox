@@ -222,11 +222,16 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	//create screen rectangle
 
-	mScreenRect = new TextBox();
+	mFontTexture = new Texture();
+	if (!mFontTexture->InitFromDDS(mD3D->GetDevice(), L"C://Users/GhettoFett/Documents/Fonts/Arial/font.dds"))
+	{
+		MessageBox(hwnd, "Could not initialize the font texture.", "Error", MB_OK);
+		return false;
+	}
 
-	if (!mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 1.0f, "Hi my name is...Lloyd", 
-							L"C://Users/GhettoFett/Documents/Fonts/Arial/font.dds", characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH, 
-							mResourceAllocator, mD3D->GetDevice()))
+	mScreenRect = new TextBox();
+	if (!mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 1.0f, "Hi my name is...Lloyd", characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH, 
+							mResourceAllocator, mFontTexture))
 	{
 		MessageBox(hwnd, "Could not initialize the screen rect.", "Error", MB_OK);
 		return false;
@@ -319,14 +324,6 @@ void TestApp::Shutdown()
 		mD3D->Shutdown();
 		delete mD3D;
 	}
-
-	// Release the color shader object.
-	//if (mMeshShaders)
-		//delete [] mMeshShaders;
-
-	// Release the model object.
-	//if (mMesh)
-		//delete[] mMesh;
 
 	if (mSamplerState)
 		mSamplerState->Release();
@@ -610,7 +607,7 @@ void TestApp::RenderUI()
 	unsigned int stride[2] = { sizeof(float) * 3, sizeof(float) * 2 };
 
 	mD3D->GetDeviceContext()->PSSetSamplers(0, 1, &mSamplerState);
-	ID3D11ShaderResourceView* srv = mScreenRect->GetTexture();
+	ID3D11ShaderResourceView* srv = mScreenRect->GetTexture()->GetTexture();;
 	mD3D->GetDeviceContext()->PSSetShaderResources(0, 1, &srv);
 
 	mRenderer->DrawIndexed(mScreenRect->GetVertBuffer(),

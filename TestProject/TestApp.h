@@ -91,7 +91,7 @@ private:
 	processedMaterialInfo* mMaterials;
 
 	Texture* mTextures;
-
+	Texture* mFontTexture;
 	TextBox* mScreenRect;
 
 	int mMouseRotateX, mMouseRotateY;
