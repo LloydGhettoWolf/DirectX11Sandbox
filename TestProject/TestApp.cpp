@@ -230,7 +230,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	}
 
 	mScreenRect = new TextBox();
-	if (!mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 1.0f, "Hi my name is...Lloyd", characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH, 
+	if (!mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f -50 , 1.0f, "Frame time: 00.0", characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH,
 							mResourceAllocator, mFontTexture))
 	{
 		MessageBox(hwnd, "Could not initialize the screen rect.", "Error", MB_OK);
@@ -362,6 +362,10 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 	double frameTime = span.count();
 	frameTime *= 0.001; //count() is in millis, so divide by 1000 to get time in secs
 
+	char message[25];
+	snprintf(message, sizeof(message), "Frame time: %f", frameTime);
+	mOutputMessage = message;
+
 	while (frameTime > 0.0)
 	{
 		double delta = min(frameTime, DELTA_TIME);
@@ -443,12 +447,7 @@ bool TestApp::Render()
 	// Clear the buffers to begin the scene.
 	mD3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f, true);
 
-	chrono::high_resolution_clock::time_point currentTime = chrono::high_resolution_clock::now();
-	
 	vector<SimpleMesh*> unculledMeshes = CullMeshesAgainstFrustum(mMesh, mNumMeshes, mFrustum);
-	chrono::high_resolution_clock::time_point newTime = chrono::high_resolution_clock::now();
-	chrono::duration<double, std::milli> span = newTime - currentTime;
-	secs.emplace_back(span.count()); 
 	XMMATRIX projView = view * proj;
 	unsigned int numUnculledMeshes = (unsigned int)unculledMeshes.size();
 
@@ -603,6 +602,9 @@ void TestApp::RenderUI()
 {
 	mOrthoShader->PrepareShader(mD3D->GetDeviceContext());
 	mOrthoShader->SetConstantShaderParameters((void*)&mOrtho, mD3D->GetDeviceContext());
+
+	mScreenRect->Init(-SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f - 50, 1.0f, mOutputMessage, characters_Arial, ARIAL_HEIGHT, ARIAL_WIDTH,
+						mResourceAllocator, mFontTexture);
 
 	unsigned int stride[2] = { sizeof(float) * 3, sizeof(float) * 2 };
 

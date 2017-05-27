@@ -38,21 +38,22 @@ bool TextBox::Init(float xPos, float yPos, float scale, char* text, Character* s
 		int charIndex = text[index++] - 32;
 		float height = scale * set[charIndex].height;
 		float width = scale * set[charIndex].width;
+		float yOffset = height - set[charIndex].originY;
 
 		vertices[i] = mXPos + startOffsetX;
-		vertices[i + 1] = mYPos - height;
+		vertices[i + 1] = mYPos - yOffset;
 		vertices[i + 2] = 0.0f;
 
 		vertices[i + 3] = mXPos + startOffsetX;
-		vertices[i + 4] = mYPos;
+		vertices[i + 4] = mYPos + height - yOffset;
 		vertices[i + 5] = 0.0f;
 
 		vertices[i + 6] = mXPos + startOffsetX + width;
-		vertices[i + 7] = mYPos;
+		vertices[i + 7] = mYPos + height - yOffset;
 		vertices[i + 8] = 0.0f;
 
 		vertices[i + 9] = mXPos + startOffsetX + width;
-		vertices[i + 10] = mYPos - height;
+		vertices[i + 10] = mYPos - yOffset;
 		vertices[i + 11] = 0.0f;
 
 		startOffsetX += width;
