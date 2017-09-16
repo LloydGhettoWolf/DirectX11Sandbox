@@ -82,7 +82,7 @@ bool Frustum::InitFrustum(ID3D11Device* device)
 }
 
 
-bool Frustum::UpdateFrustum(Camera* cam)
+void Frustum::UpdateFrustum(Camera* cam)
 {
 	XMMATRIX view = XMLoadFloat4x4( &cam->GetView());
 	XMMATRIX projection = XMLoadFloat4x4( &cam->GetProjection());
@@ -169,8 +169,48 @@ bool Frustum::UpdateFrustum(Camera* cam)
 	mPlanes[5][1] /= length;
 	mPlanes[5][2] /= length;
 	mPlanes[5][3] /= length;
+}
 
-	return true;
+
+void Frustum::UpdateFrustumFast(Camera* cam)
+{
+	XMMATRIX view = XMLoadFloat4x4(&cam->GetView());
+	XMMATRIX projection = XMLoadFloat4x4(&cam->GetProjection());
+
+	XMMATRIX viewProj = XMMatrixTranspose(view * projection);
+	XMVECTOR currPlane, len;
+	//near
+	currPlane = viewProj.r[3] + viewProj.r[2];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[0], currPlane);
+	//far
+	currPlane = viewProj.r[3] - viewProj.r[2];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[1], currPlane);
+
+    //top
+	currPlane = viewProj.r[3] + viewProj.r[1];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[2], currPlane);
+	//bottom
+	currPlane = viewProj.r[3] - viewProj.r[1];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[3], currPlane);
+
+	//left
+	currPlane = viewProj.r[3] + viewProj.r[0];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[4], currPlane);
+	//right
+	currPlane = viewProj.r[3] - viewProj.r[0];
+	len = XMVector3Length(currPlane);
+	currPlane /= len;
+	XMStoreFloat4(&mPlanesFast[5], currPlane);
 }
 
 bool Frustum::RenderFrustum(ID3D11DeviceContext* deviceContext)
@@ -204,53 +244,106 @@ bool Frustum::CheckBox(XMFLOAT3& min, XMFLOAT3& max)
 	{
 		int out = 0;
 		// Check all eight points of the cube to see if they all reside within the frustum.
-		float dotProduct = (mPlanes[plane][0] * min.x) + (mPlanes[plane][1] * min.y) + (mPlanes[plane][2] * min.z) + (mPlanes[plane][3] * 1.0f);
+		float dotProduct = (mPlanesFast[plane].x * min.x) + (mPlanesFast[plane].y * min.y) + (mPlanesFast[plane].z * min.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * max.x) + (mPlanes[plane][1] * min.y) + (mPlanes[plane][2] * min.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * max.x) + (mPlanesFast[plane].y * min.y) + (mPlanesFast[plane].z * min.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * min.x) + (mPlanes[plane][1] * max.y) + (mPlanes[plane][2] * min.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * min.x) + (mPlanesFast[plane].y * max.y) + (mPlanesFast[plane].z * min.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * min.x) + (mPlanes[plane][1] * min.y) + (mPlanes[plane][2] * max.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * min.x) + (mPlanesFast[plane].y * min.y) + (mPlanesFast[plane].z * max.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * max.x) + (mPlanes[plane][1] * max.y) + (mPlanes[plane][2] * min.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * max.x) + (mPlanesFast[plane].y * max.y) + (mPlanesFast[plane].z * min.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * min.x) + (mPlanes[plane][1] * max.y) + (mPlanes[plane][2] * max.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * min.x) + (mPlanesFast[plane].y * max.y) + (mPlanesFast[plane].z * max.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * max.x) + (mPlanes[plane][1] * min.y) + (mPlanes[plane][2] * max.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * max.x) + (mPlanesFast[plane].y * min.y) + (mPlanesFast[plane].z * max.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
 
-		dotProduct = (mPlanes[plane][0] * max.x) + (mPlanes[plane][1] * max.y) + (mPlanes[plane][2] * max.z) + (mPlanes[plane][3] * 1.0f);
+		dotProduct = (mPlanesFast[plane].x * max.x) + (mPlanesFast[plane].y * max.y) + (mPlanesFast[plane].z * max.z) + (mPlanesFast[plane].w * 1.0f);
 		if (dotProduct < 0.0f)
 		{
 			out++;
 		}
+
+		if (out == 8)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Frustum::CheckBoxFast(XMFLOAT3& min, XMFLOAT3& max)
+{
+	//construct corners
+
+	
+	// Check each of the six planes to see if the cube is inside the frustum.
+	for (int plane = 0; plane < 6; plane++)
+	{
+		int out = 0;
+		// Check all eight points of the cube to see if they all reside within the frustum.
+		float minX = mPlanesFast[plane].x * min.x;
+		float minY = mPlanesFast[plane].y * min.y;
+		float minZ = mPlanesFast[plane].z * min.z;
+
+		float W    = mPlanesFast[plane].w * 1.0f;
+
+		float maxX = mPlanesFast[plane].x * max.x;
+		float maxY = mPlanesFast[plane].y * max.y;
+		float maxZ = mPlanesFast[plane].z * max.z;
+
+		float dotProduct = minX + minY + minZ + W;
+		dotProduct < 0.0f ? out++ : out;
+		
+		dotProduct = maxX + minY + minZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = minX + maxY + minZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = minX + minY + maxZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = maxX + maxY + minZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = maxX + minY + maxZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = minX + maxY + maxZ + W;
+		dotProduct < 0.0f ? out++ : out;
+
+		dotProduct = maxX + maxY + maxZ + W;
+		dotProduct < 0.0f ? out++ : out;
 
 		if (out == 8)
 		{

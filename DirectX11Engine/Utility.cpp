@@ -16,7 +16,7 @@ vector<SimpleMesh*> CullMeshesAgainstFrustum(SimpleMesh* meshes, unsigned int nu
 		XMFLOAT3 min = meshes[i].GetBoxMin();
 		XMFLOAT3 max = meshes[i].GetBoxMax();
 
-		if (frustum->CheckBox(min, max))
+		if (frustum->CheckBoxFast(min, max))
 		{
 			unculledMeshes.emplace_back(&meshes[i]);
 		}
@@ -49,6 +49,8 @@ void UpdateThisFrameZ(SimpleMesh* mesh, XMMATRIX* viewProj)
 
 void UpdateBoundingBoxes(SimpleMesh* meshes, unsigned int numMeshes, XMMATRIX* mWorld)
 {
+	//scale matrix is mWorld
+
 	//update all the bounding boxes for the meshes according to the matrix
 	for (unsigned int i = 0; i < numMeshes; i++)
 	{
@@ -58,19 +60,21 @@ void UpdateBoundingBoxes(SimpleMesh* meshes, unsigned int numMeshes, XMMATRIX* m
 		XMVECTOR tempMin = XMLoadFloat3(&min);
 		XMVECTOR tempMax = XMLoadFloat3(&max);
 
-		tempMin = XMVector3Transform(tempMin, *mWorld);
-		tempMax = XMVector3Transform(tempMax, *mWorld);
+		XMFLOAT3 center = meshes[i].GetBoxCenter();
+		XMVECTOR offset = XMLoadFloat3(&center);
+		XMMATRIX world = XMMatrixTranslationFromVector(offset);
+
+		world = XMMatrixMultiply(world, *mWorld);
+
+		tempMin = XMVector3Transform(tempMin, world);
+		tempMax = XMVector3Transform(tempMax, world);
 
 		XMVECTOR tempCenter = tempMax - tempMin;
 
 		XMStoreFloat3(&min, tempMin);
 		XMStoreFloat3(&max, tempMax);
 
-		XMFLOAT3 center;
-		XMStoreFloat3(&center, tempCenter);
-
 		meshes[i].SetBoxMin(min);
 		meshes[i].SetBoxMax(max);
-		meshes[i].SetBoxCenter(center);
 	}
 }

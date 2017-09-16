@@ -18,8 +18,9 @@ float4 main(StandardPixelType input) : SV_TARGET0
 	
 	for (int i = 0; i < NUM_LIGHTS; i++)
 	{
-		float3 lightVec = normalize(lights[i].lightPos.xyz - input.worldPos.xyz);
-		float distance = length(lights[i].lightPos.xyz - input.worldPos.xyz);
+		float3 lightVec = lights[i].lightPos.xyz - input.worldPos.xyz;
+		float distance = length(lightVec);
+		lightVec = normalize(lightVec);
 		float specFactor = saturate(SpecFactor(eyeVec, lightVec, norm, specComponent));
 		float4 diffFactor = saturate(DiffFactor(lightVec, norm, diffSample));
 		float lightIntensity = AttenuateLight(distance);

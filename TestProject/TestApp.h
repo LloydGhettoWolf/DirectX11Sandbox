@@ -13,26 +13,27 @@ class Shader;
 class OutlineShader;
 class OrthoShader;
 class Texture;
-struct ID3D11SamplerState;
-struct ID3D11BlendState;
-struct ID3D11ShaderResourceView;
-struct materialInfo;
 class Renderer;
 class ResourceAllocator;
 class PointSprite;
+class TextBox;
+
+struct ID3D11SamplerState;
+struct ID3D11BlendState;
+struct ID3D11ShaderResourceView;
 struct LightPosBuffer;
 struct MatrixBufferType;
 struct EyeBufferType;
+struct materialInfo;
 struct processedMaterialInfo;
-class TextBox;
 
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 3000.0f;
 const float SCREEN_NEAR = 10.0f;
-const bool FULL_SCREEN = true;
-const float SCREEN_WIDTH = 1920;
-const float SCREEN_HEIGHT = 1080;
-const int NUM_SAMPLES = 8;
+const bool FULL_SCREEN = false;
+const float SCREEN_WIDTH = 800;
+const float SCREEN_HEIGHT = 600;
+const int NUM_SAMPLES = 4;
 const int NUM_RENDER_TARGETS = 1;
 
 const int NUM_LIGHTS = 400;
@@ -43,7 +44,8 @@ enum ShaderTypes{ DIFF_SHADER = 0,
 				  NORM_NO_SPEC_SHADER,
 				  MASK_SHADER,
 				  INSTANCE_SHADER,
-				  FULL_SCREEN_SHADER
+				  FULL_SCREEN_SHADER,
+				  LAST_SHADER
 				};
 
 

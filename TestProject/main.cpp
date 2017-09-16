@@ -35,6 +35,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR pScmdline, 
 
 	delete sysClass;
 
+	delete app;
+
 	return 0;
 
 }

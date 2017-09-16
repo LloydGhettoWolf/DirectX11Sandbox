@@ -55,19 +55,36 @@ bool SimpleMesh::InitBuffers(ResourceAllocator* resourceAllocator, ProcessedMesh
 
 	if (!mesh->isNormalMapped)
 	{
-		mNumBuffers = 3;
-		mVertBuffer = new ID3D11Buffer*[3];
+		
+		if (!mesh->normals)
+		{
+			mNumBuffers = 2;
+			mVertBuffer = new ID3D11Buffer*[2];
+
+			mStrides[0] = sizeof(XMFLOAT3);
+			mStrides[1] = sizeof(XMFLOAT2);
+		}
+		else
+		{
+			mNumBuffers = 3;
+			mVertBuffer = new ID3D11Buffer*[3];
+
+			mStrides[0] = sizeof(XMFLOAT3);
+			mStrides[1] = sizeof(XMFLOAT3);
+			mStrides[2] = sizeof(XMFLOAT2);
+		}
 	}
 	else
 	{
 		mNumBuffers = 4;
 		mVertBuffer = new ID3D11Buffer*[4];
+
+		mStrides[0] = sizeof(XMFLOAT3);
+		mStrides[1] = sizeof(XMFLOAT3);
+		mStrides[2] = sizeof(XMFLOAT2);
 		mStrides[3] = sizeof(XMFLOAT3);
 	}
 
-	mStrides[0] = sizeof(XMFLOAT3);
-	mStrides[1] = sizeof(XMFLOAT3);
-	mStrides[2] = sizeof(XMFLOAT2);
 
 	mVertBuffer[0] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->vertices[0]), mStrides[0], mVertCount);
 	if (mVertBuffer[0] == nullptr)
@@ -75,16 +92,27 @@ bool SimpleMesh::InitBuffers(ResourceAllocator* resourceAllocator, ProcessedMesh
 		return false;
 	}
 
-	mVertBuffer[1] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->normals[0]), mStrides[1], mVertCount);
-	if (mVertBuffer[1] == nullptr)
+	if (!mesh->normals)
 	{
-		return false;
+		mVertBuffer[1] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->uvs[0]), mStrides[1], mVertCount);
+		if (mVertBuffer[1] == nullptr)
+		{
+			return false;
+		}
 	}
-
-	mVertBuffer[2] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->uvs[0]), mStrides[2], mVertCount);
-	if (mVertBuffer[2] == nullptr)
+	else
 	{
-		return false;
+		mVertBuffer[1] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->normals[0]), mStrides[1], mVertCount);
+		if (mVertBuffer[1] == nullptr)
+		{
+			return false;
+		}
+
+		mVertBuffer[2] = resourceAllocator->AllocateVertexBuffer(static_cast<void*>(&mesh->uvs[0]), mStrides[2], mVertCount);
+		if (mVertBuffer[2] == nullptr)
+		{
+			return false;
+		}
 	}
 
 	if (mesh->isNormalMapped)

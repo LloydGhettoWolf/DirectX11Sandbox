@@ -14,10 +14,10 @@ const float RATIO = 1.0f / ASPECT;
 
 XMFLOAT3 vertices[4] = 
 {
-	XMFLOAT3(RATIO * -25.0f, 25.0f, 0.0f),
-	XMFLOAT3(RATIO * -25.0f, -25.0f, 0.0f),
-	XMFLOAT3(RATIO * 25.0f, -25.0f, 0.0f),
-	XMFLOAT3(RATIO * 25.0f, 25.0f, 0.0f)
+	XMFLOAT3(RATIO * -5.0f, 5.0f, 0.0f),
+	XMFLOAT3(RATIO * -5.0f, -5.0f, 0.0f),
+	XMFLOAT3(RATIO * 5.0f, -5.0f, 0.0f),
+	XMFLOAT3(RATIO * 5.0f, 5.0f, 0.0f)
 };
 
 XMFLOAT2 uvs[4] =

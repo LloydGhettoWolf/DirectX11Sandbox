@@ -71,7 +71,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	// Initialize the model object.
 	wstring path(L"C://Users/GhettoFett/Documents/processedMeshes/");
-	wstring name(L"sponza.boom");
+	wstring name(L"sponza3.boom");
 	string strName(name.begin(), name.end());
 	string strPath(path.begin(), path.end());
 
@@ -118,7 +118,7 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 
 	////////////////////////////////////////////////////////////
 	//Create Shaders
-	for (unsigned int i = DIFF_SHADER; i <= FULL_SCREEN_SHADER; i++)
+	for (unsigned int i = DIFF_SHADER; i < LAST_SHADER; i++)
 	{
 		// Create the color shader object.
 		mMeshShaders[i] = createShaders[i]();
@@ -156,11 +156,11 @@ bool TestApp::Init(int screenWidth, int screenHeight, HWND hwnd, HINSTANCE hInst
 	mFrustum = new Frustum();
 
 	// Initialize the world matrix scale
-	XMMATRIX World = XMMatrixScaling(0.3f, 0.3f, 0.3f);
-	XMStoreFloat4x4(&mWorld, World);
+	XMMATRIX Scale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
+	XMStoreFloat4x4(&mWorld, Scale);
 
 	//update all the bounding boxes for the meshes according to the matrix
-	UpdateBoundingBoxes(mMesh, mNumMeshes, &World);
+	UpdateBoundingBoxes(mMesh, mNumMeshes, &Scale);
 
 	///////////////////////////////////////////////////////////////
 	//Descriptors for samples, blends etc
@@ -263,10 +263,10 @@ bool TestApp::InitLights()
 
 		// position
 		float x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		x = x * 550.0f - 275.0f;
-		float y = 6.0f * (float)(i/10 + 1);
+		x = x * 750.0f - 375.0f;
+		float y = 10.0f * (float)(i/10 + 1);
 		float z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		z = z * 200.0f - 100.0f;
+		z = z * 300.0f - 150.0f;
 		mLights[i].lightPos = XMFLOAT4(x, y, z, 1.0f);
 		lightsStartPos[i] = mLights[i].lightPos;
 	}
@@ -379,15 +379,15 @@ bool TestApp::Frame(DIMOUSESTATE& state)
 	}
 
 	static float theta = 0.0f;
+	XMMATRIX rotate = XMMatrixRotationY(theta);
 
 	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
 	{
-		XMMATRIX rotate = XMMatrixRotationY(theta);
 		XMVECTOR vec = XMVector3Transform(XMLoadFloat4(&lightsStartPos[i]),rotate);
 		XMStoreFloat4(&mLights[i].lightPos, vec);
 	}
 
-	theta += 0.005f;
+	theta += 0.00125f;
 
 	mFrustum->UpdateFrustumFast(mCamera);
 
@@ -432,12 +432,10 @@ bool TestApp::Render()
 	ID3D11DeviceContext* context = mD3D->GetDeviceContext();
 	MatrixBufferType matrices;
 
-	XMMATRIX world, view, proj;
-	world = XMLoadFloat4x4(&mWorld);
+	XMMATRIX view, proj;
 	proj = XMLoadFloat4x4(&mCamera->GetProjection());
 	view = XMLoadFloat4x4(&mCamera->GetView());
 
-	matrices.world = XMMatrixTranspose(world);
 	matrices.projection = XMMatrixTranspose(proj);
 	matrices.view = XMMatrixTranspose(view);
 
@@ -482,7 +480,6 @@ bool TestApp::Render()
 		i++;
 	}
 
-	RenderMeshList(unculledMeshes, mLights, &matrices, &eyeBuffer);
 
 	unsigned int numAlphaMeshes = (unsigned int)alphaMeshes.size();
 	for (unsigned int i = 0; i < numAlphaMeshes; i++)
@@ -490,15 +487,21 @@ bool TestApp::Render()
 		UpdateThisFrameZ(alphaMeshes[i], &projView);
 	}
 	std::sort(alphaMeshes.begin(), alphaMeshes.end(), CompareZDescend);
-
-	context->OMSetBlendState(mBlendState, 0, 0xffffffff);
 	
+	RenderMeshList(unculledMeshes, mLights, &matrices, &eyeBuffer);
+	context->OMSetBlendState(mBlendState, 0, 0xffffffff);
 	RenderMeshList(alphaMeshes, mLights, &matrices, &eyeBuffer);
 
 	//set shader for point sprite
 
 	mMeshShaders[INSTANCE_SHADER]->PrepareShader(context);
 	InstancedConstantsStruct constants;
+
+	XMMATRIX Scale = XMMatrixIdentity();
+	XMFLOAT4X4 ident;
+	XMStoreFloat4x4(&ident, Scale);
+	matrices.world = XMLoadFloat4x4(&ident);
+
 	constants.matPtr = &matrices;
 	constants.eyePtr = &eyeBuffer;
 	result = mMeshShaders[INSTANCE_SHADER]->SetConstantShaderParameters((void*)&constants, context);
@@ -567,6 +570,13 @@ void TestApp::RenderMeshList(vector<SimpleMesh*>& meshes, LightPosBuffer* lights
 		processedMaterialInfo* info = &mMaterials[materialIndex];
 
 		HRESULT result = info->shader->PrepareShader(context);
+
+		XMFLOAT3 center = meshes[i]->GetBoxCenter();
+		XMVECTOR offset = XMLoadFloat3(&center);
+		XMMATRIX world = XMMatrixTranslationFromVector(offset);
+		XMMATRIX scale = XMLoadFloat4x4(&mWorld);
+		world = XMMatrixMultiply(world, scale);
+		matrices->world = XMMatrixTranspose(world);
 
 		ConstantsStruct constants;
 		constants.lightPtr = lights;

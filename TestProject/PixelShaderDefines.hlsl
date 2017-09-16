@@ -92,5 +92,5 @@ float SpecFactor(float3 eyeVec, float3 lightVec, float3 norm, float specComponen
 
 float AttenuateLight(float dist)
 {
-	return 1.0f / (1.0f + 0.2f * dist + 0.005f * dist * dist);
+	return 1.0f / (1.0f + 0.005f * dist + 0.005f * dist * dist);
 }

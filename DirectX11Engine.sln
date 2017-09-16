@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectX11Engine", "DirectX1
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "DirectXTex\DirectXTex\DirectXTex_Desktop_2015.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\TestProject.vcxproj", "{ACFC5196-7A39-4784-9D80-D4229677B064}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProjectSponza", "TestProject\TestProject.vcxproj", "{ACFC5196-7A39-4784-9D80-D4229677B064}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK_Desktop_2015", "DirectXTK-master\DirectXTK_Desktop_2015.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
 EndProject
@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComputeShader", "ComputeShader\ComputeShader.vcxproj", "{2E9F954B-3681-4011-A622-9267CB2883A9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProjectSanMiguel", "TestProjectSanMiguel\TestProjectSanMiguel.vcxproj", "{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}"
 EndProject
 Global
 	GlobalSection(Performance) = preSolution
@@ -91,6 +93,18 @@ Global
 		{2E9F954B-3681-4011-A622-9267CB2883A9}.Release|x64.Build.0 = Release|x64
 		{2E9F954B-3681-4011-A622-9267CB2883A9}.Release|x86.ActiveCfg = Release|Win32
 		{2E9F954B-3681-4011-A622-9267CB2883A9}.Release|x86.Build.0 = Release|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Debug|x64.ActiveCfg = Debug|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Debug|x64.Build.0 = Debug|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Debug|x86.ActiveCfg = Debug|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Debug|x86.Build.0 = Debug|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Profile|x64.ActiveCfg = Release|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Profile|x64.Build.0 = Release|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Profile|x86.ActiveCfg = Release|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Profile|x86.Build.0 = Release|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Release|x64.ActiveCfg = Release|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Release|x64.Build.0 = Release|x64
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Release|x86.ActiveCfg = Release|Win32
+		{19053F6C-6BBC-4773-9C73-70B90A6C2A0E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

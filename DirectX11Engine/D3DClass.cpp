@@ -8,6 +8,8 @@
 #include "D3DClass.h"
 #include "Shader.h"
 
+DXGI_FORMAT BUFFER_FORMAT = DXGI_FORMAT_R8G8B8A8_UNORM;
+
 D3DClass::D3DClass() :  mSwapChain(0),
 						mDevice (0),
 						mDeviceContext (0),
@@ -58,8 +60,8 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	if (FAILED(result))
 		return false;
 
-	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
+	// Get the number of modes that fit the bufferFormat display format for the adapter output (monitor).
+	result = adapterOutput->GetDisplayModeList(BUFFER_FORMAT, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
 	if (FAILED(result))
 		return false;
 
@@ -69,7 +71,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 		return false;
 
 	// Now fill the display mode list structures.
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
+	result = adapterOutput->GetDisplayModeList(BUFFER_FORMAT, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
 	if (FAILED(result))
 		return false;
 
@@ -114,7 +116,7 @@ bool D3DClass::Init(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bo
 	swapChainDesc.BufferDesc.Height = screenHeight;
 
 	// Set regular 32-bit surface for the back buffer.
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.BufferDesc.Format = BUFFER_FORMAT;
 
 	// Set the refresh rate of the back buffer.
 	if (mVSyncEnabled)
@@ -381,8 +383,8 @@ void D3DClass::Shutdown()
 	{
 		mRenderTargetView[0]->Release();
 		mRenderTargetView[0] = 0;
-		mRenderTargetView[1]->Release();
-		mRenderTargetView[1] = 0;
+		//mRenderTargetView[1]->Release();
+		//mRenderTargetView[1] = 0;
 	}
 
 	if (mDeviceContext)
